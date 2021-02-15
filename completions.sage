@@ -1,6 +1,6 @@
 
 
-def completions(K, p):
+def completions(K, p, prec=20):
     """
     Return the completions of the number field ``K`` at the primes above ``p``.
 
@@ -8,6 +8,7 @@ def completions(K, p):
 
     - ``K`` -- a number field
     - ``p`` -- a (rational) prime number or ``Infinity``
+    - ``prec`` -- precision of the ``p``-adic number field we use (default: 20)
 
     OUTPUT:
 
@@ -18,7 +19,7 @@ def completions(K, p):
     if p is Infinity:
         return infinite_completions(K)
     result = []
-    R.<y> = Qp(p)[]
+    R.<y> = Qp(p, prec)[]
     f = R(K.defining_polynomial())
     for g, e in factor(f):
         if g.degree() == 1:
@@ -37,7 +38,7 @@ def completions(K, p):
         result.append((q, L, phi))
     return result
 
-def completion(K, q):
+def completion(K, q, prec=20):
     """
     Return the completion of the number field ``K`` at the prime ``q``.
 
@@ -45,14 +46,18 @@ def completion(K, q):
 
     - ``K`` -- a number field
     - ``q`` -- a prime ideal of K
+    - ``prec`` -- precision of the ``p``-adic number field we use (default: 20)
 
     OUTPUT:
 
     A pair ``(L, phi)`` with ``L`` the completion of ``K`` at ``q``, and ``phi``
     the embedding of ``K`` in ``L``.
     """
+    if K is QQ:
+        L = Qp(q, prec=prec)
+        return L, QQ.embeddings(L)[0]
     p = q.gens_two()[0] # the prime below q (i.e. `p = q \cap \ZZ`)
-    all_completions = completions(K, p)
+    all_completions = completions(K, p, prec)
     for r, L, phi in all_completions:
         if r == q:
             return L, phi
