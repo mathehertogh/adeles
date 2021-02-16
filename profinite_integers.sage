@@ -12,11 +12,15 @@ from sage.structure.element import CommutativeRingElement
 class ProfiniteInteger(CommutativeRingElement):
     """
     Profinite Integer of a Number Field
-    
+
     .. TODO::
-    
+
         Write documentation for this class definition
-    
+
+    .. TODO::
+
+        Inherit from Commutative Algebra Element (not CommutativeRingElement)
+
     :automethod:`_repr_`
     """
 
@@ -27,7 +31,7 @@ class ProfiniteInteger(CommutativeRingElement):
         Write `O` for the order such that the profinite completion `\hat{O}` of
         `O` is the ring this profinite integer belongs to. Write `K` for the
         ambient number field of `O`.
-        
+
         INPUT:
 
         - ``parent`` -- `\hat{O}` as an ``ProfiniteIntegers`` object
@@ -76,6 +80,7 @@ class ProfiniteInteger(CommutativeRingElement):
             ...
             TypeError: modulus must be an integer
         """
+        #print("DEBUG - ProfiniteInteger.__init__({}, {})".format(value, modulus))
         CommutativeRingElement.__init__(self, parent)
         O = parent.base()
         K = parent.number_field()
@@ -289,13 +294,13 @@ class ProfiniteInteger(CommutativeRingElement):
         modulus = self._common_modulus(other)
         value = self.value + other.value
         return self.__class__(self.parent(), value, modulus)
-        
+
     def _sub_(self, other):
         """
         Subtract ``other`` from ``self`` and return the result
 
         EXAMPLES::
-        
+
             sage: Zhat = ProfiniteIntegers(ZZ)
             sage: a = Zhat(3, 20)
             sage: b = Zhat(-1, 30)
@@ -318,13 +323,13 @@ class ProfiniteInteger(CommutativeRingElement):
         modulus = self._common_modulus(other)
         value = self.value - other.value
         return self.__class__(self.parent(), value, modulus)
-        
+
     def _mul_(self, other):
         """
         Multiply ``self`` and ``other`` and return the result
 
         EXAMPLES::
-        
+
             sage: load("profinite_integers.sage")
             sage: Zhat = ProfiniteIntegers(ZZ)
             sage: a = Zhat(3, 20)
@@ -354,6 +359,67 @@ class ProfiniteInteger(CommutativeRingElement):
             modulus = I + J + K
         value = self.value * other.value
         return self.__class__(self.parent(), value, modulus)
+
+    def _div_(self, other):
+        """
+        Divide ``self`` by the ``other`` and return the result
+
+        Only implemented when ``other`` lies in the base order (i.e.
+        ``other.modulus`` is zero) and ``self.value`` and ``self.modulus`` are
+        both divisible by ``other.value``.
+
+        INPUT:
+
+        - ``x`` -- an element of ``self.parent().base()``
+
+        EXAMPLES::
+
+            sage: Zhat = ProfiniteIntegers()
+            sage: b = Zhat(5, 100)
+            sage: b/5
+            1 mod 20
+
+        ::
+
+            sage: K.<a> = NumberField(x^2+5)
+            sage: O = K.maximal_order()
+            sage: Ohat = ProfiniteIntegers(O)
+            sage: c = Ohat(9*a, 75); c
+            9*a mod (75)
+            sage: c/O(3*a)
+            3 mod (-5*a)
+
+        TESTS::
+
+            sage: b/Zhat(5, 10)
+            Traceback (most recent call last):
+            ...
+            TypeError: can only divide by elements of the base
+            sage: b/0
+            Traceback (most recent call last):
+            ...
+            ZeroDivisionError: division by zero
+            sage: b/3
+            Traceback (most recent call last):
+            ...
+            NotImplementedError: value is not divisible by 3
+            sage: c/9
+            Traceback (most recent call last):
+            ...
+            NotImplementedError: modulus is not divisible by 9
+        """
+        if not other.modulus.is_zero():
+            raise TypeError("can only divide by elements of the base")
+        if other.is_zero():
+            raise ZeroDivisionError("division by zero")
+        value = self.value / other.value
+        if not value.is_integral():
+            raise NotImplementedError("value is not divisible by {}".format(other))
+        modulus = self.modulus / other.value
+        if not modulus.is_integral():
+            raise NotImplementedError("modulus is not divisible by {}".format(other))
+        return self.__class__(self.parent(), value, modulus)
+
 
     def prime_repr(self):
         """
@@ -427,31 +493,24 @@ from sage.rings.ring import CommutativeAlgebra
 class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
     Element = ProfiniteInteger
 
-    def __init__(self, R=ZZ):
+    @staticmethod
+    def __classcall__(cls, R=ZZ):
         """
         Construct a profinite completion of a ring of integers
 
         INPUT:
 
-        - ``R`` -- a number field or a maximal order in a number field
-          (default: ``ZZ``)
+        - ``R`` -- a number field or a maximal order in a number field (default:
+          ``ZZ``)
 
-        OUTPUT:
+        EXAMPLES:
 
-        The profinite completion of the maximal order in the ambient field of
-        `R`.
+        This method makes sure input to UniqueRepresentation (in particular,
+        CachedRepresentation) is normalized such that a number field and its
+        maximal order return the same object::
 
-        EXAMPLES::
-
-            sage: ProfiniteIntegers()
-            Profinite Completion of Integer Ring
-            sage: K.<a> = NumberField(x^5-3*x+1)
-            sage: ProfiniteIntegers(K)
-            Profinite Completion of Maximal Order in Number Field in a with defining polynomial x^5 - 3*x + 1
-            sage: ProfiniteIntegers("not a number field")
-            Traceback (most recent call last):
-            ...
-            TypeError: R should be (the maximal order of) a number field
+            sage: ProfiniteIntegers(ZZ) is ProfiniteIntegers(QQ)
+            True
         """
         try:
             if R is ZZ or R is QQ:
@@ -465,6 +524,32 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
                 O = K.maximal_order()
         except AttributeError:
             raise TypeError("R should be (the maximal order of) a number field")
+        return super(ProfiniteIntegers, cls).__classcall__(cls, O)
+
+    def __init__(self, O):
+        """
+        Construct a profinite completion of a ring of integers
+
+        INPUT:
+
+        - ``O`` -- a maximal order in a number field
+
+        OUTPUT:
+
+        The profinite completion of the maximal order ``O``.
+
+        EXAMPLES::
+
+            sage: ProfiniteIntegers()
+            Profinite Completion of Integer Ring
+            sage: K.<a> = NumberField(x^5-3*x+1)
+            sage: ProfiniteIntegers(K)
+            Profinite Completion of Maximal Order in Number Field in a with defining polynomial x^5 - 3*x + 1
+            sage: ProfiniteIntegers("not a number field")
+            Traceback (most recent call last):
+            ...
+            TypeError: R should be (the maximal order of) a number field
+        """
         CommutativeAlgebra.__init__(self, O)
 
     def _repr_(self):
@@ -496,7 +581,7 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
     def number_field(self):
         """
         Return the ambient number field of our base
-        
+
         EXAMPLES:
 
             sage: Zhat = ProfiniteIntegers()
