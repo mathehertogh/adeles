@@ -274,6 +274,7 @@ class ProfiniteNumber(CommutativeRingElement):
             sage: Khat(a+1, 20*a+3, 7) + 5
             (-3749*a^2 mod (-20*a - 3))/7
         """
+        debug("ProfiniteNumber._add_({}, {})".format(self, other))
         numerator = self.numerator * other.denominator + other.numerator * self.denominator
         denominator = self.denominator * other.denominator
         return self.__class__(self.parent(), numerator, denominator)
@@ -303,6 +304,7 @@ class ProfiniteNumber(CommutativeRingElement):
             sage: Khat(a^2, 21, 2*(a+1)) - Khat(a, 7, 2)
             (-a mod (7*a + 7))/(2*a + 2)
         """
+        debug("ProfiniteNumber._sub_({}, {})".format(self, other))
         numerator = self.numerator * other.denominator - other.numerator * self.denominator
         denominator = self.denominator * other.denominator
         return self.__class__(self.parent(), numerator, denominator)
@@ -330,6 +332,7 @@ class ProfiniteNumber(CommutativeRingElement):
             sage: Khat(a^2, 21, 5) * Khat(a+1, 21, 10)
             (a^3 + a^2 mod (21))/50
         """
+        debug("ProfiniteNumber._mul_({}, {})".format(self, other))
         numerator = self.numerator * other.numerator
         denominator = self.denominator * other.denominator
         return self.__class__(self.parent(), numerator, denominator)
