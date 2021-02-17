@@ -65,7 +65,7 @@ def completion(K, q, prec=20):
 
 def infinite_completions(K):
     """
-    Return the infinite completions of ``K`` as a list of RR's/CC's & embeddings
+    Return the infinite completions of ``K``
 
     INPUT:
 
@@ -73,7 +73,9 @@ def infinite_completions(K):
 
     OUTPUT:
 
-    ...
+    A list of tuples (K_oo, phi) with K_oo a completion of K and phi: K --> K_oo
+    "the" embedding (the same one as K.places() returns, except with codomain
+    an interval field).
     """
     completions = []
     for phi in K.places():

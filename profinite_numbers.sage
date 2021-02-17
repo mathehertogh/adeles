@@ -340,13 +340,41 @@ from sage.rings.ring import CommutativeAlgebra
 class ProfiniteNumbers(UniqueRepresentation, CommutativeAlgebra):
     Element = ProfiniteNumber
 
-    def __init__(self, K=QQ):
+    def __classcall__(cls, K=QQ):
+        """
+        Construct the ring of profinite numbers over the number field `K`
+
+        INPUT:
+
+        - ``K`` -- a number field(default: ``QQ``)
+
+        EXAMPLES::
+
+            sage: ProfiniteNumbers("not a number field")
+            Traceback (most recent call last):
+            ...
+            TypeError: K should be a number field
+
+        We make sure this returns True::
+
+            sage: ProfiniteNumbers() is ProfiniteNumbers(QQ)
+            True
+        """
+        debug("ProfiniteNumbers.__classcall__({})".format(K))
+        try:
+            if not is_field(K) or not K.absolute_degree() in ZZ:
+                raise TypeError("K should be a number field")
+        except AttributeError:
+            raise TypeError("K should be a number field")
+        return super(ProfiniteNumbers, cls).__classcall__(cls, K)
+
+    def __init__(self, K):
         r"""
         Construct the ring of profinite numbers over the number field ``K``
 
         INPUT:
 
-        - ``K`` -- a number field (default: `\QQ`)
+        - ``K`` -- a number field
 
         EXAMPLES::
 
@@ -355,17 +383,8 @@ class ProfiniteNumbers(UniqueRepresentation, CommutativeAlgebra):
             sage: K.<a> = NumberField(x^5-3*x+1)
             sage: ProfiniteNumbers(K)
             Profinite Numbers of Number Field in a with defining polynomial x^5 - 3*x + 1
-            sage: ProfiniteNumbers("not a number field")
-            Traceback (most recent call last):
-            ...
-            TypeError: K should be a number field
         """
         debug("ProfiniteNumbers.__init__({})".format(K))
-        try:
-            if not is_field(K) or not K.absolute_degree() in ZZ:
-                raise TypeError("K should be a number field")
-        except AttributeError:
-            raise TypeError("K should be a number field")
         CommutativeAlgebra.__init__(self, K)
 
     def _repr_(self):
