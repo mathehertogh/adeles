@@ -5,6 +5,9 @@ Profinite Integers of Number Fields
 
     Write documentation for this module
 """
+
+load("util.py")
+
 load("completions.sage")
 
 from sage.structure.element import CommutativeRingElement
@@ -80,7 +83,7 @@ class ProfiniteInteger(CommutativeRingElement):
             ...
             TypeError: modulus must be an integer
         """
-        #print("DEBUG - ProfiniteInteger.__init__({}, {})".format(value, modulus))
+        debug("ProfiniteInteger.__init__({}, {})".format(value, modulus))
         CommutativeRingElement.__init__(self, parent)
         O = parent.base()
         K = parent.number_field()
@@ -117,6 +120,7 @@ class ProfiniteInteger(CommutativeRingElement):
             sage: Ohat(a, I)
             a mod (3, a + 2)
         """
+        debug("ProfiniteInteger._repr_()")
         if self.modulus == 0:
             return repr(self.value)
         modulus = self.modulus
@@ -178,6 +182,7 @@ class ProfiniteInteger(CommutativeRingElement):
             ...
             NotImplementedError: only equality and inequality are implemented
         """
+        debug("ProfiniteInteger._richcmp_({}, {})".format(self, other))
         from sage.structure.richcmp import op_EQ, op_NE
         if op == op_EQ:
             O = self.parent().base()
@@ -221,6 +226,7 @@ class ProfiniteInteger(CommutativeRingElement):
             sage: b._reduce(); b
             -a
         """
+        debug("ProfiniteInteger._reduce()")
         if self.parent().base() is ZZ:
             if self.modulus != ZZ(0):
                 self.value %= self.modulus
@@ -261,6 +267,7 @@ class ProfiniteInteger(CommutativeRingElement):
             sage: b._common_modulus(Ohat(7))
             Fractional ideal (15)
         """
+        debug("ProfiniteInteger._common_modulus({}, {})".format(self, other))
         if self.parent().base() is ZZ:
             return gcd(self.modulus, other.modulus)
         return self.modulus + other.modulus
@@ -291,6 +298,7 @@ class ProfiniteInteger(CommutativeRingElement):
             sage: O(-a)+c
             a + 1 mod (7)
         """
+        debug("ProfiniteInteger._add_({}, {})".format(self, other))
         modulus = self._common_modulus(other)
         value = self.value + other.value
         return self.__class__(self.parent(), value, modulus)
@@ -320,6 +328,7 @@ class ProfiniteInteger(CommutativeRingElement):
             sage: c-1
             2*a mod (7)
         """
+        debug("ProfiniteInteger._sub_({}, {})".format(self, other))
         modulus = self._common_modulus(other)
         value = self.value - other.value
         return self.__class__(self.parent(), value, modulus)
@@ -350,6 +359,7 @@ class ProfiniteInteger(CommutativeRingElement):
             sage: 1*c
             2*a + 1 mod (7)
         """
+        debug("ProfiniteInteger._mul_({}, {})".format(self, other))
         I = self.value * other.modulus
         J = self.modulus * other.value
         K = self.modulus * other.modulus
@@ -408,6 +418,7 @@ class ProfiniteInteger(CommutativeRingElement):
             ...
             NotImplementedError: modulus is not divisible by 9
         """
+        debug("ProfiniteInteger._div_({}, {})".format(self, other))
         if not other.modulus.is_zero():
             raise TypeError("can only divide by elements of the base")
         if other.is_zero():
@@ -415,16 +426,19 @@ class ProfiniteInteger(CommutativeRingElement):
         value = self.value / other.value
         if not value.is_integral():
             raise NotImplementedError("value is not divisible by {}".format(other))
-        modulus = self.modulus / other.value
-        if not modulus.is_integral():
-            raise NotImplementedError("modulus is not divisible by {}".format(other))
+        if self.modulus.is_zero():
+            modulus = ZZ(0)
+        else:
+            modulus = self.modulus / other.value
+            if not modulus.is_integral():
+                raise NotImplementedError("modulus is not divisible by {}".format(other))
         return self.__class__(self.parent(), value, modulus)
-
 
     def prime_repr(self):
         """
         TODO fix projection() first, then write this
         """
+        debug("ProfiniteInteger.prime_repr()")
         from sage.arith.misc import factor
         factorization = factor(self.modulus)
         rep = "("
@@ -472,6 +486,7 @@ class ProfiniteInteger(CommutativeRingElement):
 
             TODO
         """
+        debug("ProfiniteInteger.projection()")
         K = self.parent().number_field()
         if K is QQ:
             if p not in ZZ or not p.is_prime():
@@ -512,6 +527,7 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
             sage: ProfiniteIntegers(ZZ) is ProfiniteIntegers(QQ)
             True
         """
+        debug("ProfiniteIntegers.__classcall__({}, {})".format(cls, R))
         try:
             if R is ZZ or R is QQ:
                 O = ZZ
@@ -541,15 +557,16 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
         EXAMPLES::
 
             sage: ProfiniteIntegers()
-            Profinite Completion of Integer Ring
+            Profinite Integers of Rational Field
             sage: K.<a> = NumberField(x^5-3*x+1)
             sage: ProfiniteIntegers(K)
-            Profinite Completion of Maximal Order in Number Field in a with defining polynomial x^5 - 3*x + 1
+            Profinite Integers of Number Field in a with defining polynomial x^5 - 3*x + 1
             sage: ProfiniteIntegers("not a number field")
             Traceback (most recent call last):
             ...
             TypeError: R should be (the maximal order of) a number field
         """
+        debug("ProfiniteIntegers.__init__({})".format(O))
         CommutativeAlgebra.__init__(self, O)
 
     def _repr_(self):
@@ -560,9 +577,11 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
 
             sage: K = NumberField(x^3+x+1, 'a')
             sage: ProfiniteIntegers(K)
-            Profinite Completion of Maximal Order in Number Field in a with defining polynomial x^3 + x + 1
+            Profinite Integers of Number Field in a with defining polynomial x^3 + x + 1
         """
-        return "Profinite Completion of {}".format(self.base())
+        debug("ProfiniteIntegers._repr_()")
+        K = QQ if self.base() is ZZ else self.base().ambient()
+        return "Profinite Integers of {}".format(K)
 
     def _latex_(self):
         r"""
@@ -575,6 +594,7 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
             sage: latex(Ohat)
              \widehat{ \mathcal{O}_{ \Bold{Q}[a]/(a^{2} + 14) } }
         """
+        debug("ProfiniteIntegers._latex_()")
         K = self.number_field()
         return r" \widehat{ \mathcal{O}_{" + latex(K) + "} } "
 
@@ -592,6 +612,7 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
             sage: Ohat.number_field()
             Number Field in a with defining polynomial x^2 + x - 7
         """
+        debug("ProfiniteIntegers.number_field()")
         if self.base() is ZZ:
             return QQ
         return self.base().ambient()
@@ -606,6 +627,7 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
             sage: Zhat.characteristic()
             0
         """
+        debug("ProfiniteIntegers.characteristic()")
         return ZZ(0)
 
     def _element_constructor_(self, value, modulus=None):
@@ -624,6 +646,7 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
             sage: Ohat(a^2+1, 4*a)
             a^2 + 1 mod (4*a)
         """
+        debug("ProfiniteIntegers._element_constructor_({}, {})".format(value, modulus))
         if modulus is None:
             modulus = ZZ(0) if self.base() is ZZ else self.base().ideal(0)
         return self.element_class(self, value, modulus)
@@ -652,6 +675,7 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
             sage: Ohat._coerce_map_from_(K.maximal_order())
             True
         """
+        debug("ProfiniteIntegers._coerce_map_from_({})".format(S))
         if S is self.base() or S is ZZ:
             return True
         return False
@@ -666,5 +690,6 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
             sage: Zhat.is_integral_domain()
             False
         """
+        debug("ProfiniteIntegers.is_integral_domain()")
         return False
 
