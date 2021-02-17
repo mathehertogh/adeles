@@ -360,13 +360,20 @@ class ProfiniteInteger(CommutativeRingElement):
             2*a + 1 mod (7)
         """
         debug("ProfiniteInteger._mul_({}, {})".format(self, other))
-        I = self.value * other.modulus
-        J = self.modulus * other.value
-        K = self.modulus * other.modulus
-        if self.parent().base() is ZZ:
-            modulus = gcd(I, gcd(J, K))
+        # We seperate the modulus==0 cases because multiplying a non-principal
+        # ideal with the zero-ideal is not implemented.
+        if self.modulus.is_zero():
+            modulus = self.value * other.modulus
+        elif other.modulus.is_zero():
+            modulus = other.value * self.modulus
         else:
-            modulus = I + J + K
+            I = self.value * other.modulus
+            J = self.modulus * other.value
+            K = self.modulus * other.modulus
+            if self.parent().base() is ZZ:
+                modulus = gcd(I, gcd(J, K))
+            else:
+                modulus = I + J + K
         value = self.value * other.value
         return self.__class__(self.parent(), value, modulus)
 
