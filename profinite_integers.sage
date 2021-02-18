@@ -10,19 +10,15 @@ load("util.py")
 
 load("completions.sage")
 
-from sage.structure.element import CommutativeRingElement
+from sage.structure.element import CommutativeAlgebraElement
 
-class ProfiniteInteger(CommutativeRingElement):
+class ProfiniteInteger(CommutativeAlgebraElement):
     """
     Profinite Integer of a Number Field
 
     .. TODO::
 
         Write documentation for this class definition
-
-    .. TODO::
-
-        Inherit from Commutative Algebra Element (not CommutativeRingElement)
 
     :automethod:`_repr_`
     """
@@ -84,7 +80,7 @@ class ProfiniteInteger(CommutativeRingElement):
             TypeError: modulus must be an integer
         """
         debug("ProfiniteInteger.__init__({}, {})".format(value, modulus))
-        CommutativeRingElement.__init__(self, parent)
+        CommutativeAlgebraElement.__init__(self, parent)
         O = parent.base()
         K = parent.number_field()
         if value not in O:

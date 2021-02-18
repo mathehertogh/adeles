@@ -7,9 +7,9 @@ Profinite Integers of Number Fields
 """
 load("profinite_integers.sage")
 
-from sage.structure.element import CommutativeRingElement
+from sage.structure.element import CommutativeAlgebraElement
 
-class ProfiniteNumber(CommutativeRingElement):
+class ProfiniteNumber(CommutativeAlgebraElement):
     """
     Profinite Integer of a Number Field
 
@@ -19,10 +19,6 @@ class ProfiniteNumber(CommutativeRingElement):
     .. TODO::
     
         Write documentation for this class definition
-
-    .. TODO::
-
-        Inherit from Commutative Algebra Element (not CommutativeRingElement)
     
     :automethod:`_repr_`
     """
@@ -95,7 +91,7 @@ class ProfiniteNumber(CommutativeRingElement):
             TypeError: denominator should be a non-zero element of Maximal Order in Number Field in a with defining polynomial x^4 + 7
         """
         debug("ProfiniteNumber.__init__({}, {})".format(numerator, denominator))
-        CommutativeRingElement.__init__(self, parent)
+        CommutativeAlgebraElement.__init__(self, parent)
         O = parent.base().maximal_order()
         Ohat = ProfiniteIntegers(O)
         if denominator is None:
