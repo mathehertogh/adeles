@@ -13,8 +13,9 @@ class ProfiniteNumber(CommutativeAlgebraElement):
     """
     Profinite Integer of a Number Field
 
-    We maintain the invariance gcd(value, modulus, denominator) == 1.
-    Problem: moduli are ideals, not elements... gcd 
+    We try to keep gcd(value, modulus, denominator) small (in, say, norm). But
+    this is difficult for number fields with non-trivial class group. See
+    :meth:`_reduce`.
     
     .. TODO::
     

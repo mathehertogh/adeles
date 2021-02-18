@@ -104,15 +104,52 @@ class Adele(CommutativeAlgebraElement):
 
         We only implement equality and non-equality.
 
-        We declare adeles equal if...?. TODO
+        We declare two adeles equal if the *could* be equal: the open subsets
+        they represents should have non-empty intersection.
 
         EXAMPLES::
 
+            sage: A = Adeles()
+            sage: Qhat = ProfiniteNumbers(QQ)
+            sage: b = A([RIF(2.0, 3.0)], Qhat(3, 10, 7))
+            sage: c = A([RIF(2.5, 3.5)], Qhat(13, 20, 7))
+            sage: d = A([2.1], Qhat(13, 20, 7))
+            sage: e = A([2.1], Qhat(3, 20, 7))
+            sage: b == c
+            True
+            sage: b == d
+            True
+            sage: c == d
+            False
+            sage: b != e
+            False
+            sage: d == e
+            False
+            sage: c != d
+            True
+
+        ::
+
+            sage: K.<i> = NumberField(x^2+1)
+            sage: Ak = Adeles(K)
+            sage: Khat = ProfiniteNumbers(K)
+            sage: b = Ak([I], Khat(i, 10+i, 3))
+            sage: c = Ak([RIF(-1, 4)*I], Khat(-10, 20+2*i, 3))
+            sage: b == c
+            True
+            sage: b != c
+            False
         """
         debug("Adele._richcmp_({}, {})".format(self, other))
         from sage.structure.richcmp import op_EQ, op_NE
         if op == op_EQ:
-            return self.numerator * other.denominator == self.denominator * other.numerator
+            for i in range(len(self.infinite)):
+                try:
+                    self.infinite[i].intersection(other.infinite[i])
+                except ValueError:
+                    # This indicates the intersection is empty
+                    return False
+            return self.finite == other.finite
         if op == op_NE:
             return not self._richcmp_(other, op_EQ)
         raise NotImplementedError("only equality and inequality are implemented")
@@ -363,9 +400,10 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
         .. TODO::
 
             For a field extension K --> L, define coercion A_K --> A_L
+            Also Ohat_K --> Ohat_L and Khat --> Lhat
 
-            Define Coercion `\QQ_p` --> A_Q
-            Maybe even K_p --> A_K?
+            Define Coercion `\QQ_p` --> A_Q; even K_p --> A_K
+            Maybe via Khat? So two coercions: K_p --> Khat --> A_K
         """
         debug("Adeles._coerce_map_from_({})".format(S))
         if self.base().has_coerce_map_from(S):

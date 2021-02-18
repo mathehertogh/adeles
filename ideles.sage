@@ -42,18 +42,6 @@ where `S` is a finite set of places of `K` and each `U_p` is of the form
 load("completions.sage")
 
 
-def all_units(K):
-    """
-    Return a list of all units of the maximal order of the number field ``K``
-    """
-    if K is QQ:
-        return [K(1), K(-1)]
-    U = K.unit_group()
-    if not U.is_finite():
-        raise NotImplementedError("K has infinite unit group")
-    U.gens_v
-
-
 from sage.structure.element import MultiplicativeGroupElement
 class Idele(MultiplicativeGroupElement):
     r"""
@@ -474,7 +462,9 @@ class Idele(MultiplicativeGroupElement):
         """
         Return whether or not ``self`` equals ``other``
 
-        By equal we here mean: represent the same subset of the idele group.
+        We define equality of ideles very loosely: if two ideles *could* be
+        equal, that is if the open subsets they represent have non-empty
+        intersection, than we declare them equal.
 
         EXAMPLES::
 
@@ -484,6 +474,8 @@ class Idele(MultiplicativeGroupElement):
             sage: w = J(None, None, {2: (3, 7), 3: (1/2, 6), 5: (1, 0)})
             sage: u._equals(u)
             True
+            sage: (u/u)._equals(J(1))
+            True
             sage: u._equals(v)
             False
             sage: u._equals(w)
@@ -492,20 +484,24 @@ class Idele(MultiplicativeGroupElement):
             False
 
         If an idele ``x`` represents a strict subset of another idele ``v``,
-        they are not equal::
+        they are equal::
 
             sage: x = J(4, [-1.23], {3: (5, 11)})
             sage: v._equals(x)
-            False
+            True
 
         Also in this case the result is not equal, due to the non-exactness of
         ``u``::
-
-            sage: (u/u)._equals(J(1))
-            False
         """
-        if self.exact != other.exact:
-            return False
+        K = self.parent().number_field
+
+        if self._has_exact() and other._has_exact():
+            if self.exact != other.exact:
+                return False
+        elif self._has_exact() or other._has_exact():
+            ex, nex = (self, other) if self._has_exact() else (other, self)
+            if not nex._contains(ex.exact):
+                return False
 
         t = len(self.infinite)
         for i in range(t):
@@ -515,36 +511,31 @@ class Idele(MultiplicativeGroupElement):
             else:
                 if other.infinite[i] is None:
                     return False
-                if self.infinite[i].endpoints() != other.infinite[i].endpoints():
+                try:
+                    self.infinite[i].intersection(other.infinite[i])
+                except ValueError:
+                    # This indicates the intersection is empty
                     return False
 
-        K = self.parent().number_field
         for q, v in self.finite.items():
             if q in other.finite:
                 w = other.finite[q]
-                # Check that the open subgroups up to which we know this
-                # place are equal:
-                if v[1] != w[1]:
-                    return False
-                x, y, i = v[0], w[0], v[1]
-                # We need to check that x*(1+M_q^i) == y*(1+M_q^i) holds.
-                # This is equivalent to x/y-1 having valution at least i at q.
-                z = x/y-1
-                if K is not QQ:
-                    z = K.ideal(z)
-                if z.valuation(q) < i:
+                small, big = (self, other) if v[1] >= w[1] else (other, self)
+                if not big._contains_at(small.finite[q][0], q):
+                    # the small open subset does not lie in the big open subset
+                    # so they are disjoint
                     return False
             else: # other[q] not stored
                 if other._has_exact():
-                    # self[q] is an approximation, while other[q] is exact.
-                    return False
+                    if not self._contains_at(other.exact, q):
+                        return False
                 else:
-                    # other[q] is Z_q*
-                    # So self[q] must be x*Z_q*, with x in Z_q*
                     x = v[0]
+                    # other[q] is Z_q*
+                    # So x must lie in Z_q*, i.e. have valuation zero
                     if K is not QQ:
                         x = K.ideal(x)
-                    if v[1] != 0 or x.valuation(q) != 0:
+                    if  x.valuation(q) != 0:
                         return False
         for q, v in other.finite.items():
             if q not in self.finite:
@@ -552,12 +543,12 @@ class Idele(MultiplicativeGroupElement):
                     # self[q] is exact, while other[q] is an approximation.
                     return False
                 else:
-                    # self[q] is Z_q*
-                    # So other[q] must be x*Z_q*, with x in Z_q*
                     x = v[0]
+                    # self[q] is Z_q*
+                    # So x must lie in Z_q*, i.e. have valuation zero
                     if K is not QQ:
                         x = K.ideal(x)
-                    if v[1] != 0 or x.valuation(q) != 0:
+                    if x.valuation(q) != 0:
                         return False
 
         # Passed all checks. We are equal!
@@ -950,8 +941,6 @@ class Idele(MultiplicativeGroupElement):
                 x = K.ideal(x)
             if x.valuation(q) != ZZ(0):
                 raise TypeError("no conversion from this idele to a modulo element")
-
-
 
 
 
