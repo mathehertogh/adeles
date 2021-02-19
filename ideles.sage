@@ -1155,7 +1155,71 @@ class IdeleGroup(UniqueRepresentation, Group):
         #print("DEBUG: IdeleGroup._element_constructor_({}, {}, {})".format(exact, infinite, finite))
         if exact is None and infinite is None and finite is None:
             raise TypeError("No arguments supplied to Idele-constructor")
+        if exact.parent() is Adeles(self.number_field): # conversion A_K --> J_K
+            return self._from_adele(exact)
         return self.element_class(self, exact, infinite, finite)
+
+    def _from_adele(self, adele):
+        r"""
+        Convert the adele ``adele`` to an idele
+
+        Let U be the subset of the adele ring that ``adele`` represents. Write J
+        for the idele group. Then the idele returned represents a subset that
+        *contains* `U \cap J`. Note that in general this looses precision.
+        TODO: example of precision loss
+
+        EXAMPLES::
+
+            sage: J = IdeleGroup(QQ)
+            sage: A = Adeles(QQ)
+            sage: Qhat = ProfiniteNumbers(QQ)
+            sage: a = A([-1.5], Qhat(7, 24, 5))
+            sage: J._from_adele(a)
+            (-1.5000000000000000?, 7*(1+M_2^3), 7*(1+M_3^1), ...)
+            sage: b = A([RIF(-1, 1)], Qhat(5, 25, 2))
+            sage: J._from_adele(b)
+            (0.?, Z_2*, Z_3*, 5*(1+M_5^1), ...)
+            sage: c = A([pi.n()], 20/3)
+            sage: J._from_adele(c)
+            (3.1415926535897932?, 20/3, 20/3, 20/3, ...)
+
+        If the given adele has value zero modulo on of its stored primes (i.e.
+        ``4 mod 12`` has value zero modulo 2^2), then there is no idele that
+        represents the adele. For example: the given adele then represents
+        multiple element which have different valuation at that prime. But an
+        idele always has a unique valuation at every prime. In this case, we
+        throw an exception::
+
+            sage: d = A([1], Qhat(4, 12, 3))
+            sage: J._from_adele(d)
+            Traceback (most recent call last):
+            ...
+            ValueError: adele is zero at the prime 2
+        """
+        K = self.number_field
+        value = adele.finite.numerator.value
+        modulus = adele.finite.numerator.modulus
+        denominator = adele.finite.denominator
+
+        exact = None
+        if modulus.is_zero():
+            exact = value / denominator
+            finite = None
+        else:
+            x = value
+            if K is not QQ:
+                x = K.ideal(x)
+
+            finite = {}
+            for q, e in factor(modulus):
+                v = x.valuation(q)
+                if v >= e:
+                    # value is zero modulo q^e, which we cannot represent as an
+                    # idele
+                    raise ValueError("adele is zero at the prime {}".format(q))
+                finite[q] = (value, e-v)
+
+        return self.element_class(self, exact, adele.infinite, finite)
 
     def cardinality(self):
         return Infinity
