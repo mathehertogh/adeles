@@ -1,7 +1,7 @@
 
 load("completions.sage")
 load("profinite_numbers.sage")
-load("ideles.sage")
+#load("ideles.sage")
 
 from sage.structure.element import CommutativeAlgebraElement
 class Adele(CommutativeAlgebraElement):
@@ -266,6 +266,63 @@ class Adele(CommutativeAlgebraElement):
         finite = self.finite * other.finite
         return self.__class__(self.parent(), infinite, finite)
 
+    def to_modulo_element(self):
+        """
+        Convert this *integral* adele to an element of `O/I`, with `O` the
+        maximal order in our number feild and `I` the ideal up to which our
+        finite part is defined
+
+        If ``self`` is not integral, throw an exception.
+
+        EXAMPLES::
+
+            sage: A = Adeles(QQ)
+            sage: Qhat = ProfiniteNumbers(QQ)
+            sage: b = A([1], Qhat(3, 10))
+            sage: b_bar = b.to_modulo_element()
+            sage: b_bar, b_bar.parent()
+            (3, Ring of integers modulo 10)
+            sage: c = A([pi.n()], Qhat(97, 790))
+            sage: c_bar = c.to_modulo_element()
+            sage: c_bar, c_bar.parent()
+            (97, Ring of integers modulo 790)
+
+        ::
+
+            sage: K.<a> = NumberField(x^2+5)
+            sage: Ak = Adeles(K)
+            sage: Khat = ProfiniteNumbers(K)
+            sage: b = Ak([I], Khat(a, K.ideal(2, a+1)))
+            sage: b_bar = b.to_modulo_element()
+            sage: b_bar, b_bar.parent()
+            (a,
+             Quotient of Maximal Order in Number Field in a with defining polynomial x^2 + 5 by the ideal (2, a + 1))
+            sage: c = Ak([I], Khat(-3, K.ideal(9, 3*a+3), 3))
+            sage: c_bar = c.to_modulo_element()
+            sage: c_bar, c_bar.parent()
+            (a,
+             Quotient of Maximal Order in Number Field in a with defining polynomial x^2 + 5 by the ideal (3, a + 1))
+
+        TESTS::
+
+            sage: d = Ak([1], Khat(a, 7, 3))
+            sage: d.to_modulo_element()
+            Traceback (most recent call last):
+            ...
+            ValueError: non-integral adele can't be converted to O/I
+        """
+        if self.finite.denominator != 1:
+            raise ValueError("non-integral adele can't be converted to O/I")
+        K = self.parent().base()
+        O = K.maximal_order()
+        I = self.finite.numerator.modulus
+        x = self.finite.numerator.value
+        if I.is_zero():
+            return O(x)
+        name = K.variable_name() + "_bar"
+        OmodI = O.quotient(I, name)
+        return OmodI(x)
+
 
 from sage.structure.unique_representation import UniqueRepresentation
 from sage.rings.ring import CommutativeAlgebra
@@ -386,6 +443,8 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
         K = self.base()
         J_K = IdeleGroup(K)
         if y is None:
+            if x.parent() is self: # make copy
+                return self.element_class(self, x.infinite, x.finite)
             if x in K:  # coercion K --> A_K
                 infinite = [phi(x) for L, phi in completions(K, oo)]
                 return self.element_class(self, infinite, x)
@@ -490,6 +549,9 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
             value = K.solve_CRT(values, moduli)
         modulus = prod(moduli)
         finite = Khat(value, modulus, denominator)
+
+        if len(moduli) == 0 and idele._has_exact():
+            finite = idele.exact
 
         return self.element_class(self, infinite, finite)
 

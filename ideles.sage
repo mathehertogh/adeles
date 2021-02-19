@@ -48,6 +48,7 @@ where `S` is a finite set of places of `K` and each `U_p` is of the form
 """
 
 load("completions.sage")
+load("adeles.sage")
 
 
 from sage.structure.element import MultiplicativeGroupElement
@@ -889,9 +890,10 @@ class Idele(MultiplicativeGroupElement):
 
 
 
-    def to_modulo_element(self, I):
+    def to_modulo_element(self):
         r"""
         Convert this idele to its image in O/I, with O the maximal order of K
+        and I the (biggest) ideal where ``self`` is defined
 
         This implements the canonical homomorphism `\hat{O} \to O/I`, where
         we view `\hat{O}` as the subring of the idele group of ideles which are
@@ -903,20 +905,16 @@ class Idele(MultiplicativeGroupElement):
 
         - ``I`` -- an ideal of the maximal order ``O`` of our number field ``K``
 
-        OUTPUT:
-
-        The image of ``self`` in ``(O/I)^*``.
-
         EXAMPLES:
-
-        edge case: 0-modulus
+            
+        sage: J = IdeleGroup(QQ)
+        sage: u = J(None, None, {2: (1/3, 3), 5: (7, 1)})
+        sage: u_bar = u.to_modulo_element()
+        sage: u_bar, u_bar.parent()
+        (27, Ring of integers modulo 40)
         """
-        for q, val in self.finite.items():
-            x, i = val
-            if K is not QQ:
-                x = K.ideal(x)
-            if x.valuation(q) != ZZ(0):
-                raise TypeError("no conversion from this idele to a modulo element")
+        A = Adeles(self.parent().number_field)
+        return A(self).to_modulo_element()
 
 
 
@@ -1155,7 +1153,8 @@ class IdeleGroup(UniqueRepresentation, Group):
         #print("DEBUG: IdeleGroup._element_constructor_({}, {}, {})".format(exact, infinite, finite))
         if exact is None and infinite is None and finite is None:
             raise TypeError("No arguments supplied to Idele-constructor")
-        if exact.parent() is Adeles(self.number_field): # conversion A_K --> J_K
+        if (infinite is None and finite is None and
+                exact.parent() is Adeles(self.number_field)): # conversion A_K --> J_K
             return self._from_adele(exact)
         return self.element_class(self, exact, infinite, finite)
 
@@ -1169,7 +1168,7 @@ class IdeleGroup(UniqueRepresentation, Group):
         TODO: example of precision loss
 
         EXAMPLES::
-
+            
             sage: J = IdeleGroup(QQ)
             sage: A = Adeles(QQ)
             sage: Qhat = ProfiniteNumbers(QQ)
