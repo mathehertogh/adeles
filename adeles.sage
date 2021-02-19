@@ -1,8 +1,7 @@
 
 load("completions.sage")
 load("profinite_numbers.sage")
-
-
+load("ideles.sage")
 
 from sage.structure.element import CommutativeAlgebraElement
 class Adele(CommutativeAlgebraElement):
@@ -90,11 +89,22 @@ class Adele(CommutativeAlgebraElement):
             sage: Khat = ProfiniteNumbers(K)
             sage: A([-1, I], Khat(zeta-1, zeta^3+zeta, 10))
             (-1, 1*I, (0 mod (zeta^3 + zeta))/10)
+            sage: inf = CIF(RIF(-oo, oo), RIF(-oo, oo))
+            sage: A([-97*I, inf], Khat(zeta, 100, 1+zeta^2))
+            (-97*I, CC, (zeta mod (100))/(zeta^2 + 1))
         """
         debug("Adele._repr_()")
+        rif_oo = RIF(-oo, oo)
+        cif_oo = CIF(rif_oo, rif_oo)
         rep = "("
-        for x_oo in self.infinite:
-            rep += repr(x_oo) + ", "
+        for i in range(len(self.infinite)):
+            x_oo = self.infinite[i]
+            if x_oo.endpoints() == rif_oo.endpoints():
+                rep += "RR, "
+            elif x_oo.endpoints() == cif_oo.endpoints():
+                rep += "CC, "
+            else:
+                rep += repr(x_oo) + ", "
         rep += repr(self.finite) + ")"
         return rep
 
@@ -316,7 +326,7 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
         EXAMPLES::
 
             sage: K = NumberField(x^3+x+1, 'a')
-            sage: ProfiniteNumbers(K)
+            sage: Adeles(K)
             Adele Ring of Number Field in a with defining polynomial x^3 + x + 1
         """
         debug("Adeles._repr_()")
@@ -329,8 +339,7 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
         EXAMPLES::
 
             sage: K.<a> = NumberField(x^2+14)
-            sage: Khat = ProfiniteNumbers(K)
-            sage: latex(Khat)
+            sage: latex(Adeles(K))
              \Bold{A}_{ \Bold{Q}[a]/(a^{2} + 14) }
         """
         debug("Adeles._latex_()")
@@ -375,11 +384,114 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
         """
         debug("Adeles._element_constructor_({}, {})".format(x, y))
         K = self.base()
+        J_K = IdeleGroup(K)
         if y is None:
-            if x in K:  # coercion from base()
+            if x in K:  # coercion K --> A_K
                 infinite = [phi(x) for L, phi in completions(K, oo)]
                 return self.element_class(self, infinite, x)
+            if x in J_K:  # coercion J_K --> A_K
+                return self._from_idele(x)
         return self.element_class(self, x, y)
+
+    def _from_idele(self, idele):
+        """
+        Construct the adele corresponding to the idele ``idele``
+
+        This implements the natural embedding of the ideles into the adeles. Due
+        to the ways we store ideles/adeles, this may lose precision: the returend
+        ``Adele`` represents a subset of the adeles that contains all ideles
+        ``self`` represents. TODO happens when p^i*Z_p* (i.e. x*U_q^0 w/
+        v_q(x)>0) explain+example. Also if exact set?
+
+        EXAMPLES::
+
+            sage: A = Adeles(QQ)
+            sage: J = IdeleGroup(QQ)
+            sage: u = J(None, None, {2: (1/4, 1), 3: (3/5, 2)})
+            sage: v = J(None, [-1], {2: (4, 2), 3: (1/4, 1), 5: (3, 0)})
+            sage: w = J(None, [RIF(7, 9)], {2: (4, 2), 3: (1/4, 1), 5: (5, 0)})
+            sage: A(u)
+            (RR, (51 mod 54)/4)
+            sage: A(v)
+            (-1, 4 mod 48)
+            sage: A(w)
+            (8.?, 100 mod 240)
+            sage: A(u*v)
+            (RR, 15 mod 18)
+            sage: A(u)*A(v)
+            (RR, 15 mod 18)
+
+        ::
+
+            sage: K.<a> = NumberField(x^2+5)
+            sage: Ak = Adeles(K)
+            sage: Jk = IdeleGroup(K)
+            sage: u = Jk(None, [I], {})
+            sage: Ak(u)
+            (1*I, 0 mod (1))
+            sage: p2, p3 = K.prime_above(2), K.prime_above(3)
+            sage: v = Jk(None, None, {p2: (a, 3), p3: (1/3-a, 3)})
+            sage: Ak(v)
+            (CC, (a + 2 mod (108, 6*a + 42))/3)
+
+        This defines a coercion::
+
+            sage: J = IdeleGroup(QQ)
+            sage: A = Adeles(QQ)
+            sage: Qhat = ProfiniteNumbers(QQ)
+            sage: a = A([2.5], Qhat(3, 10, 2))
+            sage: u = J(None, [-0.5], {2: (2, 2), 5: (1/2, 1)})
+            sage: a+u
+            (2, (9 mod 10)/2)
+            sage: u - a
+            (-3, (3 mod 10)/2)
+            sage: a * u
+            (-1.2500000000000000?, 7 mod 10)
+
+        .. TODO::
+            
+            - empty finite
+            - non-matching exact and finite part
+        """
+        K = self.base()
+        Khat = ProfiniteNumbers(K)
+
+        if idele._has_exact() and not idele._contains(idele.exact):
+            raise NotImplementedError("non-matching exact and finite part not implemented yet...")
+
+        K_oo = completions(K, oo)
+        infinite = idele.infinite.copy()
+        for i in range(len(infinite)):
+            if infinite[i] is None:
+                if idele._has_exact():
+                    phi = K_oo[i][1]  # phi: K --> RIF/CIF
+                    infinite[i] = phi(idele.exact)
+                elif K_oo[i][0] is RIF:
+                    infinite[i] = RIF(-oo, oo)
+                else:
+                    infinite[i] = CIF(RIF(-oo, oo), RIF(-oo, oo))
+
+        integral, denominator = idele.integral_split()
+        values = []
+        moduli = []
+        for q, val in integral.finite.items():
+            x, i = val
+            if i == ZZ(0):
+                values.append(0)
+            else:
+                values.append(x)
+            if K is not QQ:
+                x = K.ideal(x)
+            e = x.valuation(q)
+            moduli.append(q^(i+e))
+        if K is QQ:
+            value = CRT(values, moduli)
+        else:
+            value = K.solve_CRT(values, moduli)
+        modulus = prod(moduli)
+        finite = Khat(value, modulus, denominator)
+
+        return self.element_class(self, infinite, finite)
 
     def _coerce_map_from_(self, S):
         r"""
@@ -407,6 +519,9 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
         """
         debug("Adeles._coerce_map_from_({})".format(S))
         if self.base().has_coerce_map_from(S):
+            return True
+        J = IdeleGroup(self.base())
+        if J.has_coerce_map_from(S):
             return True
         return False
 

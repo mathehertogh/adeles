@@ -37,6 +37,14 @@ subgroups of the form
 where `S` is a finite set of places of `K` and each `U_p` is of the form
 `1+M_p^i` with `i \in \NN`. These basic open sets our what our
 ``Idele``'s  will represent.
+
+.. TODO::
+
+    Check all idele-code for edge cases:
+        - finite empty
+        - exact vs non-exact
+        - infinite None vs value
+    Also check idele-code in other files (i.e. Adeles._from_idele())
 """
 
 load("completions.sage")
@@ -807,7 +815,7 @@ class Idele(MultiplicativeGroupElement):
 
     def integral_split(self):
         """
-        Return a tuple ``(u, d)`` with ``u` an integral idele and ``d`` an
+        Return a tuple ``(u, d)`` with ``u` an "integral" idele and ``d`` an
         integer such that ``self = u/d``
 
         The "integrality" of ``u`` is strong, in the following sense: at every
@@ -880,38 +888,6 @@ class Idele(MultiplicativeGroupElement):
         return (u, d)
 
 
-
-    def to_adele(self):
-        """
-        Convert this idele to an adele.
-
-        This implement the natural embedding of the ideles into the adeles. Due
-        to the ways we store ideles/adeles, this loses precision: the returend
-        ``Adele`` represents a subset of the adeles that contains all ideles
-        ``self`` represents.
-        """
-        K = self.parent().number_field
-
-        u, d = self.integral_split()
-
-        values = []
-        moduli = []
-        for q, val in u.finite.items():
-            x, i = val
-            if i == ZZ(0):
-                values.append(0)
-            else:
-                values.append(x)
-            if K is not QQ:
-                x = K.ideal(x)
-            e = x.valuation(q)
-            moduli.append(q^(i+e))
-        if K is QQ:
-            value = CRT(values, moduli) / d
-        else:
-            value = K.solve_CRT(values, moduli)
-        modulus = prod(moduli) / d
-        return "plan text  {} mod {}".format(value, modulus)
 
     def to_modulo_element(self, I):
         r"""
@@ -1163,6 +1139,7 @@ class IdeleGroup(UniqueRepresentation, Group):
     Element = Idele
 
     def __init__(self, K):
+        # TODO: implement default K=QQ, via __classcall__()
         if not is_field(K) or not K.absolute_degree() in ZZ:
             raise TypeError("K should be a number field")
         self.number_field = K
