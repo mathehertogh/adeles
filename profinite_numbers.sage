@@ -333,6 +333,39 @@ class ProfiniteNumber(CommutativeAlgebraElement):
         numerator = self.numerator * other.numerator
         denominator = self.denominator * other.denominator
         return self.__class__(self.parent(), numerator, denominator)
+        
+    def _div_(self, other):
+        r"""
+        Divide ``self`` and ``other`` and return the result
+
+        Only implemented for exact ``other`` (i.e. ``other`` a number field
+        element).
+
+        EXAMPLES::
+        
+            sage: Qhat = ProfiniteNumbers(QQ)
+            sage: Qhat(3, 10, 2) / 2
+            (3 mod 10)/4
+            sage: Qhat(3, 10, 2) / (2/3)
+            (9 mod 30)/4
+            sage: Qhat(3, 10, 2) / Qhat(3, 0, 2)
+            (3 mod 10)/3
+
+        ::
+
+            sage: K.<a> = CyclotomicField(5)
+            sage: Khat = ProfiniteNumbers(K)
+            sage: Khat(a+1, 7, 2) / a
+            (a + 1 mod (7))/2*a
+            sage: Khat(a+1, 7, 2) / (3*a/2)
+            (a + 1 mod (7))/3*a
+        """
+        debug("ProfiniteNumber._div_({}, {})".format(self, other))
+        if not other.numerator.modulus.is_zero():
+            raise NotImplementedError("Division of profinite numbers only implemented for exact denominators")
+        numerator = self.numerator * other.denominator
+        denominator = self.denominator * other.numerator.value
+        return self.__class__(self.parent(), numerator, denominator)
 
 
 from sage.structure.unique_representation import UniqueRepresentation
