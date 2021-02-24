@@ -206,7 +206,9 @@ class ProfiniteNumber(CommutativeAlgebraElement):
                 sum([not c.is_zero() for c in self.numerator.value.list()]) > 1):
             numerator = "(" + numerator + ")"
         denominator = repr(self.denominator)
-        if sum([not c.is_zero() for c in self.denominator.list()]) > 1:
+        if not (self.denominator in QQ or
+                (sum([not c.is_zero() for c in self.denominator.list()]) == 1
+                    and sum([c for c in self.denominator.list()]) == 1)):
             denominator = "(" + denominator + ")"
         return numerator + "/" + denominator
 
@@ -356,9 +358,9 @@ class ProfiniteNumber(CommutativeAlgebraElement):
             sage: K.<a> = CyclotomicField(5)
             sage: Khat = ProfiniteNumbers(K)
             sage: Khat(a+1, 7, 2) / a
-            (a + 1 mod (7))/2*a
+            (a + 1 mod (7))/(2*a)
             sage: Khat(a+1, 7, 2) / (3*a/2)
-            (a + 1 mod (7))/3*a
+            (a + 1 mod (7))/(3*a)
         """
         debug("ProfiniteNumber._div_({}, {})".format(self, other))
         if not other.numerator.modulus.is_zero():
@@ -484,7 +486,7 @@ class ProfiniteNumbers(UniqueRepresentation, CommutativeAlgebra):
             sage: Khat(a^2+a, 9*a^2, a^3-1)
             (a^2 + a mod (9*a^2))/(-a - 2)
             sage: Khat(a^2+a, 9*a^2, a^3+1)
-            (a^2 + a mod (9*a^2))/-a
+            (a^2 + a mod (9*a^2))/(-a)
             sage: Khat(3*a-2, 4*a^2+16, a)
             (-24*a^2 - a + 2 mod (4*a^2 + 16))/a
 
