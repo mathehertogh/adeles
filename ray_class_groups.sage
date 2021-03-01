@@ -209,6 +209,52 @@ def ray_class_group(K, modulus, proof=True, names='c'):
     K.__ray_class_group[modulus, proof, names] = G
     return G
 
+def _integer_n_tuple_L1_iterator(n):
+    if n == 1:
+        i = 1
+        while True:
+            yield [i]
+            yield [-i]
+            i += 1
+    else:
+        from sage.combinat.partition import OrderedPartitions
+        from sage.combinat.subset import Subsets
+        N = 1
+        sign_options_dict = {}
+        Subsets_of_n = []
+        while True:
+            #print "***"
+            #print N
+            for k in range(1, n + 1):
+                Ps = OrderedPartitions(N, k)
+                for P in Ps:
+                    #print "--"
+                    #print P
+                    try:
+                        Ss = Subsets_of_n[k - 1]
+                    except IndexError:
+                        Ss = Subsets(range(n), k)
+                        Subsets_of_n.append(Ss)
+                    for S in Ss:
+                        #print "="
+                        #print S
+                        i = [0] * n
+                        for j in range(k):
+                            i[S[j]] = P[j]
+                        yield i
+                        try:
+                            sign_options = sign_options_dict[S]
+                        except KeyError:
+                            sign_options = Subsets(S)[1:]
+                            sign_options_dict[S] = sign_options
+                        for signs in sign_options:
+                            ii = list(i)
+                            for index in signs:
+                                ii[index] = - ii[index]
+                            yield ii
+            N += 1
+
+
 class Modulus(SageObject):
     def __init__(self, finite, infinite=None, check=True):
         r"""
