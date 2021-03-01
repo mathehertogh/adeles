@@ -916,6 +916,21 @@ class Idele(MultiplicativeGroupElement):
         A = Adeles(self.parent().number_field)
         return A(self).to_modulo_element()
 
+    def to_ray(self, G):
+        # First we check if the precision of this idele is high enough to have
+        # a well-defined image in the ray class group ``G``.
+        for i in G.modulus().infinite_part():
+            if not (self.infinite[i] <= 0 or self.infinite[i] >= 0) or self.infinite[i].is_zero():
+                raise ValueError("idele has no well-defined sign at infinite prime {}".format(i))
+        for q, e in G.modulus().finite_factors():
+            if q not in self.finite or self.finite[q][1] < e:
+                raise ValueError("idele must be known up to at least U_{}^{}".format(self._prime_name(q), e))
+
+        # Next we must make ``self`` one mod star G.modulus() by multiplying
+        # ``self`` with an element of K
+        raise NotImplementedError("to_ray not implementted")
+
+
 
 
 
@@ -1228,9 +1243,9 @@ class IdeleGroup(UniqueRepresentation, Group):
             return True
         return False
 
-    def _from_ray_class_group_element(self, I, modulus):
+    def _from_ray_class_group_element(self, r):
         """
-        Convert the ray class group element ``I mod R(modulus)`` to an idele
+        Convert the ray class group element ``r`` to an idele
 
         INPUT:
 
@@ -1244,6 +1259,13 @@ class IdeleGroup(UniqueRepresentation, Group):
         The idele corresping to ``I mod R(modulus)``.
 
         EXAMPLES::
+
+sage: K.<a> = NumberField(x^2-6)
+sage: m = Modulus(K.ideal(10*a), [1])
+sage: G = ray_class_group(K, m)
+sage: r = G([3, 0, 1])
+sage: J = IdeleGroup(K)
+sage: J(r)
 
             sage: J = IdeleGroup(QQ)
             sage: J._from_ray_class_group_element(9, (10, [0]))
@@ -1264,10 +1286,18 @@ class IdeleGroup(UniqueRepresentation, Group):
                     p5 = Fractional ideal (5)
                     p7 = Fractional ideal (-a)
         """
+        K = self.number_field
+        G = r.parent()  # ray class group of r
         exact = None
-        infinite = [RIF(0, oo) if f_oo else None for f_oo in modulus[1]]
+        infinite = [None for phi in self.number_field.places()]
+        for i in G.modulus().infinite_part():
+            infinite[i] = RIF(0, oo)
+
         finite = {}
-        for q, e in factor(I):
+        for q, e in G.modulus().finite_factors():
+            finite[q] = (K(1), e)
+
+        for q, e in factor(r.ideal()):
             if self.number_field is QQ:
                 finite[q] = (q^e, 0)
             else:
@@ -1275,8 +1305,7 @@ class IdeleGroup(UniqueRepresentation, Group):
                     finite[q] = ((q^e).gens_reduced()[0], 0)
                 else:
                     raise NotImplementedError("don't know how to handle non-principal ideals...")
-        for q, e in factor(modulus[0]):
-            finite[q] = (1, e)
+
         return self.element_class(self, exact, infinite, finite)
 
 
