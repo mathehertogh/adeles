@@ -318,14 +318,62 @@ class Idele(MultiplicativeGroupElement):
 
     def _repr_(self):
         """
-        Return a representation of this idele
+        Return a representation of this idele.
+
+        If ``self`` only stored values at primes that lie above rational primes
+        smaller than 50, we return a dense representation (see
+        :meth:`_repr_dense`).
+        Else, we return a sparse representation (see :meth:`_repr_sparse`).
+        """
+        K = self.parent().number_field
+        for q in self.finite:
+            p = q if K is QQ else q.gens_two()[0] # the rational prime below q
+            if p >= 50:
+                return self._repr_sparse()
+        return self._repr_dense()
+
+    def _repr_sparse(self):
+        """
+        Return a sparse representation of this idele.
+
+        EXAMPLES::
+
+            sage: J = IdeleGroup(QQ)
+            sage: u = J(1/2, None, {10000079: (7/9, 20)})
+            sage: 
+            Idele over Rational Field with values
+                    10000079: 7/9 * U_q^20
+            and which equals exactly 1/2 at all other primes
+            sage: J(None, [7.9], {10000079: (7/9, 20)})
+            Idele over Rational Field with values
+                    infinity_0: 7.9000000000000004?
+                    10000079: 7/9 * U_q^20
+        """
+        K = self.parent().number_field
+        rep = "Idele over {} with values\n".format(K)
+        for i in range(len(K.places())):
+            x_oo_i = self.infinite[i]
+            if x_oo_i is not None:
+                rep += "\tinfinity_{}: {}\n".format(i, x_oo_i)
+        for q in self.finite:
+            x_q, i_q = self.finite[q]
+            q_name = q if K is QQ else q.gens_reduced()
+            rep += "\t{}: {} * U_q^{}\n".format(q_name, x_q, i_q)
+        if self._has_exact():
+            rep += "and which equals exactly {} at all other primes.".format(self.exact)
+        return rep[0:-1]
+
+
+    def _repr_dense(self):
+        """
+        Return a dense representation of this idele
 
         We represent the idele "densely": first we print (the values at) all
         infinite primes, then at the primes above 2, then at the primes above
         3, then at the primes above 5, etc. Each time we use the order as
         returned by :meth:`NumberField.primes_above`. We keep printing until
-        we printed all stored values. All unknown values in between are printed
-        as "RR*", "CC*" or "Z_p*".
+        we printed all stored values. All not-stored values in between are
+        printed as "RR*", "CC*" or "Z_p*".
         
         EXAMPLES::
 
@@ -1159,7 +1207,10 @@ class IdeleGroup(UniqueRepresentation, Group):
         Group.__init__(self)
 
     def _repr_(self):
-        return "Idele Group of Rational Field".format(self.number_field)
+        """
+        Return a string representation of ``self``
+        """
+        return "Idele Group of {}".format(self.number_field)
 
     def _latex_(self):
         return r"\Bold{A}_{" + latex(self.number_field) + "}^*"
