@@ -651,7 +651,57 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
         """
         debug("ProfiniteIntegers._element_constructor_({}, {})".format(value, modulus))
         if modulus is None:
+            if (isinstance(value, ProfiniteNumber)
+                    and self.number_field().has_coerce_map_from(value.parent().base())):
+                return self._from_profinite_number(value)
             modulus = ZZ(0) if self.base() is ZZ else self.base().ideal(0)
+        return self.element_class(self, value, modulus)
+
+    def _from_profinite_number(self, number):
+        """
+        Construct a profinite integer from the profinite number ``number``
+
+        INPUT:
+
+        - ``number`` -- a profinite number over ``self.number_field()`` with a
+          denominator that is a unit in ``self.base()`` (the maximal order).
+
+        OUTPUT:
+
+        The profinite integer `v^{-1} x mod v^{-1} m` when ``number`` is
+        `(x mod m)/v`.
+
+        EXAMPLES::
+
+            sage: K.<a> = NumberField(x^2-5)
+            sage: Khat = ProfiniteNumbers(K)
+            sage: O = K.maximal_order()
+            sage: Ohat = ProfiniteIntegers(O)
+            sage: b = O((a+1)/2)
+            sage: b.is_unit(), b.inverse_of_unit()
+            (True, 1/2*a - 1/2)
+            sage: Ohat._from_profinite_number(Khat(1, 10, b))
+            1/2*a - 1/2 mod (5*a - 5)
+
+        If the denominator is not a unit, then ``number`` is not a profinite
+        integer and so we throw an exception::
+
+            sage: c = O(2*a+3)
+            sage: c.is_unit()
+            False
+            sage: Ohat._from_profinite_number(Khat(1, 10, c))
+            Traceback (most recent call last):
+            ...
+            ValueError: Can't convert profinite number with non-unit denominator to a profinite integer
+        """
+        O = self.base()
+        try:
+            d = O(number.denominator)
+            v = d.inverse_of_unit()
+        except ArithmeticError:
+            raise ValueError("Can't convert profinite number with non-unit denominator to a profinite integer")
+        value = v * number.numerator.value
+        modulus = v * number.numerator.modulus
         return self.element_class(self, value, modulus)
 
     def _coerce_map_from_(self, S):
