@@ -369,6 +369,27 @@ class ProfiniteNumber(CommutativeAlgebraElement):
         denominator = self.denominator * other.numerator.value
         return self.__class__(self.parent(), numerator, denominator)
 
+    def __getitem__(self, p):
+        r"""
+        Return `x_p` where ``self`` `= \prod_p x_p \in \prod_p' \QQ_p`
+
+        INPUT:
+
+        - ``p`` -- a prime number
+
+        .. NOTE:
+
+            Only implemented over `\QQ`, since we only have `p`-adics for
+            rational `p` in Sage.
+        """
+        if self.parent().base() is not QQ:
+            raise NotImplementedError("Projection to `p`-adics only implemented over rationals")
+        if p not in Primes():
+            raise ValueError("p should be a prime number")
+
+        e = self.numerator.modulus.valuation(p) - self.denominator.valuation(p)
+        return Qp(p)(self.numerator.value/self.denominator, e)
+
 
 from sage.structure.unique_representation import UniqueRepresentation
 from sage.rings.ring import CommutativeAlgebra
