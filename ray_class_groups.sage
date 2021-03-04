@@ -481,8 +481,9 @@ class Modulus(SageObject):
             beta_is, Ainv = self._find_beta_is_Ainv()
         d = len(self.infinite_part())
         v = [0] * d
-        for i in negative:
-            v[i] = 1
+        for i in range(d):
+            if self._infinite[i] in negative:
+                v[i] = 1
         v = (GF(2)**d)(v)
         w = Ainv * v
         t = self.number_field().one()
