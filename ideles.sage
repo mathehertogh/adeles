@@ -48,6 +48,7 @@ where `S` is a finite set of places of `K` and each `U_p` is of the form
 """
 
 load("completions.sage")
+load("ray_class_groups.sage")
 load("adeles.sage")
 
 
@@ -964,23 +965,205 @@ class Idele(MultiplicativeGroupElement):
         A = Adeles(self.parent().number_field)
         return A(self).to_modulo_element()
 
-    def to_ray(self, G):
+    def to_ray_class(self, modulus):
+        r"""
+        Return the image of ``self`` in the ray class group modulo ``modulus``
+
+        Let `K` denote our number field and let `O` denote its maximal order.
+        Let `I(modulus)` be the group of fractional `O`-ideals coprime to
+        ``modulus`` and let `R(modulus)` denote the ray modulo ``modulus``.
+        Hence the ray class group of `K` modulo ``modulus`` is
+        `I(modulus)/R(modulus)`.
+        Write `J_K` for the group of ideles of `K` (to which ``self`` belongs).
+
+        This method implementst the homomorphism
+
+        .. MATH::
+
+            \phi: J_K \to I(modulus)/R(modulus)
+
+        that sends a prime element at a finite prime `q` (not dividing `m`) to
+        `q \mod R(modulus)`.
+
+        INPUT:
+
+        - ``modulus`` -- a :class:`Modulus` of `K`
+
+        OUTPUT:
+
+        The image of ``self`` under `\phi`.
+
+        EXAMPLES::
+
+            sage: Q = NumberField(x-1, "one")
+            sage: J = IdeleGroup(Q)
+            sage: u = J(None, [-9], {2: (10, 1), 3: (3, 2), 7: (1/2, 4)})
+            sage: m = Modulus(Q.ideal(18), [0])
+            sage: u.to_ray_class(m).ideal()
+            Fractional ideal (7)
+
+        ::
+
+            sage: K.<a> = NumberField(x^3-x-1)
+            sage: Jk = IdeleGroup(K)
+            sage: p7, q7 = K.primes_above(7)
+            sage: u = Jk(None, [2, I], {p7: (1/2, 1), q7: (7*a, 2)})
+            sage: m = Modulus(K.ideal(7), [0])
+            sage: u.to_ray_class(m).ideal()
+            Fractional ideal (-a^2 - 3*a + 2)
+
+        TESTS:
+
+            sage: K = NumberField(x^2 + 5*x - 3, 'a')
+            sage: J = IdeleGroup(K)
+            sage: G = ray_class_group(K, Modulus(K.ideal(14), [0])); G
+            Ray class group of order 18 with structure C6 x C3 of Number Field in a with defining polynomial x^2 + 5*x - 3 of modulus (Fractional ideal (14)) * infinity_0
+            sage: c0, c1 = G.gens()
+            sage: for e in range(6):
+            ....:     for f in range(3):
+            ....:         r = c0^e * c1^f
+            ....:         assert G(J(r)) == r, "bug!"  # long
+
+        .. TODO::
+
+            Implement the case that ``self`` has exact.
+        
+        ALGORITHM:
+
+        We construct an idele `v` satisfying:
+            - `v \equiv self \mod K^*`
+            - `v \equiv 1 \mod^* modulus`
+        We do this by starting of with `v = self` and then improve `v` in three
+        steps:
+            1. Make `v` integral at the primes dividing ``modulus``.
+            2. Make `v \equiv 1 \mod^*` ``modulus.finite_part()``
+            3. Make `v \equiv 1 \mod^*` ``modulus`` (fix the infinite part)
+        In every step we only change `v` by multiplying it with principal ideles
+        (i.e. elements of K^*) as to never violate the first desired condition
+        on `v`.
+        For Step 2 we use the number field version of the Chinese Remainder
+        Theorem (cf. :func:`solve_CRT`). For Step 3 we use
+        :meth:`get_one_mod_star_finite_with_fixed_signs`.
+
+        Once we have such a `v`, we return the image of the ideal
+        `\prod_{p} p^{\ord_p(v)}` in ``G``, where `p` ranges over the finite
+        primes of `K`.
+        """
+        if self._has_exact():
+            raise NotImplementedError("to_ray_class() not implemented yet for exact ideles")
+
+        J = self.parent()
+        K = J.number_field
+        G = ray_class_group(K, modulus)
+
         # First we check if the precision of this idele is high enough to have
         # a well-defined image in the ray class group ``G``.
-        for i in G.modulus().infinite_part():
-            if not (self.infinite[i] <= 0 or self.infinite[i] >= 0) or self.infinite[i].is_zero():
+        for i in modulus.infinite_part():
+            if (self.infinite[i] is None
+                    or not (self.infinite[i] <= 0 or self.infinite[i] >= 0)
+                    or self.infinite[i].is_zero()):
                 raise ValueError("idele has no well-defined sign at infinite prime {}".format(i))
-        for q, e in G.modulus().finite_factors():
+        for q, e in modulus.finite_factors():
             if q not in self.finite or self.finite[q][1] < e:
-                raise ValueError("idele must be known up to at least U_{}^{}".format(self._prime_name(q), e))
+                raise ValueError("idele must be known up to at least U_q^{} at q={}".format(e, q))
 
-        # Next we must make ``self`` one mod star G.modulus() by multiplying
-        # ``self`` with an element of K
-        raise NotImplementedError("to_ray not implementted")
+        v = self
+        # Step 1. We make `v` integral at the primes dividing modulus.
+        for q, e in modulus.finite_factors():
+            x, i = self.finite[q]
+            if x not in K.maximal_order():
+                v *= x.denominator()
+
+        # Step 2. We find an element y in the maximal order O_K of K such that
+        # y \equiv v \mod modulus.finite_part() using the Chinese Remainder
+        # Theorem.
+        values = []
+        moduli = []
+        for q, e in modulus.finite_factors():
+            x, i = v.finite[q]
+            f = i + x.valuation(q)
+            # v represents x*U_q^i at q, which equals x+q^f\Z_q because
+            # i >= modulus.valuation(q) >= 1 and x.valuation(q) >= 0 (so we
+            # do not need to worry about the case i==0 representing x*Z_q^*)
+            values.append(x)
+            moduli.append(q^f)
+        y = K.solve_CRT(values, moduli)
+        if not y.is_zero():
+            # y is zero if and only if values and moduli are empty, so when
+            # modulus is infinite. In that case we can just leave v as it is.
+            v /= J(y)
+        # Now we have v \equiv 1 \mod^* modulus.finite_part().
+        
+
+        # Step 3. We address the infinite part using the Modulus-method
+        # get_one_mod_star_finite_with_fixed_signs().
+        positive = []
+        negative = []
+        for i in modulus.infinite_part():
+            if v.infinite[i] >= 0:
+                positive.append(i)
+            else:
+                negative.append(i)
+        t = modulus.get_one_mod_star_finite_with_fixed_signs(positive, negative)
+        v *= t
+
+        # TODO do not do the redundant check below to save its costs
+        assert v.is_one_mod_star(modulus), r"Assertion error in Idele.to_ray_class(): v \not\equiv 1 \mod^* m"
+
+        # Our `v` is finished. We can now build up an ideal representing the
+        # image of `v` (which is equal to the image of ``self``) in ``G``.
+        I = K.unit_ideal()
+        for q, val in v.finite.items():
+            I *= q^(val[0].valuation(q))
+
+        return G(I)
 
 
+    def is_one_mod_star(self, modulus):
+        r"""
+        Return whether or not ` ``self`` \equiv 1 \mod^\ast ``modulus`` ` holds
 
+        EXAMPLES::
 
+            sage: Q = NumberField(x-1, "one")
+            sage: J = IdeleGroup(Q)
+            sage: u = J(None, None, {5: (6, 2)})
+            sage: u.is_one_mod_star(Modulus(Q.ideal(3)))
+            False
+            sage: u.is_one_mod_star(Modulus(Q.ideal(5)))
+            True
+            sage: u.is_one_mod_star(Modulus(Q.ideal(25)))
+            False
+            sage: u.is_one_mod_star(Modulus(Q.ideal(5), [0]))
+            False
+            sage: u.infinite[0] = RIF(1.2345)
+            sage: u.is_one_mod_star(Modulus(Q.ideal(5), [0]))
+            True
+            sage: u.infinite[0] = RIF(-1.2345)
+            sage: u.is_one_mod_star(Modulus(Q.ideal(5), [0]))
+            False
+            sage: u.exact = Q.one()
+            sage: u.is_one_mod_star(Modulus(Q.ideal(2*3*5*7*11)))
+            True
+        """
+        for q, e in modulus.finite_factors():
+            if not q in self.finite:
+                if not self._has_exact():
+                    return False
+                x = self.exact
+            else:
+                x, i = self.finite[q]
+                if i < e:
+                    return False
+            if (x-1).valuation(q) < e:
+                return False
+        for i in modulus.infinite_part():
+            x = self.infinite[i]
+            if x is None:
+                return False
+            if not (x >= 0):
+                return False
+        return True
 
     def _contains_at(self, x, q):
         r"""
@@ -1217,11 +1400,15 @@ class IdeleGroup(UniqueRepresentation, Group):
 
     def _element_constructor_(self, exact, infinite=None, finite=None):
         #print("DEBUG: IdeleGroup._element_constructor_({}, {}, {})".format(exact, infinite, finite))
-        if exact is None and infinite is None and finite is None:
-            raise TypeError("No arguments supplied to Idele-constructor")
-        if (infinite is None and finite is None and
-                exact.parent() is Adeles(self.number_field)): # conversion A_K --> J_K
-            return self._from_adele(exact)
+        if infinite is None and finite is None:
+            if exact is None:
+                raise TypeError("No arguments supplied to Idele-constructor")
+            if exact.parent() is Adeles(self.number_field): # conversion A_K --> J_K
+                return self._from_adele(exact)
+            if hasattr(exact.parent(), "_bnr"): # conversion Cl_m --> J_K
+                # TODO make the check above less hacky and more robust
+                # for some reason checking isinstance(exact, RayClassGroupElement) fails
+                return self._from_ray_class(exact)
         return self.element_class(self, exact, infinite, finite)
 
     def _from_adele(self, adele):
@@ -1286,56 +1473,78 @@ class IdeleGroup(UniqueRepresentation, Group):
 
         return self.element_class(self, exact, adele.infinite, finite)
 
-    def cardinality(self):
-        return Infinity
-
-    def _coerce_map_from_(self, S):
-        if self.number_field.has_coerce_map_from(S):
-            return True
-        return False
-
-    def _from_ray_class_group_element(self, r):
-        """
+    def _from_ray_class(self, r):
+        r"""
         Convert the ray class group element ``r`` to an idele
 
         INPUT:
 
-        - ``I`` -- an ideal of `K` coprime to (the finite part of) ``modulus``
-        - ``modulus`` -- a pair (`J`, `P`) where:
-            * `J` is an ideal of `K`
-            * `P` is a list of 0's and 1's, corresponding to ``K.places()``
+        - ``r`` -- a ray class group element
 
         OUPUT:
+        
+        Denote the ray class group to which ``r`` belongs by `G` and denote the
+        modulus of `G` by `m`. So `G = I(m)/R(m)`.
+        Consider the homomorphism `\phi: ` ``self`` `\to` `G` that sends a prime
+        element at a finite prime `q` (not dividing `m`) to `q \mod R(m)`.
+        The kernel of `\phi` is `K^* W_m` where `W_m = \prod_p U_p^{\ord_p(m)}`.
 
-        The idele corresping to ``I mod R(modulus)``.
+        Given ``r``, let `H` be the inverse image of ``r`` under `\phi`. We can
+        try to find an idele that represents the subset `H` of ``self``. This is
+        however not precisely possible. We can exactly represent `W_m`, but 
+        we can not represent `K^*`. Hence what we do is the following: we find
+        some `x \in H` en return an idele that represents at least `x \cdot W_m`
+        and at most `H = x \cdot K^* W_m`.
+
+        Although we do always return the same idele for equal inputs, the user
+        should be aware that from a mathematical perspective, the output is only
+        defined up to multiplication by a principal idele.
+        
 
         EXAMPLES::
 
-sage: K.<a> = NumberField(x^2-6)
-sage: m = Modulus(K.ideal(10*a), [1])
-sage: G = ray_class_group(K, m)
-sage: r = G([3, 0, 1])
-sage: J = IdeleGroup(K)
-sage: J(r)
+            sage: Q = NumberField(x-1, "one")
+            sage: J = IdeleGroup(Q)
+            sage: G = ray_class_group(Q, Modulus(Q.ideal(10), [0]))
+            sage: r = G(Q.ideal(9))
+            sage: factor(r.ideal())
+            (Fractional ideal (3)) * (Fractional ideal (163))
+            sage: J._from_ray_class(r)
+            Idele over Number Field in one with defining polynomial x - 1 with values
+                    infinity_0: [0.0000000000000000 .. +infinity]
+                    (2,): 1 * U_q^1
+                    (5,): 1 * U_q^1
+                    (3,): 3 * U_q^0
+                    (163,): 163 * U_q^0
+            sage: s = G(Q.ideal(7))
+            sage: s.ideal()
+            Fractional ideal (67)
+            sage: J._from_ray_class(s)
+            Idele over Number Field in one with defining polynomial x - 1 with values
+                    infinity_0: [0.0000000000000000 .. +infinity]
+                    (2,): 1 * U_q^1
+                    (5,): 1 * U_q^1
+                    (67,): 67 * U_q^0
+           
+        :: 
 
-            sage: J = IdeleGroup(QQ)
-            sage: J._from_ray_class_group_element(9, (10, [0]))
-            (RR*, 1*(1+M_2^1), 9*Z_3*, 1*(1+M_5^1), ...)
-            sage: J._from_ray_class_group_element(21, (40, [1]))
-            ([0.0000000000000000 .. +infinity], 1*(1+M_2^3), 3*Z_3*, 1*(1+M_5^1), 7*Z_7*, ...)
-            
-            sage: K.<a> = NumberField(x^2+7)
+            sage: K.<a> = NumberField(x^2-6)
+            sage: G = ray_class_group(K, Modulus(K.ideal(10*a), [1]))
+            sage: r = G([3, 0, 1])
+            sage: factor(r.ideal())
+            (Fractional ideal (25*a + 19)) * (Fractional ideal (28*a - 25)) * (Fractional ideal (-67*a + 109)) * (Fractional ideal (-1507*a - 5011))
             sage: Jk = IdeleGroup(K)
-            sage: I = K.ideal(2*a)
-            sage: modulus = (K.ideal(9), [0])
-            sage: Jk._from_ray_class_group_element(I, modulus)
-            (CC*, (-1/2*a + 1/2)*Z_p2*, (1/2*a + 1/2)*Z_q2*, 1*(1+M_p3^2), Z_p5*, -a*Z_p7*, ...)
-            where:
-                    p2 = Fractional ideal (-1/2*a + 1/2)
-                    q2 = Fractional ideal (1/2*a + 1/2)
-                    p3 = Fractional ideal (3)
-                    p5 = Fractional ideal (5)
-                    p7 = Fractional ideal (-a)
+            sage: Jk(r)
+            Idele over Number Field in a with defining polynomial x^2 - 6 with values
+                    infinity_1: [0.0000000000000000 .. +infinity]
+                    (-a + 2,): 1 * U_q^3
+                    (a + 3,): 1 * U_q^1
+                    (-a - 1,): 1 * U_q^1
+                    (-a + 1,): 1 * U_q^1
+                    (25*a + 19,): a + 543 * U_q^0
+                    (28*a - 25,): a - 1312 * U_q^0
+                    (-67*a + 109,): a - 1799 * U_q^0
+                    (-1507*a - 5011,): a + 1242116 * U_q^0
         """
         K = self.number_field
         G = r.parent()  # ray class group of r
@@ -1348,15 +1557,22 @@ sage: J(r)
         for q, e in G.modulus().finite_factors():
             finite[q] = (K(1), e)
 
-        for q, e in factor(r.ideal()):
-            if self.number_field is QQ:
-                finite[q] = (q^e, 0)
-            else:
-                if (q^e).is_principal():
-                    finite[q] = ((q^e).gens_reduced()[0], 0)
+        if not r.is_one():
+            for q, e in factor(r.ideal()):
+                if self.number_field is QQ:
+                    finite[q] = (q^e, 0)
                 else:
-                    raise NotImplementedError("don't know how to handle non-principal ideals...")
-
+                    pi = K.uniformizer(q)
+                    finite[q] = (pi^e, 0)
+        
         return self.element_class(self, exact, infinite, finite)
+
+    def cardinality(self):
+        return Infinity
+
+    def _coerce_map_from_(self, S):
+        if self.number_field.has_coerce_map_from(S):
+            return True
+        return False
 
 

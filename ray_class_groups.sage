@@ -676,6 +676,8 @@ class RayClassGroup(AbelianGroup_class):
                     I = nf.idealmul(I, nf.idealpow(g, e, flag=1), flag=1)
             exps = tuple(ZZ(c) for c in bnr.bnrisprincipal(nf.idealmul(I[0], nf.nffactorback(I[1])), flag = 0))
             return self.element_class(self, exps)
+        elif isinstance(args[0], Idele):
+            return args[0].to_ray_class(self.modulus())
         else:
             I = self._number_field.ideal(*args, **kwds)
             if I.is_zero():
