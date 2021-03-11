@@ -379,16 +379,15 @@ class ProfiniteNumber(CommutativeAlgebraElement):
 
         .. NOTE:
 
-            Only implemented over `\QQ`, since we only have `p`-adics for
-            rational `p` in Sage.
+            Only implemented over `\QQ`, since we currently only have `p`-adics
+            for rational `p` in Sage.
         """
         if self.parent().base() is not QQ:
             raise NotImplementedError("Projection to `p`-adics only implemented over rationals")
         if p not in Primes():
             raise ValueError("p should be a prime number")
 
-        e = self.numerator.modulus.valuation(p) - self.denominator.valuation(p)
-        return Qp(p)(self.numerator.value/self.denominator, e)
+        return self.numerator[p] / self.denominator
 
 
 from sage.structure.unique_representation import UniqueRepresentation

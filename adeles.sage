@@ -195,7 +195,7 @@ class Adele(CommutativeAlgebraElement):
             infinite.append(self.infinite[i] + other.infinite[i])
         finite = self.finite + other.finite
         return self.__class__(self.parent(), infinite, finite)
-        
+
     def _sub_(self, other):
         """
         Subtract ``other`` from ``self`` and return the result
@@ -231,7 +231,7 @@ class Adele(CommutativeAlgebraElement):
             infinite.append(self.infinite[i] - other.infinite[i])
         finite = self.finite - other.finite
         return self.__class__(self.parent(), infinite, finite)
-        
+
     def _mul_(self, other):
         """
         Multiply ``self`` and ``other`` and return the result
@@ -322,6 +322,109 @@ class Adele(CommutativeAlgebraElement):
         name = K.variable_name() + "_bar"
         OmodI = O.quotient(I, name)
         return OmodI(x)
+
+    def to_rational_adele_vector(self):
+        r"""
+        Return ``self`` as a rational adele vector
+
+        Write `A_K` for ``self.parent()``, with base the number field `K` and
+        denote the rational adeles by `A_\QQ`.
+        Then we have a canonical isomorphism of topological rings
+        `\phi: A_K \to A_\QQ \otimes K`.
+        The codomain is an `A_\QQ`-vector space with basis
+        `B = \{1, a, a^2, ... a^{n-1}\}`, where `a` is the algebraic number
+        adjoined to `\QQ` to obtain `K` and `n = \deg(K/\QQ)`.
+
+        This method returns the image of ``self`` under `\phi` in the form of an
+        `A_\QQ`-vector relative to the basis `B`.
+
+        EXAMPLES::
+
+            sage: K.<a> = NumberField(x^3-2)
+            sage: Khat = ProfiniteNumbers(K)
+            sage: AK = Adeles(K)
+            sage: b = AK([-1, CIF(7.9*I)], Khat(a, 10*(a+1), 3))
+            sage: c = b.to_rational_adele_vector()
+            sage: d = AK._from_rational_adele_vector(c)
+            sage: c
+            ((-0.33333333333333?, (0 mod 10)/3), (3.35555453543495?, (1 mod 5)/3), (-3.08327908304135?, (0 mod 5)/3))
+            sage: b == d
+            True
+
+        .. TODO::
+
+            Move the computation on the finite part to a separate method of
+            :class:`ProfiniteNumber`.
+        """
+        K = self.parent().base()
+        n = K.absolute_degree()
+        x = self.finite.numerator.value / self.finite.denominator
+        I = self.finite.numerator.modulus / self.finite.denominator
+        # Our finite part is `x mod I` with x in K, I a fractional ideal of K
+
+        values = x.vector()
+        moduli = []
+        e_p = {}
+        for i in range(n):
+            for q, e in factor(I):
+                p = q.gens_two()[0]  # p = q \cap ZZ
+                e_q = p.valuation(q)
+                if p not in e_p:
+                    e_p[p] = e // e_q
+                else:
+                    e_p[p] = min(e_p[p], e // e_q)
+            modulus = QQ(1)
+            for p in e_p:
+                modulus *= p^e_p[p]
+            moduli.append(modulus)
+            I /= K.gen()
+
+        Qhat = ProfiniteNumbers(QQ)
+        finites = []
+        for i in range(n):
+            denominator = lcm(values[i].denominator(), moduli[i].denominator())
+            value = values[i] * denominator
+            modulus = moduli[i] * denominator
+            finites.append(Qhat(value, modulus, denominator))
+
+        r, s = K.signature()
+        K_oo = infinite_completions(K)
+        A = []
+        for i in range(r+s):
+            phi = K_oo[i][1] # phi: K --> \RR
+            gen_im = phi(K.gen())
+            row = []
+            if i < r: # Real place
+                for j in range(n):
+                    row.append(gen_im^j)
+            else: # Complex place
+                for j in range(n):
+                    row.append((gen_im^j).real())
+                A.append(row)
+                row = []
+                for j in range(n):
+                    row.append((gen_im^j).imag())
+            A.append(row)
+        A = matrix(RIF, A)
+
+        Y = []
+        for i in range(r+s):
+            if i < r: # Real place
+                Y.append(self.infinite[i])
+            else: # Complex place
+                Y.append(self.infinite[i].real())
+                Y.append(self.infinite[i].imag())
+        Y = vector(Y)
+
+        infinites = A.solve_right(Y)
+
+        A_Q = Adeles(QQ)
+        result = []
+        for i in range(n):
+            a = A_Q([infinites[i]], finites[i])
+            result.append(a)
+
+        return vector(result)
 
 
 from sage.structure.unique_representation import UniqueRepresentation
@@ -443,11 +546,11 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
         K = self.base()
         J_K = IdeleGroup(K)
         if y is None:
-            if x.parent() is self: # make copy
-                return self.element_class(self, x.infinite, x.finite)
             if x in K:  # coercion K --> A_K
                 infinite = [phi(x) for L, phi in completions(K, oo)]
                 return self.element_class(self, infinite, x)
+            if x.parent() is self: # make copy
+                return self.element_class(self, x.infinite, x.finite)
             if x in J_K:  # coercion J_K --> A_K
                 return self._from_idele(x)
         return self.element_class(self, x, y)
@@ -554,6 +657,45 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
             finite = idele.exact
 
         return self.element_class(self, infinite, finite)
+
+    def _from_rational_adele_vector(self, v):
+        r"""
+        Build a `K`-adele out of the rational adele vector ``v``.
+
+        Let `K = \QQ(a)` be our number field of degree `n` over `\QQ`.
+
+        INPUT:
+
+        - ``v`` -- a vector of rational adeles of length `n`
+
+        OUPUT:
+
+        The `K`-adele `v[0] + v[1]*a + v[2]*a^2 + ... + v[n-1]*a^{n-1}`.
+
+        .. TODO::
+
+            Move the computation on the finite part to a separate method of
+            :class:`ProfiniteNumber`.
+        """
+        K = self.base()
+        n = K.absolute_degree()
+
+        infinite = []
+        places = [phi for L, phi in infinite_completions(K)]
+        for k in range(len(places)):
+            phi = places[k]
+            x_oo = sum([v[i].infinite[0] * phi(K.gen())^i for i in range(n)])
+            infinite.append(x_oo)
+        denominator = lcm([v[i].finite.denominator for i in range(n)])
+        v = denominator * v
+        value = sum([v[i].finite.numerator.value * K.gen()^i for i in range(n)])
+        modulus = sum([K.ideal(v[i].finite.numerator.modulus * K.gen()^i) for i in range(n)])
+        finite = ProfiniteNumbers(K)(value, modulus, denominator)
+
+        return self.element_class(self, infinite, finite)
+
+
+
 
     def _coerce_map_from_(self, S):
         r"""

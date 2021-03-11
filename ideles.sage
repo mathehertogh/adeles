@@ -43,7 +43,7 @@ where `S` is a finite set of places of `K` and each `U_p` is of the form
     Check all idele-code for edge cases:
         - finite empty
         - exact vs non-exact
-        - infinite None vs value
+        - infinite: None vs value
     Also check idele-code in other files (i.e. Adeles._from_idele())
 """
 
@@ -1493,8 +1493,7 @@ class IdeleGroup(UniqueRepresentation, Group):
         try to find an idele that represents the subset `H` of ``self``. This is
         however not precisely possible. We can exactly represent `W_m`, but 
         we can not represent `K^*`. Hence what we do is the following: we find
-        some `x \in H` en return an idele that represents at least `x \cdot W_m`
-        and at most `H = x \cdot K^* W_m`.
+        some `x \in H` en return an idele that represents `x \cdot W_m`.
 
         Although we do always return the same idele for equal inputs, the user
         should be aware that from a mathematical perspective, the output is only
