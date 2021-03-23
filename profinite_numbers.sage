@@ -389,6 +389,79 @@ class ProfiniteNumber(CommutativeAlgebraElement):
 
         return self.numerator[p] / self.denominator
 
+    def to_profinite_rational_vector(self):
+        r"""
+        Return ``self`` as a profinite rational vector
+
+        Denote our base field by `K`.
+        Then we have a canonical isomorphism of topological rings
+        `\phi: \hat{K} \to \hat{\QQ} \otimes K`.
+        The codomain is a free `\hat{\QQ}`-module with basis
+        `B = \{1, a, a^2, ... a^{n-1}\}`, where `a` is the algebraic number
+        adjoined to `\QQ` to obtain `K` and `n = \deg(K/\QQ)`.
+
+        This method returns the image of ``self`` under `\phi` in the form of an
+        `\hat{\QQ}`-vector relative to the basis `B`.
+
+        EXAMPLES::
+
+            sage: K.<a> = NumberField(x^4-2)
+            sage: Khat = ProfiniteNumbers(K)
+            sage: b = Khat(a, 12*(a-1), 5)
+            sage: b.to_profinite_rational_vector()
+            ((0 mod 12)/5, (1 mod 6)/5, (0 mod 6)/5, (0 mod 6)/5)
+        """
+        K = self.parent().base()
+        n = K.absolute_degree()
+        Qhat = ProfiniteNumbers(QQ)
+
+        if self.numerator.modulus.is_zero():
+            # self is (exactly) the following element x of K:
+            x = self.numerator.value / self.denominator
+            return vector(Qhat, x.vector())
+        
+        x = self.numerator.value / self.denominator
+        I = self.numerator.modulus / self.denominator
+        # self is `x mod I` with x in K, I a fractional ideal of K
+
+        values = x.vector()
+        moduli = []
+        e_p = {}
+        for i in range(n):
+            for q, e in factor(I):
+                p = q.gens_two()[0]  # p = q \cap ZZ
+                e_q = p.valuation(q)
+                if p not in e_p:
+                    e_p[p] = e // e_q
+                else:
+                    e_p[p] = min(e_p[p], e // e_q)
+            modulus = QQ(1)
+            for p in e_p:
+                modulus *= p^e_p[p]
+            moduli.append(modulus)
+            I /= K.gen()
+
+        profinite_rationals = []
+        for i in range(n):
+            denominator = lcm(values[i].denominator(), moduli[i].denominator())
+            value = values[i] * denominator
+            modulus = moduli[i] * denominator
+            profinite_rationals.append(Qhat(value, modulus, denominator))
+
+        return vector(profinite_rationals)
+
+    def modulus(self):
+        """
+        Return the modulus of self as a fractional ideal of our number field
+        """
+        return self.numerator.modulus / self.denominator
+
+    def value(self):
+        """
+        Return the value of self as an element of our number field
+        """
+        return self.numerator.value / self.denominator
+
 
 from sage.structure.unique_representation import UniqueRepresentation
 from sage.rings.ring import CommutativeAlgebra
