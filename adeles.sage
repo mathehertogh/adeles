@@ -331,7 +331,7 @@ class Adele(CommutativeAlgebraElement):
         denote the rational adeles by `A_\QQ`.
         Then we have a canonical isomorphism of topological rings
         `\phi: A_K \to A_\QQ \otimes K`.
-        The codomain is an `A_\QQ`-vector space with basis
+        The codomain is a free `A_\QQ`-module with basis
         `B = \{1, a, a^2, ... a^{n-1}\}`, where `a` is the algebraic number
         adjoined to `\QQ` to obtain `K` and `n = \deg(K/\QQ)`.
 
@@ -350,42 +350,14 @@ class Adele(CommutativeAlgebraElement):
             ((-0.33333333333333?, (0 mod 10)/3), (3.35555453543495?, (1 mod 5)/3), (-3.08327908304135?, (0 mod 5)/3))
             sage: b == d
             True
-
-        .. TODO::
-
-            Move the computation on the finite part to a separate method of
-            :class:`ProfiniteNumber`.
+            sage: e = AK([2, -1], Khat(a/3))
+            sage: e.to_rational_adele_vector()
+            ((0.?e-14, 0), (0.79370052598410?, 1/3), (0.629960524947437?, 0))
         """
         K = self.parent().base()
         n = K.absolute_degree()
-        x = self.finite.numerator.value / self.finite.denominator
-        I = self.finite.numerator.modulus / self.finite.denominator
-        # Our finite part is `x mod I` with x in K, I a fractional ideal of K
-
-        values = x.vector()
-        moduli = []
-        e_p = {}
-        for i in range(n):
-            for q, e in factor(I):
-                p = q.gens_two()[0]  # p = q \cap ZZ
-                e_q = p.valuation(q)
-                if p not in e_p:
-                    e_p[p] = e // e_q
-                else:
-                    e_p[p] = min(e_p[p], e // e_q)
-            modulus = QQ(1)
-            for p in e_p:
-                modulus *= p^e_p[p]
-            moduli.append(modulus)
-            I /= K.gen()
-
-        Qhat = ProfiniteNumbers(QQ)
-        finites = []
-        for i in range(n):
-            denominator = lcm(values[i].denominator(), moduli[i].denominator())
-            value = values[i] * denominator
-            modulus = moduli[i] * denominator
-            finites.append(Qhat(value, modulus, denominator))
+        
+        finites = self.finite.to_profinite_rational_vector()
 
         r, s = K.signature()
         K_oo = infinite_completions(K)
