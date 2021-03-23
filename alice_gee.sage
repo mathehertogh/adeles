@@ -149,36 +149,36 @@ def weber_gamma_2(x):
     return (fx^24 - 16) / fx^8
 
 
-def alice_gee(D=-71, N=3):
+def alice_gee():
     """
-    INPUT:
-
-    - ``D`` -- discriminant of the input field, must be negative
-    - ``N`` -- level of the modular function we are trying
+    We re-do Alice Gee's first example: 
     """
-    if D >= 0:
-        raise ValueError("D must be negative")
-    K = QuadraticField(D)
-    O = K.maximal_order()
-    C, B, _ = O.gen(0).minpoly().coefficients()
-    B, C = 1, 18 # TODO
+    ###########################
+    # Phase 1. Initialization #
+    ###########################
+    D = -71 # discriminant of our imaginary quadratic field K
+    N = 3 # level of our modular function gamma_2
+    B, C = 1, 18
     R.<x> = ZZ[]
     K.<theta> = NumberField(x^2 + B*x + C)
-    im_theta = K.embeddings(CF)[1].im_gens()[0]
-    phi = Hom(K, CF)([im_theta], check=False) # K --> CF
-    print("Working over K={}".format(K))
+    sqrtD = 2*theta + 1
+    theta_complex = K.embeddings(CF)[1].im_gens()[0] # the image of theta in CF with positive imaginary part
+    complex_embedding = Hom(K, CF)([theta_complex], check=False) # K --> CF, sending theta to theta_complex
+
+    ######################################
+    # Phase 2. Compute a class invariant #
+    ######################################
     OmodNstar = K.ideal(N).idealstar(flag=2) # flag=2 means compute generators
     for x in OmodNstar.gens_values():
         compute_action(K, N, x)
+    print("\n#####\n# Deduce (by hand) the invarent element alpha = zeta_3 * gamma_2(theta)\n#####")
 
-    # TODO: automatically find the invariant zeta_3*gamma_2(theta)
-    print("\n------------\ndeduce the invarent element alpha\n------------")
-
-    Cy.<y> = CF[]
-    minimal_polynomial = Cy.one()
+    #################################################################
+    # Phase 3. Compute the conjugates of our class invariant over K #
+    #################################################################
+    conjugates = []
     J = IdeleGroup(K)
     Ak = Adeles(K)
-    sqrtD = 2*theta + 1 # TODO check that this is correct for general D
     L = BinaryQF_reduced_representatives(D)
     for bqf in L:
         a, b, c = bqf.polynomial().coefficients()
@@ -204,7 +204,6 @@ def alice_gee(D=-71, N=3):
         beta, alpha = (-b/2+sqrtD/2).vector()
         M = matrix(QQ, [[alpha, beta], [0, a]])
         ux = gx * ~M
-        #print(ux); print()
 
         n = 0
         while not is_defined_modulo(ux, N):
@@ -220,9 +219,6 @@ def alice_gee(D=-71, N=3):
             gx = connecting_homomorphism(K, Ak(x).finite)
             ux = gx * ~M
             n += 1
-            #print(x);print()
-            #print(Ak(x).finite); print()
-            #print(ux); print()
 
         print("\nux at (a,b,c)=({},{},{}):\n{}".format(a, b, c, ux))
         ux_modN = matrix_modulo(ux, N)
@@ -231,19 +227,27 @@ def alice_gee(D=-71, N=3):
 
         tau = (-b + sqrtD) / (2*a)
         zeta3 = CF(exp(2*CF(pi)*CF(I)/3))
-        conjugate_theta = zeta3^ZZ(d) * zeta3^ZZ(e) * weber_gamma_2(phi(tau))
+        conjugate_theta = zeta3^ZZ(e) * weber_gamma_2(complex_embedding(tau))
+        conjugate_alpha = zeta3^ZZ(d) * conjugate_theta
         print("conjugate of theta is: {}".format(conjugate_theta))
-        minimal_polynomial *= y - conjugate_theta
+        conjugates.append(conjugate_alpha)
 
+
+    ##################################################################
+    # Phase 4. Compute the minimal polynomial of our class invariant #
+    ##################################################################
+    Cy.<y> = CF[]
+    minimal_polynomial = prod([y - conjugate for conjugate in conjugates])
+    coefficients = [round(c.real()) + round(c.imag())*I for c in minimal_polynomial.coefficients()]
+    R.<x> = ZZ[]
     try:
-        coefficients = [round(c.real()) + round(c.imag())*I for c in minimal_polynomial.coefficients()]
-        R.<x> = ZZ[]
         f = R(coefficients)
     except TypeError:
         raise ValueError("Precision of our numerical complex computations ({} bits) is too low!".format(CF.prec()))
-    print("minimal polynomial of alpha is:\n{}".format(f))
+    if not NumberField(f, 'a').is_isomorphic(NumberField(hilbert_class_polynomial(-71), 'b')):
+        raise ValueError("Computed hibert class field differs from the standard sage one!")
     return f
 
 
 CF = ComplexField(prec=53)
-#f = x^7 + 6745*x^6 - 327467*x^5 + 51857115*x^4 +2319299751*x^3 + 41264582513*x^2 - 307873876442*x + 903568991567
+#f = x^7 + 6745*x^6 - 327467*x^5 + 51857115*x^4 -2319299751*x^3 + 41264582513*x^2 - 307873876442*x + 903568991567
