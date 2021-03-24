@@ -53,7 +53,7 @@ def connecting_homomorphism(K, x):
 
     INPUT:
 
-    - ``x`` -- element of (or can be converted into) `\hat{K}`
+    - ``x`` -- an idele over ``K``
 
     OUTPUT:
 
@@ -61,9 +61,9 @@ def connecting_homomorphism(K, x):
     free `\hat{\QQ}`-module `\hat{K} = \theta \cdot \hat{\QQ} + \hat{\QQ}` with
     respect to the basis `(\theta, 1)`.
     """
-    C, B, _ = K.gen().minpoly().coefficients()
-    x = ProfiniteNumbers(K)(x)
+    x = Adeles(K)(x).finite
     t, s = x.to_profinite_rational_vector()
+    C, B, _ = K.gen().minpoly().coefficients()
     return matrix(ProfiniteNumbers(QQ), [[t-B*s, -C*s], [s, t]])
 
 def matrix_modulo(A, N):
@@ -86,7 +86,7 @@ def matrix_modulo(A, N):
         rows_modN.append(row_modN)
     return matrix(Zmod(N), rows_modN)
 
-def compute_action_SL2ZmodN(A, N):
+def compute_action_GL2ZmodN(A, N):
     """
     Compute the action of ``A`` on the level-``N`` modular function gamma_2
     """
@@ -123,7 +123,7 @@ def compute_action_SL2ZmodN(A, N):
 def compute_action(K, N, x):
     gx = connecting_homomorphism(K, x)
     gx_modN = matrix_modulo(gx, N)
-    compute_action_SL2ZmodN(gx_modN, N)
+    compute_action_GL2ZmodN(gx_modN, N)
 
 def matrix_modulus(A):
     return gcd([a.modulus() for a in A.list()])
@@ -147,6 +147,19 @@ def weber_gamma_2(x):
     """
     fx = weber_f(x)
     return (fx^24 - 16) / fx^8
+
+def increase_precision(x, rational_primes):
+    """
+    Increase the precision of the idele ``x`` at every prime lying above a
+    rational prime in ``rational_primes``
+    """
+    for p in rational_primes:
+        for q in K.primes_above(p):
+            if q in x.finite:
+                x_q, i_q = x.finite[q]
+                x.finite[q] = (x_q, i_q+1)
+            else:
+                x.finite[q] = (K(1), 1)
 
 
 def alice_gee():
@@ -179,6 +192,7 @@ def alice_gee():
     conjugates = []
     J = IdeleGroup(K)
     Ak = Adeles(K)
+    Cl = ray_class_group(K, Modulus(K.ideal(1))) # ray class group of modulus 1, i.e. ideal class group
     L = BinaryQF_reduced_representatives(D)
     for bqf in L:
         a, b, c = bqf.polynomial().coefficients()
@@ -200,7 +214,7 @@ def alice_gee():
                 x_q = -b/2 + sqrtD/2
             finite[q] = (x_q, 1)
         x = J(None, None, finite)
-        gx = connecting_homomorphism(K, Ak(x).finite)
+        gx = connecting_homomorphism(K, x)
         beta, alpha = (-b/2+sqrtD/2).vector()
         M = matrix(QQ, [[alpha, beta], [0, a]])
         ux = gx * ~M
@@ -216,14 +230,14 @@ def alice_gee():
                         x.finite[q] = (x_q, i_q+1)
                     else:
                         x.finite[q] = (a, 1)
-            gx = connecting_homomorphism(K, Ak(x).finite)
+            gx = connecting_homomorphism(K, x)
             ux = gx * ~M
             n += 1
 
         print("\nux at (a,b,c)=({},{},{}):\n{}".format(a, b, c, ux))
         ux_modN = matrix_modulo(ux, N)
         assert ux_modN == ux_accoring_to_paper, "ERROR!!!!!!!! According to the paper we should get\n{}".format(ux_accoring_to_paper)
-        d, e = compute_action_SL2ZmodN(ux_modN, N)
+        d, e = compute_action_GL2ZmodN(ux_modN, N)
 
         tau = (-b + sqrtD) / (2*a)
         zeta3 = CF(exp(2*CF(pi)*CF(I)/3))
@@ -231,6 +245,40 @@ def alice_gee():
         conjugate_alpha = zeta3^ZZ(d) * conjugate_theta
         print("conjugate of theta is: {}".format(conjugate_theta))
         conjugates.append(conjugate_alpha)
+
+        #####
+        # Third way of computing these Z/3Z-matrices, this time using our
+        # ray class group to idele conversion.
+        #####
+        aa = K.ideal(a, (-b+sqrtD)/2)
+        x = J(Cl(aa))
+        gx = connecting_homomorphism(K, x)
+        beta, alpha = (-b/2+sqrtD/2).vector()
+        M = matrix(QQ, [[alpha, beta], [0, a]])
+        ux = gx * ~M
+
+        while not is_defined_modulo(ux, N):
+            d = (matrix_modulus(ux) / N).denominator()
+            d *= gcd(N, matrix_denominator(ux))
+            for p in d.prime_divisors():
+                for q in K.primes_above(p):
+                    if q in x.finite:
+                        x_q, i_q = x.finite[q]
+                        x.finite[q] = (x_q, i_q+1)
+                    else:
+                        x.finite[q] = (K(1), 1)
+            gx = connecting_homomorphism(K, x)
+            ux = gx * ~M
+
+        new_ux_modN = matrix_modulo(ux, N)
+        print("this is ideal class {}".format(Cl(aa)))
+        if new_ux_modN != ux_modN and new_ux_modN != -1*ux_modN:
+            print("ERROR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! new_ux_modN is now:\n{}".format(new_ux_modN))
+        #####
+        # End of the third way
+        #####
+
+
 
 
     ##################################################################
