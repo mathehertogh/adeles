@@ -1375,6 +1375,103 @@ class Idele(MultiplicativeGroupElement):
         return (self/v).is_principal()
 
 
+    def increase_precision(self, primes, prec_increment=1):
+        """
+        Increase the precision of ``self`` at the primes given in ``primes``
+
+        INPUT:
+
+        - ``primes`` -- an iterable containing prime ideals of our number field
+                        and/or rational prime numbers, or a prime ideal of our
+                        number field
+        - ``prec_increment`` -- integer (default = 1); the amount by which we
+                                increase the precision at each prime in
+                                ``primes``
+
+        Let `p` be a prime ideal in ``primes``. Suppose ``self`` represents the
+        open subset `x * U_p^i` at `p`. Then after calling this method, ``self``
+        will represent `x * U_p^(i + prec_increment)` at `p`.
+
+        If `p` in ``primes`` is a rational prime number, then the above is done
+        for each prime `q` lying above `p`.
+
+        .. NOTE::
+
+            If ``self`` has an exact known value at a prime `p`, then nothing
+            changes. If one sees exactness as having infinite precision, this
+            just corresponds to ``oo + prec_increment == oo``.
+
+        .. NOTE::
+
+            Setting ``prec_increment`` to a negative value will decrease the
+            precision of ``self``. If the precision drops below zero anywhere,
+            we throw an exception.
+
+        EXAMPLE::
+
+            sage: K.<a> = NumberField(x^3-2)
+            sage: J = IdeleGroup(K)
+            sage: p2 = K.prime_above(2)
+            sage: p5 = K.prime_above(5)
+            sage: u = J(None, None, {p2: (a, 5), p5: (1/3, 1)})
+
+        Let's increase the precision of ``p2`` and *both* prime ideals above 5
+        by 3::
+
+            sage: u.increase_precision([p2, 5], 3)
+            sage: u
+            Idele over Number Field in a with defining polynomial x^3 - 2 with values
+                    (a,): a * U_q^8
+                    (-a^2 - 1,): 1/3 * U_q^4
+                    (a^2 - 2*a - 1,): 1 * U_q^3
+
+        We can also decrease precision::
+
+            sage: u.increase_precision(p2, -1)
+            sage: u
+            Idele over Number Field in a with defining polynomial x^3 - 2 with values
+                    (a,): a * U_q^7
+                    (-a^2 - 1,): 1/3 * U_q^4
+                    (a^2 - 2*a - 1,): 1 * U_q^3
+
+        The precision of exact values is unchanged::
+        
+            sage: u.exact = a+1
+            sage: p3 = K.prime_above(3)
+            sage: u.increase_precision([p2, p3, p5])
+            sage: u
+            Idele over Number Field in a with defining polynomial x^3 - 2 with values
+                    (a,): a * U_q^8
+                    (-a^2 - 1,): 1/3 * U_q^5
+                    (a^2 - 2*a - 1,): 1 * U_q^3
+            and which equals exactly a + 1 at all other primes
+        """
+        K = self.parent().number_field
+
+        if primes in K.ideal_monoid() and K.ideal(primes).is_prime():
+            p = primes # primes is just a single prime ideal, let's call it p
+            if p in self.finite:
+                x, i = self.finite[p]
+            elif self._has_exact():
+                # We know the value at p exactly, so we don't change
+                return
+            else:
+                x, i = K(1), ZZ(0)
+            new_prec = i + prec_increment
+            if new_prec < 0:
+                raise ValueError("Trying to give idele negative precision")
+            self.finite[p] = (x, new_prec)
+            return
+
+        for p in primes:
+            if p in K.ideal_monoid() and K.ideal(p).is_prime():
+                self.increase_precision(p, prec_increment)
+            elif p in Primes():
+                for q in K.primes_above(p):
+                    self.increase_precision(q, prec_increment)
+            else:
+                raise TypeError("primes should be a list of primes")
+
 
 
 from sage.structure.unique_representation import UniqueRepresentation
