@@ -66,12 +66,12 @@ def ST_factor(A, return_homomorphism=False):
     N = A.base_ring().order()
     A_lift = SL2Z(lift_matrix_to_sl2z(A.list(), N))
     G.<S,T> = FreeGroup() # S=(0,-1;1,0), T=L=(1,1;0,1), R=(1,0;1,1)
-    # We want to factor C into a product of S's and T's. The function
+    # We want to factor A_lift into a product of S's and T's. The function
     # sl2z_word_problem() already factors it into L's and R's for us.
     # We just do a simple remapping using the following relation:
     R = S^3 * T^-1 * S
     factorization = G.one()
-    for is_R, e in sl2z_word_problem(C):
+    for is_R, e in sl2z_word_problem(A_lift):
         if is_R:
             factorization = factorization * R^e
         else:
@@ -120,7 +120,7 @@ def SUM_factor(A):
     # Create a zero at the bottom-left entry of A.
     #print("# Create a zero at the bottom-left entry of A.")
     while A[1,0].value != 0:
-        if A[1,1].value < A[1,0].value:
+        if A[1,1].value.abs() < A[1,0].value.abs():
             alpha = matrix(ZZ, [[0, 1], [1, 0]])
             A = A * alpha # swap columns
             M = ~alpha * M
@@ -166,6 +166,12 @@ def SUM_factor(A):
     A[1,1].modulus //= g
     M = ~delta * M
     #print(A); print()
+
+    # Make sure M has positive determinant.
+    if det(M) < 0:
+        epsilon = matrix(ZZ, [[1, 0], [0, -1]])
+        A = A * epsilon
+        M = epsilon * M # We have ~epsilon==epsilon
 
     # Compute S = iota(det(A)) and U, the left-over with determinant 1
     S = matrix(Zhat, [[1, 0], [0, det(A)]])
