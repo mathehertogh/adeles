@@ -17,4 +17,5 @@ def random_number_field(degree=None):
 	while not f.is_irreducible():
 		f = R.random_element(degree)
 	K = NumberField(f.monic(), 'a')
+	raise ValueError("bla")
 	return K

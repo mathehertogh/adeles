@@ -49,7 +49,7 @@ where `S` is a finite set of places of `K` and each `U_p` is of the form
 
 load("completions.sage")
 load("ray_class_groups.sage")
-load("adeles.sage")
+#load("adeles.sage")
 
 
 from sage.structure.element import MultiplicativeGroupElement
