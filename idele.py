@@ -1508,15 +1508,17 @@ class IdeleGroup(UniqueRepresentation, Group):
     def _element_constructor_(self, exact, infinite=None, finite=None):
         #print("DEBUG: IdeleGroup._element_constructor_({}, {}, {})".format(exact, infinite, finite))
         if infinite is None and finite is None:
-            if exact is None:
+            x = exact
+            if x is None:
                 raise TypeError("No arguments supplied to Idele-constructor")
             from adele import Adeles
-            if exact.parent() is Adeles(self.number_field): # conversion A_K --> J_K
-                return self._from_adele(exact)
-            if hasattr(exact.parent(), "_bnr"): # conversion Cl_m --> J_K
+            Ak = Adeles(self.number_field)
+            if Ak.has_coerce_map_from(x.parent()): # conversion A_K --> J_K
+                return self._from_adele(Ak(x))
+            if hasattr(x.parent(), "_bnr"): # conversion Cl_m --> J_K
                 # TODO make the check above less hacky and more robust
-                # for some reason checking isinstance(exact, RayClassGroupElement) fails
-                return self._from_ray_class(exact)
+                # for some reason checking isinstance(x, RayClassGroupElement) fails
+                return self._from_ray_class(x)
         return self.element_class(self, exact, infinite, finite)
 
     def _from_adele(self, adele):
