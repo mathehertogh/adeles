@@ -653,12 +653,56 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
             sage: Ohat(a^2+1, 4*a)
             a^2 + 1 mod (4*a)
         """
+        from sage.rings.quotient_ring import is_QuotientRing
         if modulus is None:
-            # TODO fix the ugly hack below and just make isinstance(value, ProfiniteNumber) work
-            if (hasattr(value, "parent") and value.parent()._repr_()[0:17] == 'Profinite Numbers'
-                    and self.number_field().has_coerce_map_from(value.parent().base())):
-                return self._from_profinite_number(value)
+            if hasattr(value, "parent"):
+                P = value.parent()
+                if is_QuotientRing(P):
+                    I = P.defining_ideal()
+                    if I.ring() == self.base() or I.ring() == self.number_field():
+                        return self._from_modulo_element(value)
+                # TODO fix the ugly hack below and just make isinstance(value, ProfiniteNumber) work
+                if (P._repr_()[0:17] == 'Profinite Numbers'
+                        and self.number_field().has_coerce_map_from(P.base())):
+                    return self._from_profinite_number(value)
             modulus = ZZ(0) if self.base() is ZZ else self.base().ideal(0)
+        return self.element_class(self, value, modulus)
+
+    def _from_modulo_element(self, element):
+        """
+        Construct a profinite intger from the modulo element ``element``
+
+        INPUT:
+
+        - ``element`` -- an element of `O/I`, where `O` is our base ring of
+                         integers and `I` is an ideal of `O`
+
+        EXAMPLES::
+
+            sage: b = Zmod(25)(10)
+            sage: Zhat._from_modulo_element(b)
+            10 mod 25
+            sage: Zhat(b)
+            10 mod 25
+
+        ::
+
+            sage: K.<a> = NumberField(x^3-2)
+            sage: O = K.maximal_order()
+            sage: I = O.ideal(5*a)
+            sage: OmodI = O.quotient_ring(I, 'z')
+            sage: c = OmodI(3-a)
+            sage: Ohat = ProfiniteIntegers(O)
+            sage: Ohat._from_modulo_element(c)
+            -a + 3 mod (5*a)
+            sage: Ohat(c)
+            -a + 3 mod (5*a)
+        """
+        OmodI = element.parent()
+        modulus = OmodI.defining_ideal()
+        if self.base() is ZZ:
+            modulus = modulus.gens_reduced()[0]
+        value = element.lift()
         return self.element_class(self, value, modulus)
 
     def _from_profinite_number(self, number):
@@ -735,6 +779,11 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
         """
         if self.base().has_coerce_map_from(S):
             return True
+        from sage.rings.quotient_ring import is_QuotientRing
+        if is_QuotientRing(S):
+            I = S.defining_ideal()
+            if I.ring() == self.base() or I.ring() == self.number_field():
+                return True
         return False
 
     def is_integral_domain(self, proof=None):
