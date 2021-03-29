@@ -648,3 +648,4 @@ class ProfiniteNumbers(UniqueRepresentation, CommutativeAlgebra):
         """
         return False
 
+Qhat = ProfiniteNumbers(QQ)
