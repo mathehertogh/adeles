@@ -523,6 +523,12 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
                 return self.element_class(self, infinite, x)
             if x.parent() is self: # make copy
                 return self.element_class(self, x.infinite, x.finite)
+            Khat = ProfiniteNumbers(K)
+            if Khat.has_coerce_map_from(x.parent()):
+                rif_oo = RIF(-oo, oo)
+                cif_oo = CIF(rif_oo, rif_oo) # TODO or should we put ones at infinity...?
+                infinite = [rif_oo if L is RIF else cif_oo for L, phi in completions(K, oo)]
+                return self.element_class(self, infinite, Khat(x))
             if x.parent()._repr_()[0:11] == 'Idele Group' and x.parent().number_field == K:  # coercion J_K --> A_K
                 # TODO fix the ugly check above
                 return self._from_idele(x)
@@ -698,10 +704,15 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
             Define Coercion `\QQ_p` --> A_Q; even K_p --> A_K
             Maybe via Khat? So two coercions: K_p --> Khat --> A_K
         """
+        from profinite_number import ProfiniteNumbers
         from idele import IdeleGroup
-        if self.base().has_coerce_map_from(S):
+        K = self.base()
+        if K.has_coerce_map_from(S):
             return True
-        J = IdeleGroup(self.base())
+        Khat = ProfiniteNumbers(K)
+        if Khat.has_coerce_map_from(S):
+            return True
+        J = IdeleGroup(K)
         if J.has_coerce_map_from(S):
             return True
         return False
