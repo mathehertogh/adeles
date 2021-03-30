@@ -362,6 +362,7 @@ class Adele(CommutativeAlgebraElement):
             ((0.?e-14, 0), (0.79370052598410?, 1/3), (0.629960524947437?, 0))
         """
         from sage.modules.free_module_element import vector
+        from sage.matrix.constructor import matrix
         K = self.parent().base()
         n = K.absolute_degree()
         
