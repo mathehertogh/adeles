@@ -47,14 +47,8 @@ def connecting_homomorphism(K, x, N=3):
     respect to the basis `(\theta, 1)`.
     """
     Qhat = ProfiniteNumbers(QQ)
-
     x = Adeles(K)(x).finite
-
-    t, s = x.value().vector() # TODO beautify & make rigid
-    d = lcm(t.denominator(), s.denominator())
-    t, s = Qhat(d*t, d*N, d), Qhat(d*s, d*N, d)
-    #t, s = x.to_profinite_rational_vector()
-
+    t, s = x.to_profinite_rational_vector(enclosure=False)
     C, B, _ = K.gen().minpoly().coefficients()
     return matrix(Qhat, [[t-B*s, -C*s], [s, t]])
 
@@ -126,7 +120,7 @@ def action_iota(S):
 
     OUTPUT:
 
-    An integer `d \in \{0, 1, 2\}` such that `\gamma_2^S = \zeta_3^d \gamma_2`.
+    An integer `d \in \{0, 1, 2\}` such that `\zeta_3^S = \zeta_3^d`.
     Here `zeta_3` is `exp(2*\pi*i/3)`.
     """
     return ZZ(Zmod(3)(S[1,1].value))
