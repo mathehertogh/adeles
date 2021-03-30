@@ -28,7 +28,10 @@ def weber_gamma_2(x):
     fx = weber_f(x)
     return (fx**ZZ(24) - ZZ(16)) / fx**ZZ(8) 
 
-def connecting_homomorphism(K, x):
+def iota(d, N=3):
+    return matrix(Zmod(N), [[1, 0], [0, d]])
+
+def connecting_homomorphism(K, x, N=3):
     r"""
     This function implements Shimura's connecting homomorphism `\hat{K}^* \to
     GL(\hat{\QQ})`
@@ -43,10 +46,17 @@ def connecting_homomorphism(K, x):
     free `\hat{\QQ}`-module `\hat{K} = \theta \cdot \hat{\QQ} + \hat{\QQ}` with
     respect to the basis `(\theta, 1)`.
     """
+    Qhat = ProfiniteNumbers(QQ)
+
     x = Adeles(K)(x).finite
-    t, s = x.to_profinite_rational_vector()
+
+    t, s = x.value().vector() # TODO beautify & make rigid
+    d = lcm(t.denominator(), s.denominator())
+    t, s = Qhat(d*t, d*N, d), Qhat(d*s, d*N, d)
+    #t, s = x.to_profinite_rational_vector()
+
     C, B, _ = K.gen().minpoly().coefficients()
-    return matrix(ProfiniteNumbers(QQ), [[t-B*s, -C*s], [s, t]])
+    return matrix(Qhat, [[t-B*s, -C*s], [s, t]])
 
 def apply_fractional_linear_transformation(M, tau):
     r"""
@@ -169,7 +179,6 @@ def print_action(d, e, M):
 
 
 
-
 ###########################
 # Phase 1. Initialization #
 ###########################
@@ -182,6 +191,7 @@ N = ZZ(3) # level of our modular function gamma_2
 B, C = ZZ(1), ZZ(18) 
 K = NumberField(x**2  + B*x + C, names=('theta',))
 (theta,) = K._first_ngens(1)
+O = K.maximal_order()
 sqrtD = 2*theta + 1 
 theta_complex = K.embeddings(CF)[1].im_gens()[0] # the image of theta in CF with positive imaginary part
 complex_embedding = Hom(K, CF)([theta_complex], check=False) # K --> CF, sending theta to theta_complex
@@ -190,10 +200,17 @@ J = IdeleGroup(K)
 ######################################
 # Phase 2. Compute a class invariant #
 ######################################
+OmodN = O.quotient_ring(N, 'b')
 OmodNstar = K.ideal(N).idealstar(flag=2) # flag=2 means compute generators
+
 for x in OmodNstar.gens_values():
-    d, e, M = action_idele(J(x))
-    print_action(d, e, M)
+    x = OmodN(x)
+    gx = connecting_homomorphism(K, J(x))
+    A = matrix_modulo(gx, N)
+    d = ZZ(det(A))
+    U = ~iota(det(A)) * A
+    e = action_SL2ZmodN(U)
+    print("x = {}:\n  d = {}\n  e = {}".format(x, d, e))
 
 print("\n#####\n# Deduce (by hand) the invarent element alpha = zeta_3 * gamma_2(theta)\n#####")
 
@@ -201,11 +218,12 @@ print("\n#####\n# Deduce (by hand) the invarent element alpha = zeta_3 * gamma_2
 # Phase 3. Compute the conjugates of our class invariant over K #
 #################################################################
 conjugates = []
-J = IdeleGroup(K)
 Cl = ray_class_group(K, Modulus(K.ideal(1))) # ray class group of modulus 1, i.e. ideal class group
 for a in Cl:
     print("computing alpha^{}".format(a))
     x = J(a)
+    print("idele: {}".format(x))
+"""
     d, e, M = action_idele(x)
 
     tau = apply_fractional_linear_transformation(M, theta)
@@ -224,8 +242,8 @@ R = ZZ['x']; (x,) = R._first_ngens(1)
 try:
     f = R(coefficients)
 except TypeError:
-    raise ValueError("Precision of our numerical complex computations ({} bits) is too low!".format(CF.prec()))
-if not NumberField(f, 'a').is_isomorphic(NumberField(hilbert_class_polynomial(D), 'b')):
-    raise ValueError("Computed hibert class field differs from the standard sage one!")
-print(f)
-
+    pass # raise ValueError("Precision of our numerical complex computations ({} bits) is too low!".format(CF.prec()))
+#if not NumberField(f, 'a').is_isomorphic(NumberField(hilbert_class_polynomial(D), 'b')):
+    #raise ValueError("Computed hibert class field differs from the standard sage one!")
+#print(f)
+"""
