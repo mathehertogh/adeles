@@ -392,7 +392,7 @@ class ProfiniteNumber(CommutativeAlgebraElement):
 
         return self.numerator[p] / self.denominator
 
-    def to_profinite_rational_vector(self):
+    def to_profinite_rational_vector(self, enclosure=True):
         r"""
         Return ``self`` as a profinite rational vector
 
@@ -406,6 +406,17 @@ class ProfiniteNumber(CommutativeAlgebraElement):
         This method returns the image of ``self`` under `\phi` in the form of an
         `\hat{\QQ}`-vector relative to the basis `B`.
 
+        INPUT:
+
+        - ``enclosure`` -- boolean (default: ``True``); whether or not to return
+                           an enclosure of the exact result `u`. We cannot in
+                           general represent `u`. Hence we must choose to either
+                           return an enclosure `v` of `u`, meaning `v` 
+                           represents at least all profinite numbers that `u`
+                           represents; or return a vector with "too much"
+                           precision: some `w` that represents at most all
+                           profinite numbers that `u` represents.
+
         EXAMPLES::
 
             sage: K.<a> = NumberField(x^4-2)
@@ -413,6 +424,8 @@ class ProfiniteNumber(CommutativeAlgebraElement):
             sage: b = Khat(a, 12*(a-1), 5)
             sage: b.to_profinite_rational_vector()
             ((0 mod 12)/5, (1 mod 6)/5, (0 mod 6)/5, (0 mod 6)/5)
+            sage: b.to_profinite_rational_vector(enclosure=False)
+            ((0 mod 12)/5, (1 mod 12)/5, (0 mod 12)/5, (0 mod 12)/5)
         """
         from sage.modules.free_module_element import vector
         from sage.arith.functions import lcm
@@ -431,20 +444,26 @@ class ProfiniteNumber(CommutativeAlgebraElement):
 
         values = x.vector()
         moduli = []
-        e_p = {}
-        for i in range(n):
-            for q, e in factor(I):
-                p = q.gens_two()[0]  # p = q \cap ZZ
-                e_q = p.valuation(q)
-                if p not in e_p:
-                    e_p[p] = e // e_q
-                else:
-                    e_p[p] = min(e_p[p], e // e_q)
-            modulus = QQ(1)
-            for p in e_p:
-                modulus *= p**e_p[p]
-            moduli.append(modulus)
-            I /= K.gen()
+        if enclosure:
+            e_p = {}
+            for i in range(n):
+                for q, e in factor(I):
+                    p = q.gens_two()[0]  # p = q \cap ZZ
+                    e_q = p.valuation(q)
+                    if p not in e_p:
+                        e_p[p] = e // e_q
+                    else:
+                        e_p[p] = min(e_p[p], e // e_q)
+                modulus = QQ(1)
+                for p in e_p:
+                    modulus *= p**e_p[p]
+                moduli.append(modulus)
+                I /= K.gen()
+        else:
+            for i in range(n):
+                m = I.gens_two()[0]  # m = I \cap QQ
+                moduli.append(m)
+                I /= K.gen()
 
         profinite_rationals = []
         for i in range(n):
