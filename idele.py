@@ -402,7 +402,7 @@ class Idele(MultiplicativeGroupElement):
                     p5 = Fractional ideal (-a)
         """
         from sage.rings.fast_arith import prime_range
-        if not self.finite and all([x is None for x in self.infinite]):
+        if self._has_exact() and not self.finite and all([x is None for x in self.infinite]):
             return str(self.exact)
         rep = "("
         K = self.parent().number_field
