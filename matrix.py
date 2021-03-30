@@ -200,8 +200,9 @@ def SUM_factor(A):
 
     # Compute S = iota(det(A)) and U, the left-over with determinant 1
     S = matrix(Zhat, [[1, 0], [0, det(A)]])
-    det_inv = det(A).value.inverse_mod(det(A).modulus)
-    S_inv = matrix(Zhat, [[1, 0], [0, det_inv]])
+    x, m = det(A).value, det(A).modulus
+    detA_inv = Zhat(x.inverse_mod(m), m)
+    S_inv = matrix(Zhat, [[1, 0], [0, detA_inv]])
     U = S_inv * A
 
     return S, U, M
