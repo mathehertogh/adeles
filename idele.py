@@ -1460,7 +1460,8 @@ class Idele(MultiplicativeGroupElement):
         K = self.parent().number_field
 
         if primes in K.ideal_monoid() and K.ideal(primes).is_prime():
-            p = primes # primes is just a single prime ideal, let's call it p
+            # primes is just a single prime ideal, let's call it p.
+            p = ZZ(primes) if K is QQ else K.ideal(primes)
             if p in self.finite:
                 x, i = self.finite[p]
             elif self._has_exact():
