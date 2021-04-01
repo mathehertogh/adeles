@@ -87,18 +87,18 @@ class ProfiniteInteger(CommutativeAlgebraElement):
         K = parent.number_field()
         if value not in O:
             raise TypeError("value must be an element of {}".format(O))
-        self.value = O(value)
+        self._value = O(value)
         if O is ZZ:
             if modulus not in ZZ:
                 raise TypeError("modulus must be an integer")
             if modulus < ZZ(0):
                 modulus = -modulus
-            self.modulus = ZZ(modulus)
+            self._modulus = ZZ(modulus)
         else:
             if modulus not in K.ideal_monoid() or not modulus.is_integral():
                 raise TypeError("modulus must be an ideal of {}".format(O))
             modulus = O.ideal(modulus)
-            self.modulus = O.ideal(modulus.gens_reduced())
+            self._modulus = O.ideal(modulus.gens_reduced())
         self._reduce()
 
     def _repr_(self):
@@ -118,18 +118,18 @@ class ProfiniteInteger(CommutativeAlgebraElement):
             sage: Ohat(a, I)
             a mod (3, a + 2)
         """
-        if self.modulus == 0:
-            return repr(self.value)
-        modulus = self.modulus
+        if self.modulus() == 0:
+            return repr(self.value())
+        modulus = self.modulus()
         if self.parent().base() is not ZZ:
-            t = len(self.modulus.gens())
+            t = len(modulus.gens())
             modulus = "("
             for i in range(t):
-                modulus += str(self.modulus.gens()[i])
+                modulus += str(self.modulus().gens()[i])
                 if i < t-1:
                     modulus += ", "
             modulus += ")"
-        return "{} mod {}".format(self.value, modulus)
+        return "{} mod {}".format(self.value(), modulus)
 
     def _richcmp_(self, other, op):
         r"""
@@ -183,14 +183,14 @@ class ProfiniteInteger(CommutativeAlgebraElement):
         if op == op_EQ:
             O = self.parent().base()
             common_modulus = O.ideal(self._common_modulus(other))
-            return (self.value - other.value) in common_modulus
+            return (self.value() - other.value()) in common_modulus
         if op == op_NE:
             return not self._richcmp_(other, op_EQ)
         raise NotImplementedError("only equality and inequality are implemented")
 
     def _reduce(self):
         """
-        Reduce ``self.value`` modulo ``self.modulus``
+        Reduce ``self.value()`` modulo ``self.modulus()``
 
         .. TODO::
 
@@ -201,7 +201,7 @@ class ProfiniteInteger(CommutativeAlgebraElement):
 
             sage: Zhat = ProfiniteIntegers()
             sage: a = Zhat(0, 10)
-            sage: a.value = 91; a
+            sage: a._value = 91; a
             91 mod 10
             sage: a._reduce(); a
             1 mod 10
@@ -211,22 +211,22 @@ class ProfiniteInteger(CommutativeAlgebraElement):
             sage: K.<a> = NumberField(x^2-6)
             sage: Ohat = ProfiniteIntegers(K)
             sage: b = Ohat(0, a+1)
-            sage: b.value = 10*a+11; b
+            sage: b._value = 10*a+11; b
             10*a + 11 mod (a + 1)
             sage: b._reduce(); b
             -a mod (a + 1)
 
         TESTS::
 
-            sage: b.modulus = K.ideal(0)
+            sage: b._modulus = K.ideal(0)
             sage: b._reduce(); b
             -a
         """
         if self.parent().base() is ZZ:
-            if self.modulus != 0:
-                self.value %= self.modulus
+            if self.modulus() != 0:
+                self._value %= self.modulus()
         else:
-            self.value = self.modulus.reduce(self.value)
+            self._value = self.modulus().reduce(self.value())
 
     def _common_modulus(self, other):
         """
@@ -263,8 +263,8 @@ class ProfiniteInteger(CommutativeAlgebraElement):
             Fractional ideal (15)
         """
         if self.parent().base() is ZZ:
-            return gcd(self.modulus, other.modulus)
-        return self.modulus + other.modulus
+            return gcd(self.modulus(), other.modulus())
+        return self.modulus() + other.modulus()
 
     def _add_(self, other):
         """
@@ -293,7 +293,7 @@ class ProfiniteInteger(CommutativeAlgebraElement):
             a + 1 mod (7)
         """
         modulus = self._common_modulus(other)
-        value = self.value + other.value
+        value = self.value() + other.value()
         return self.__class__(self.parent(), value, modulus)
 
     def _sub_(self, other):
@@ -322,7 +322,7 @@ class ProfiniteInteger(CommutativeAlgebraElement):
             2*a mod (7)
         """
         modulus = self._common_modulus(other)
-        value = self.value - other.value
+        value = self.value() - other.value()
         return self.__class__(self.parent(), value, modulus)
 
     def _mul_(self, other):
@@ -352,19 +352,19 @@ class ProfiniteInteger(CommutativeAlgebraElement):
         """
         # We seperate the modulus==0 cases because multiplying a non-principal
         # ideal with the zero-ideal is not implemented in Sage.
-        if self.modulus.is_zero():
-            modulus = self.value * other.modulus
-        elif other.modulus.is_zero():
-            modulus = other.value * self.modulus
+        if self.modulus().is_zero():
+            modulus = self.value() * other.modulus()
+        elif other.modulus().is_zero():
+            modulus = other.value() * self.modulus()
         else:
-            I = self.value * other.modulus
-            J = self.modulus * other.value
-            K = self.modulus * other.modulus
+            I = self.value() * other.modulus()
+            J = self.modulus() * other.value()
+            K = self.modulus() * other.modulus()
             if self.parent().base() is ZZ:
                 modulus = gcd(I, gcd(J, K))
             else:
                 modulus = I + J + K
-        value = self.value * other.value
+        value = self.value() * other.value()
         return self.__class__(self.parent(), value, modulus)
 
     def _div_(self, other):
@@ -372,8 +372,8 @@ class ProfiniteInteger(CommutativeAlgebraElement):
         Divide ``self`` by the ``other`` and return the result
 
         Only implemented when ``other`` lies in the base order (i.e.
-        ``other.modulus`` is zero) and ``self.value`` and ``self.modulus`` are
-        both divisible by ``other.value``.
+        ``other.modulus()`` is zero) and ``self.value()`` and ``self.modulus()``
+        are both divisible by ``other.value()``.
 
         INPUT:
 
@@ -415,17 +415,17 @@ class ProfiniteInteger(CommutativeAlgebraElement):
             ...
             NotImplementedError: modulus is not divisible by 9
         """
-        if not other.modulus.is_zero():
+        if not other.modulus().is_zero():
             raise TypeError("can only divide by elements of the base")
         if other.is_zero():
             raise ZeroDivisionError("division by zero")
-        value = self.value / other.value
+        value = self.value() / other.value()
         if not value.is_integral():
             raise NotImplementedError("value is not divisible by {}".format(other))
-        if self.modulus.is_zero():
+        if self.modulus().is_zero():
             modulus = ZZ(0)
         else:
-            modulus = self.modulus / other.value
+            modulus = self.modulus() / other.value()
             if not modulus.is_integral():
                 raise NotImplementedError("modulus is not divisible by {}".format(other))
         return self.__class__(self.parent(), value, modulus)
@@ -435,10 +435,10 @@ class ProfiniteInteger(CommutativeAlgebraElement):
         TODO fix projection() first, then write this
         """
         from sage.arith.misc import factor
-        factorization = factor(self.modulus)
+        factorization = factor(self.modulus())
         rep = "("
         for p, e in factorization:
-            rep += str(Qp(p)(self.value, e)) + ", "
+            rep += str(Qp(p)(self.value(), e)) + ", "
         rep += "...)"
         return rep
 
@@ -488,13 +488,13 @@ class ProfiniteInteger(CommutativeAlgebraElement):
         else:
             if p not in K.ideal_monoid() or not p.is_prime():
                 raise ValueError("p should be a prime ideal of {}".format(K))
-        #prec = self.modulus.valuation(p)
+        #prec = self.modulus().valuation(p)
         #Kp, phi = completion(K, p, prec) # phi is the natural embedding K --> Kp
-        #return phi(self.value)
+        #return phi(self.value())
         O = self.parent().base()
-        I = p**(self.modulus.valuation(p))
+        I = p**(self.modulus().valuation(p))
         R = O.quotient(I, 'a')
-        return R(self.value)
+        return R(self.value())
 
     def __getitem__(self, p):
         r"""
@@ -513,8 +513,8 @@ class ProfiniteInteger(CommutativeAlgebraElement):
             raise NotImplementedError("Projection to `p`-adics only implemented over rationals")
         if p not in Primes():
             raise ValueError("p should be a prime number")
-        e = self.modulus.valuation(p)
-        return Zp(p)(self.value, e)
+        e = self.modulus().valuation(p)
+        return Zp(p)(self.value(), e)
 
     def is_unit(self):
         r"""
@@ -547,9 +547,30 @@ class ProfiniteInteger(CommutativeAlgebraElement):
             False
         """
         O = self.parent().base()
-        x = O.ideal(self.value)
+        x = O.ideal(self.value())
         # We check if x is coprime to our modulus:
-        return x + self.modulus == 1
+        return x + self.modulus() == 1
+
+    def value(self):
+        """
+        Return the "value" of ``self``
+
+        Writing `O` for our base ring of integers, "value" here means an element
+        of `O` that is equal to ``self`` modulo ``self.modulus()``.
+        """
+        return self._value
+
+    def modulus(self):
+        """
+        Return the modulus of ``self``
+        """
+        return self._modulus
+
+    def is_integral(self):
+        """
+        Return ``True``, indicating that ``self`` is integral
+        """
+        return True
 
 
 class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
@@ -776,17 +797,11 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
             sage: Ohat._from_profinite_number(Khat(1, 10, c))
             Traceback (most recent call last):
             ...
-            ValueError: Can't convert profinite number with non-unit denominator to a profinite integer
+            ValueError: Can't convert non-integral profinite number to profinite integer
         """
-        O = self.base()
-        try:
-            d = O(number.denominator)
-            v = d.inverse_of_unit()
-        except ArithmeticError:
-            raise ValueError("Can't convert profinite number with non-unit denominator to a profinite integer")
-        value = v * number.numerator.value
-        modulus = v * number.numerator.modulus
-        return self.element_class(self, value, modulus)
+        if not (number.value().is_integral() and number.modulus().is_integral()):
+            raise ValueError("Can't convert non-integral profinite number to profinite integer")
+        return self.element_class(self, number.value(), number.modulus())
 
     def _coerce_map_from_(self, S):
         """

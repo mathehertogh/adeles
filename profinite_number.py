@@ -110,8 +110,8 @@ class ProfiniteNumber(CommutativeAlgebraElement):
             raise TypeError("numerator should be an element of {}".format(Ohat))
         if denominator not in O or denominator.is_zero():
             raise TypeError("denominator should be a non-zero element of {}".format(O))
-        self.numerator = Ohat(numerator)
-        self.denominator = O(denominator)
+        self._numerator = Ohat(numerator)
+        self._denominator = O(denominator)
         self._reduce()
 
     def _reduce(self):
@@ -127,11 +127,11 @@ class ProfiniteNumber(CommutativeAlgebraElement):
             sage: Qhat = ProfiniteNumbers()
             sage: a = Qhat(1, 100, 60); a
             (1 mod 100)/60
-            sage: a.numerator.value = 10; a
+            sage: a._numerator._value = 10; a
             (10 mod 100)/60
             sage: a._reduce(); a
             (1 mod 10)/6
-            sage: a.numerator.value = 14; a
+            sage: a._numerator._value = 14; a
             (14 mod 10)/6
             sage: a._reduce(); a
             (2 mod 5)/3
@@ -184,17 +184,17 @@ class ProfiniteNumber(CommutativeAlgebraElement):
         O = self.parent().base().maximal_order()
         if O is ZZ:
             from sage.arith.misc import gcd
-            common = gcd(self.numerator.value, self.numerator.modulus)
-            common = gcd(common, self.denominator)
-            self.numerator /= common
-            self.denominator = ZZ(self.denominator // common)
+            common = gcd(self.numerator().value(), self.numerator().modulus())
+            common = gcd(common, self.denominator())
+            self._numerator /= common
+            self._denominator = ZZ(self.denominator() // common)
         else:
-            common = O.ideal(self.numerator.value) + O.ideal(self.numerator.modulus)
-            common += O.ideal(self.denominator)
+            common = O.ideal(self.numerator().value()) + O.ideal(self.numerator().modulus())
+            common += O.ideal(self.denominator())
             gens = common.gens_reduced()
             if len(gens) == 1:
-                self.numerator /= O(gens[0])
-                self.denominator = O(self.denominator // gens[0])
+                self._numerator /= O(gens[0])
+                self._denominator = O(self.denominator() // gens[0])
 
     def _repr_(self):
         """
@@ -207,16 +207,16 @@ class ProfiniteNumber(CommutativeAlgebraElement):
             sage: Khat(a-1, K.ideal(4, 2*a+2), 2*a-5)
             (-a + 1 mod (4, 2*a + 2))/(2*a - 5)
         """
-        if self.denominator == 1:
-            return repr(self.numerator)
-        numerator = repr(self.numerator)
-        if (not self.numerator.modulus.is_zero() or
-                sum([not c.is_zero() for c in self.numerator.value.list()]) > 1):
+        if self.denominator() == 1:
+            return repr(self.numerator())
+        numerator = repr(self.numerator())
+        if (not self.numerator().modulus().is_zero() or
+                sum([not c.is_zero() for c in self.numerator().value().list()]) > 1):
             numerator = "(" + numerator + ")"
-        denominator = repr(self.denominator)
-        if not (self.denominator in QQ or
-                (sum([not c.is_zero() for c in self.denominator.list()]) == 1
-                    and sum([c for c in self.denominator.list()]) == 1)):
+        denominator = repr(self.denominator())
+        if not (self.denominator() in QQ or
+                (sum([not c.is_zero() for c in self.denominator().list()]) == 1
+                    and sum([c for c in self.denominator().list()]) == 1)):
             denominator = "(" + denominator + ")"
         return numerator + "/" + denominator
 
@@ -254,7 +254,7 @@ class ProfiniteNumber(CommutativeAlgebraElement):
         """
         from sage.structure.richcmp import op_EQ, op_NE
         if op == op_EQ:
-            return self.numerator * other.denominator == self.denominator * other.numerator
+            return self.numerator() * other.denominator() == self.denominator() * other.numerator()
         if op == op_NE:
             return not self._richcmp_(other, op_EQ)
         raise NotImplementedError("only equality and inequality are implemented")
@@ -280,8 +280,8 @@ class ProfiniteNumber(CommutativeAlgebraElement):
             sage: Khat(a+1, 20*a+3, 7) + 5
             (-3749*a^2 mod (-20*a - 3))/7
         """
-        numerator = self.numerator * other.denominator + other.numerator * self.denominator
-        denominator = self.denominator * other.denominator
+        numerator = self.numerator() * other.denominator() + other.numerator() * self.denominator()
+        denominator = self.denominator() * other.denominator()
         return self.__class__(self.parent(), numerator, denominator)
         
     def _sub_(self, other):
@@ -309,8 +309,8 @@ class ProfiniteNumber(CommutativeAlgebraElement):
             sage: Khat(a^2, 21, 2*(a+1)) - Khat(a, 7, 2)
             (-a mod (7*a + 7))/(2*a + 2)
         """
-        numerator = self.numerator * other.denominator - other.numerator * self.denominator
-        denominator = self.denominator * other.denominator
+        numerator = self.numerator() * other.denominator() - other.numerator() * self.denominator()
+        denominator = self.denominator() * other.denominator()
         return self.__class__(self.parent(), numerator, denominator)
         
     def _mul_(self, other):
@@ -336,8 +336,8 @@ class ProfiniteNumber(CommutativeAlgebraElement):
             sage: Khat(a^2, 21, 5) * Khat(a+1, 21, 10)
             (a^3 + a^2 mod (21))/50
         """
-        numerator = self.numerator * other.numerator
-        denominator = self.denominator * other.denominator
+        numerator = self.numerator() * other.numerator()
+        denominator = self.denominator() * other.denominator()
         return self.__class__(self.parent(), numerator, denominator)
         
     def _div_(self, other):
@@ -366,10 +366,10 @@ class ProfiniteNumber(CommutativeAlgebraElement):
             sage: Khat(a+1, 7, 2) / (3*a/2)
             (a + 1 mod (7))/(3*a)
         """
-        if not other.numerator.modulus.is_zero():
+        if not other.numerator().modulus().is_zero():
             raise NotImplementedError("Division of profinite numbers only implemented for exact denominators")
-        numerator = self.numerator * other.denominator
-        denominator = self.denominator * other.numerator.value
+        numerator = self.numerator() * other.denominator()
+        denominator = self.denominator() * other.numerator().value()
         return self.__class__(self.parent(), numerator, denominator)
 
     def __getitem__(self, p):
@@ -390,7 +390,7 @@ class ProfiniteNumber(CommutativeAlgebraElement):
         if p not in Primes():
             raise ValueError("p should be a prime number")
 
-        return self.numerator[p] / self.denominator
+        return self.numerator()[p] / self.denominator()
 
     def to_profinite_rational_vector(self, enclosure=True):
         r"""
@@ -433,13 +433,13 @@ class ProfiniteNumber(CommutativeAlgebraElement):
         n = K.absolute_degree()
         Qhat = ProfiniteNumbers(QQ)
 
-        if self.numerator.modulus.is_zero():
+        if self.numerator().modulus().is_zero():
             # self is (exactly) the following element x of K:
-            x = self.numerator.value / self.denominator
+            x = self.numerator().value() / self.denominator()
             return vector(Qhat, x.vector())
         
-        x = self.numerator.value / self.denominator
-        I = self.numerator.modulus / self.denominator
+        x = self.numerator().value() / self.denominator()
+        I = self.numerator().modulus() / self.denominator()
         # self is `x mod I` with x in K, I a fractional ideal of K
 
         values = x.vector()
@@ -474,17 +474,36 @@ class ProfiniteNumber(CommutativeAlgebraElement):
 
         return vector(profinite_rationals)
 
+    def numerator(self):
+        """
+        Return the numerator of ``self`` as a profinite integer
+        """
+        return self._numerator
+
+    def denominator(self):
+        """
+        Return the denominator of ``self`` as an integral element of our base
+        field
+        """
+        return self._denominator
+
     def modulus(self):
         """
         Return the modulus of self as a fractional ideal of our number field
         """
-        return self.numerator.modulus / self.denominator
+        return self.numerator().modulus() / self.denominator()
 
     def value(self):
         """
         Return the value of self as an element of our number field
         """
-        return self.numerator.value / self.denominator
+        return self.numerator().value() / self.denominator()
+
+    def is_integral(self):
+        """
+        Return whether or not ``self`` is integral
+        """
+        return self.value().is_integral() and self.modulus().is_integral()
 
 
 class ProfiniteNumbers(UniqueRepresentation, CommutativeAlgebra):
@@ -666,5 +685,18 @@ class ProfiniteNumbers(UniqueRepresentation, CommutativeAlgebra):
             False
         """
         return False
+
+    def number_field(self):
+        """
+        Return the base number field of ``self``
+
+        EXAMPLES::
+
+            sage: K.<a> = NumberField(x^5+7*x+9)
+            sage: Khat = ProfiniteNumbers(K)
+            sage: Khat.number_field()
+            Number Field in a with defining polynomial x^5 + 7*x + 9
+        """
+        return self.base()
 
 Qhat = ProfiniteNumbers(QQ)

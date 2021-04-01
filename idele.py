@@ -126,9 +126,9 @@ class Idele(MultiplicativeGroupElement):
         (3, 1/2*a^2 - a - 1/2): a^3 + a + 1 * U_q^10
         """
         #print("DEBUG Idele.__init__({}, {}, {}, {})".format(parent, exact, infinite, finite))
-        self.exact = exact
-        self.infinite = infinite
-        self.finite = finite
+        self._exact = exact
+        self._infinite = infinite
+        self._finite = finite
         MultiplicativeGroupElement.__init__(self, parent)
         self._validate_exact()
         self._validate_infinite()
@@ -150,25 +150,25 @@ class Idele(MultiplicativeGroupElement):
             sage: K.<a> = NumberField(x^3-2)
             sage: J = IdeleGroup(K)
             sage: u = J(1)
-            sage: u.exact = None
+            sage: u._exact = None
             sage: u._validate_exact()
-            sage: u.exact = QQ(3/2)
+            sage: u._exact = QQ(3/2)
             sage: u._validate_exact()
-            sage: u.exact.parent()
+            sage: u._exact.parent()
             Number Field in a with defining polynomial x^3 - 2
-            sage: u.exact = []
+            sage: u._exact = []
             sage: u._validate_exact()
             Traceback (most recent call last):
             ...
             TypeError: exact should be an element of the number field
         """
-        if self.exact is None:
+        if self.exact() is None:
             return
-        K = self.parent().number_field
-        if self.exact not in K:
+        K = self.parent().number_field()
+        if self.exact() not in K:
             raise TypeError("exact should be an element of the number field")
-        self.exact = K(self.exact)
-        if self.exact.is_zero():
+        self._exact = K(self.exact())
+        if self.exact().is_zero():
             raise ValueError("exact must be a unit (i.e. non-zero)")
 
     def _validate_infinite(self):
@@ -194,59 +194,59 @@ class Idele(MultiplicativeGroupElement):
             sage: K.<a> = NumberField(x^3 + x + 1)
             sage: Jk = IdeleGroup(K)
             sage: u = Jk(1)
-            sage: u.infinite = [1.2, I]
+            sage: u._infinite = [1.2, I]
             sage: u._validate_infinite()
 
         Below the ``Integer 3`` will be cast into ``RIF``::
 
-            sage: u.infinite = [ZZ(3), I]
+            sage: u._infinite = [ZZ(3), I]
             sage: u._validate_infinite()
-            sage: u.infinite[0].parent()
+            sage: u._infinite[0].parent()
             Real Interval Field with 53 bits of precision
 
         And here we cast ``None`` to a list of ``None``s::
 
-            sage: u.infinite = None
+            sage: u._infinite = None
             sage: u._validate_infinite()
-            sage: u.infinite
+            sage: u._infinite
             [None, None]
 
         The exceptions that we may throw:
 
-            sage: u.infinite = [3.14, I, I]
+            sage: u._infinite = [3.14, I, I]
             sage: u._validate_infinite()
             Traceback (most recent call last):
             ...
             TypeError: infinite should have length 2
-            sage: u.infinite = {CIF: I+1}
+            sage: u._infinite = {CIF: I+1}
             sage: u._validate_infinite()
             Traceback (most recent call last):
             ...
             TypeError: infinite should be a list
-            sage: u.infinite = [I, I]
+            sage: u._infinite = [I, I]
             sage: u._validate_infinite()
             Traceback (most recent call last):
             ...
             TypeError: 0th infinite value (I) should lie in Real Interval Field with 53 bits of precision
         """
-        K = self.parent().number_field
+        K = self.parent().number_field()
         K_oo = infinite_completions(K)
         t = len(K_oo)
-        if self.infinite is None:
-            self.infinite = [None for i in range(t)]
+        if self.infinite() is None:
+            self._infinite = [None for i in range(t)]
             return
-        if not isinstance(self.infinite, list):
+        if not isinstance(self.infinite(), list):
             raise TypeError("infinite should be a list")
-        if len(self.infinite) != t:
+        if len(self.infinite()) != t:
             raise TypeError("infinite should have length {}".format(t))
         for i in range(t):
-            val = self.infinite[i]
+            val = self.infinite(i)
             if val is not None:
                 if val not in K_oo[i][0]:
                     raise TypeError("{}th infinite value ({}) should lie in {}".format(i, val, K_oo[i][0]))
                 if val.is_zero():
                     raise ValueError("{}th infinite value ({}) should be a unit (i.e. non-zero)".format(i, val))
-                self.infinite[i] = K_oo[i][0](val)
+                self._infinite[i] = K_oo[i][0](val)
 
     def _validate_finite(self):
         r"""
@@ -264,42 +264,42 @@ class Idele(MultiplicativeGroupElement):
             sage: K.<a> = NumberField(x^4+x+1)
             sage: J = IdeleGroup(K)
             sage: u = J(1)
-            sage: u.finite = None
+            sage: u._finite = None
             sage: u._validate_finite()
-            sage: u.finite
+            sage: u._finite
             {}
-            sage: u.finite = {K.prime_above(2): (1, 1)}
+            sage: u._finite = {K.prime_above(2): (1, 1)}
             sage: u._validate_finite()
-            sage: u.finite[K.prime_above(2)][0].parent()
+            sage: u._finite[K.prime_above(2)][0].parent()
             Number Field in a with defining polynomial x^4 + x + 1
 
         And some exceptions we may throw::
 
-            sage: u.finite = "blah"
+            sage: u._finite = "blah"
             sage: u._validate_finite()
             Traceback (most recent call last):
             ...
             TypeError: finite should be a dict
-            sage: u.finite = {40: (1, 1)}
+            sage: u._finite = {40: (1, 1)}
             sage: u._validate_finite()
             Traceback (most recent call last):
             ...
             TypeError: keys of finite should be prime ideals of the number field
-            sage: u.finite = {K.prime_above(2): (1, -1)}
+            sage: u._finite = {K.prime_above(2): (1, -1)}
             sage: u._validate_finite()
             Traceback (most recent call last):
             ...
             TypeError: values at finite primes should be pairs in K x NN
         """
-        if self.finite is None:
-            self.finite = {}
+        if self.finite() is None:
+            self._finite = {}
             return
-        if not isinstance(self.finite, dict):
+        if not isinstance(self.finite(), dict):
             raise TypeError("finite should be a dict")
-        K = self.parent().number_field
+        K = self.parent().number_field()
         already_seen = set()
         new_finite = {}
-        for q, val in self.finite.items():
+        for q, val in self.finite().items():
             if q not in K.ideal_monoid() or not q.is_prime():
                 if K is QQ:
                     raise TypeError("keys of finite should be prime numbers")
@@ -324,7 +324,7 @@ class Idele(MultiplicativeGroupElement):
             if not new_q.is_prime():
                 raise ValueError("{} is not prime as an ideal of {}".format(q, K))
             new_finite[new_q] = (K(v), ZZ(i))
-        self.finite = new_finite
+        self._finite = new_finite
 
     def _repr_(self):
         """
@@ -335,8 +335,8 @@ class Idele(MultiplicativeGroupElement):
         :meth:`_repr_dense`).
         Else, we return a sparse representation (see :meth:`_repr_sparse`).
         """
-        K = self.parent().number_field
-        for q in self.finite:
+        K = self.parent().number_field()
+        for q in self.finite():
             p = q if K is QQ else q.gens_two()[0] # the rational prime below q
             if p >= 50:
                 return self._repr_sparse()
@@ -359,20 +359,19 @@ class Idele(MultiplicativeGroupElement):
                     infinity_0: 7.9000000000000004?
                     10000079: 7/9 * U_q^20
         """
-        K = self.parent().number_field
+        K = self.parent().number_field()
         rep = "Idele over {} with values\n".format(K)
         for i in range(len(K.places())):
-            x_oo_i = self.infinite[i]
+            x_oo_i = self.infinite(i)
             if x_oo_i is not None:
                 rep += "\tinfinity_{}: {}\n".format(i, x_oo_i)
-        for q in self.finite:
-            x_q, i_q = self.finite[q]
+        for q in self.finite():
+            x_q, i_q = self.finite(q)
             q_name = q if K is QQ else q.gens_reduced()
             rep += "\t{}: {} * U_q^{}\n".format(q_name, x_q, i_q)
         if self._has_exact():
-            rep += "and which equals exactly {} at all other primes.".format(self.exact)
+            rep += "and which equals exactly {} at all other primes.".format(self.exact())
         return rep[0:-1]
-
 
     def _repr_dense(self):
         """
@@ -402,17 +401,17 @@ class Idele(MultiplicativeGroupElement):
                     p5 = Fractional ideal (-a)
         """
         from sage.rings.fast_arith import prime_range
-        if self._has_exact() and not self.finite and all([x is None for x in self.infinite]):
-            return str(self.exact)
+        if self._has_exact() and not self.finite() and all([x is None for x in self.infinite()]):
+            return str(self.exact())
         rep = "("
-        K = self.parent().number_field
+        K = self.parent().number_field()
         K_oo = infinite_completions(K)
         for i in range(len(K_oo)):
-            val = self.infinite[i]
+            val = self.infinite(i)
             if val is None:
                 if self._has_exact():
                     phi = K_oo[i][1] # phi: K --> RIF/CIF
-                    rep += "{}, ".format(phi(self.exact))
+                    rep += "{}, ".format(phi(self.exact()))
                 elif K_oo[i][0] is CIF:
                     rep += "CC*, "
                 else:
@@ -421,12 +420,12 @@ class Idele(MultiplicativeGroupElement):
                 rep += "{}, ".format(val)
         start = ZZ(0) 
         step = ZZ(100) 
-        to_do = set(self.finite)
+        to_do = set(self.finite())
         if K is QQ:
             while to_do:
                 for p in prime_range(start, start+step):
                     if p in to_do:
-                        v, i = self.finite[p]
+                        v, i = self.finite(p)
                         if i > 0:
                             rep += "{}*(1+M_{}^{}), ".format(v, p, i)
                         else:
@@ -434,10 +433,10 @@ class Idele(MultiplicativeGroupElement):
                         to_do.remove(p)
                         if not to_do:
                             break
-                    elif self.exact is None:
+                    elif self.exact() is None:
                         rep += "Z_{}*, ".format(p)
                     else:
-                        rep += "{}, ".format(self.exact)
+                        rep += "{}, ".format(self.exact())
                 start += step
         else:
             legend = "\nwhere:"
@@ -447,7 +446,7 @@ class Idele(MultiplicativeGroupElement):
                     for i in range(len(qs)):
                         q_str = self._prime_name(p, i)
                         if qs[i] in to_do:
-                            v, w = self.finite[qs[i]]
+                            v, w = self.finite(qs[i])
                             if sum([c != 0 for c in v.list()]) > 1:
                                 v = "(" + str(v) + ")"
                             if w > 0:
@@ -456,16 +455,16 @@ class Idele(MultiplicativeGroupElement):
                                 rep += "{}*Z_{}*, ".format(v, q_str)
                             legend += "\n\t{} = {}".format(q_str, qs[i])
                             to_do.remove(qs[i])
-                        elif self.exact is None:
+                        elif self.exact() is None:
                             rep += "Z_{}*, ".format(q_str)
                             legend += "\n\t{} = {}".format(q_str, qs[i])
                         else:
-                            rep += "{}, ".format(self.exact)
+                            rep += "{}, ".format(self.exact())
                     if not to_do:
                         break
                 start += step
         if self._has_exact():
-            rep += "{}, {}, {}, ".format(self.exact, self.exact, self.exact)
+            rep += "{}, {}, {}, ".format(self.exact(), self.exact(), self.exact())
         rep += "...)"
         if K is not QQ:
             rep += legend
@@ -488,7 +487,7 @@ class Idele(MultiplicativeGroupElement):
         as follows: "pX", "qX", "rX", "sX", "tX", "ppX", "pqX", "prX", etc.
         
         We do not validate the input. For example, we don't check if ``p`` is a
-        prime number and we do not check if ``self.parent().number_field``
+        prime number and we do not check if ``self.parent().number_field()``
         actually has at least ``i+1`` primes above ``p``.
 
         EXAMPLES::
@@ -561,41 +560,41 @@ class Idele(MultiplicativeGroupElement):
         Also in this case the result is not equal, due to the non-exactness of
         ``u``::
         """
-        K = self.parent().number_field
+        K = self.parent().number_field()
 
         if self._has_exact() and other._has_exact():
-            if self.exact != other.exact:
+            if self.exact() != other.exact():
                 return False
         elif self._has_exact() or other._has_exact():
             ex, nex = (self, other) if self._has_exact() else (other, self)
-            if not nex._contains(ex.exact):
+            if not nex._contains(ex.exact()):
                 return False
 
-        t = len(self.infinite)
+        t = len(self.infinite())
         for i in range(t):
-            if self.infinite[i] is None:
-                if other.infinite[i] is not None:
+            if self.infinite(i) is None:
+                if other.infinite(i) is not None:
                     return False
             else:
-                if other.infinite[i] is None:
+                if other.infinite(i) is None:
                     return False
                 try:
-                    self.infinite[i].intersection(other.infinite[i])
+                    self.infinite(i).intersection(other.infinite(i))
                 except ValueError:
                     # This indicates the intersection is empty
                     return False
 
-        for q, v in self.finite.items():
-            if q in other.finite:
-                w = other.finite[q]
+        for q, v in self.finite().items():
+            if q in other.finite():
+                w = other.finite(q)
                 small, big = (self, other) if v[1] >= w[1] else (other, self)
-                if not big._contains_at(small.finite[q][0], q):
+                if not big._contains_at(small.finite(q)[0], q):
                     # the small open subset does not lie in the big open subset
                     # so they are disjoint
                     return False
             else: # other[q] not stored
                 if other._has_exact():
-                    if not self._contains_at(other.exact, q):
+                    if not self._contains_at(other.exact(), q):
                         return False
                 else:
                     x = v[0]
@@ -605,8 +604,8 @@ class Idele(MultiplicativeGroupElement):
                         x = K.ideal(x)
                     if  x.valuation(q) != 0:
                         return False
-        for q, v in other.finite.items():
-            if q not in self.finite:
+        for q, v in other.finite().items():
+            if q not in self.finite():
                 if self._has_exact():
                     # self[q] is exact, while other[q] is an approximation.
                     return False
@@ -660,11 +659,74 @@ class Idele(MultiplicativeGroupElement):
             sage: u = J(None, [3.1415])
             sage: u._has_exact()
             False
-            sage: u.exact = 1/2
+            sage: u._exact = 1/2
             sage: u._has_exact()
             True
         """
-        return self.exact is not None
+        return self.exact() is not None
+
+    def exact(self):
+        """
+        Return the exact part of ``self`` as an element of our number field (or
+        None)
+        """
+        return self._exact
+
+    def infinite(self, index=None):
+        """
+        Return the infinite part of ``self`` as a list, or an entry of it
+
+        INPUT:
+
+        - ``index`` -- integer (optional) such that ``0 <= index < t`` where
+                       ``t`` denotes the number of infinite places of our base
+                       number field
+
+        OUTPUT:
+
+        If ``index`` is not specified, return the infinite part of ``self`` as
+        a list of RIF/CIF/None elements.
+        Else, return ``self.infinite()[i]``.
+
+        .. WARNING::
+
+            The input ``index`` is not checked for validity.
+        """
+        if index is None:
+            return self._infinite
+        return self._infinite[index]
+
+    def finite(self, prime=None):
+        """
+        Return the finite part of ``self`` as a dictionary, or an entry of it
+
+        INPUT:
+
+        - ``prime`` -- a (finite) prime of our base number field (optional)
+
+        OUTPUT:
+
+        If ``index`` is not specified, return the finite part of ``self`` as
+        a dictionary with (finite) primes as keys and pairs `(x, i)` as values,
+        indiciating that we are equals at that prime to the `K`-element `x`, up
+        to multiplication by `U(i)`.
+        Else, return ``self.finite()[prime]``.
+
+        .. WARNING::
+
+            The input ``prime`` is not checked for validity.
+
+        .. TODO::
+
+            Improve this docstring
+        """
+        if prime is None:
+            return self._finite
+        if prime not in self._finite:
+            K = self.parent().number_field()
+            return (K(1), ZZ(0))
+        return self._finite[prime]
+
     
     def _mul_(self, other):
         """
@@ -717,54 +779,54 @@ class Idele(MultiplicativeGroupElement):
         """
         exact = None
         if self._has_exact() and other._has_exact():
-            exact = self.exact * other.exact
+            exact = self.exact() * other.exact()
 
-        infinite = self.infinite.copy()
-        K = self.parent().number_field
+        infinite = self.infinite().copy()
+        K = self.parent().number_field()
         K_oo = infinite_completions(K)
         for i in range(len(K_oo)):
             if infinite[i] is None:
-                if other.infinite[i] is None:
+                if other.infinite(i) is None:
                     pass # keep None, depends on exact which is already set correctly
                 else: # other has infinite value
                     if self._has_exact():
                         phi = K_oo[i][1] # phi: K --> RIF/CIF
-                        infinite[i] = phi(self.exact) * other.infinite[i]
+                        infinite[i] = phi(self.exact()) * other.infinite(i)
                     else:
                         pass
             else: # infinite[i] set
-                if other.infinite[i] is None:
+                if other.infinite(i) is None:
                     if other._has_exact():
                         phi = K_oo[i][1] # phi: K --> RIF/CIF
-                        infinite[i] = infinite[i] * phi(other.exact)
-                    else: # other.infinite[i] unknown
+                        infinite[i] = infinite[i] * phi(other.exact())
+                    else: # other.infinite(i) unknown
                         infinite[i] = None
                 else: # both values set
-                    infinite[i] *= other.infinite[i]
+                    infinite[i] *= other.infinite(i)
 
-        finite = self.finite.copy()
+        finite = self.finite().copy()
         for q, val in finite.items():
-            if q in other.finite:
+            if q in other.finite():
                 x, i = val
-                y, j = other.finite[q]
+                y, j = other.finite(q)
                 finite[q] = (x*y, min(i, j))
             else:
                 if other._has_exact():
-                    finite[q] = (val[0] * other.exact, val[1])
+                    finite[q] = (val[0] * other.exact(), val[1])
                 else: # other is unknown (i.e. Z_q^*) at q
                     # U_q^i is a subgroup of Z_q^*, so x*U_q^i * Z_q^* = x*Z_q^*
                     finite[q] = (val[0], ZZ(0)) 
-        for q, val in other.finite.items():
+        for q, val in other.finite().items():
             if q not in finite:
                 if self._has_exact():
-                    finite[q] = (val[0] * self.exact, val[1])
+                    finite[q] = (val[0] * self.exact(), val[1])
                 else: # self is unknown (i.e. Z_q^*) at q
                     # U_q^i is a subgroup of Z_q^*, so x*U_q^i * Z_q^* = x*Z_q^*
                     finite[q] = (val[0], ZZ(0))
         if ((self._has_exact() and not other._has_exact())
                 or (not self._has_exact() and other._has_exact())):
             # One has an exact value and one is Z_q^* almost everywhere.
-            value = self.exact if self._has_exact() else other.exact
+            value = self.exact() if self._has_exact() else other.exact()
             # Where value has valuation 0, we have value * Z_q^* = Z_q^*, so we
             # don't have to store this.
             # But at the finitely many places where value has non-zero
@@ -802,14 +864,14 @@ class Idele(MultiplicativeGroupElement):
         """
         exact = None
         if self._has_exact():
-            exact = ZZ(1) / self.exact
+            exact = ZZ(1) / self.exact()
 
-        infinite = self.infinite.copy()
+        infinite = self.infinite().copy()
         for i in range(len(infinite)):
             if infinite[i] is not None:
                 infinite[i] = ZZ(1) / infinite[i]
 
-        finite = self.finite.copy()
+        finite = self.finite().copy()
         for q, val in finite.items():
             finite[q] = (ZZ(1) / val[0], val[1])
 
@@ -906,18 +968,18 @@ class Idele(MultiplicativeGroupElement):
              30)
         """
         from sage.arith.functions import lcm
-        K = self.parent().number_field
+        K = self.parent().number_field()
 
         denominators = []
         factors = factor(ZZ(1))
-        for q, val in self.finite.items():
+        for q, val in self.finite().items():
             d_q = val[0].denominator()
             denominators.append(d_q)
             if K is not QQ:
                 d_q = K.ideal(d_q)
             factors *= factor(d_q)
-        if self.exact is not None:
-            d_exact = self.exact.denominator()
+        if self.exact() is not None:
+            d_exact = self.exact().denominator()
             denominators.append(d_exact)
             if K is not QQ:
                 d_exact = K.ideal(d_exact)
@@ -930,16 +992,16 @@ class Idele(MultiplicativeGroupElement):
         # ``u`` directly. This is what we will do below.
 
         finite = {}
-        for q, val in self.finite.items():
+        for q, val in self.finite().items():
             finite[q] = (d*val[0], val[1])
         exact = None
         if self._has_exact():
-            exact = self.exact * d
+            exact = self.exact() * d
         else:
             for q, e in factors:
                 if q not in finite:
                     finite[q] = (d, ZZ(0))
-        infinite = self.infinite.copy()
+        infinite = self.infinite().copy()
         for i in range(len(infinite)):
             if infinite[i] is not None:
                 infinite[i] = d*infinite[i]
@@ -973,7 +1035,7 @@ class Idele(MultiplicativeGroupElement):
         (27, Ring of integers modulo 40)
         """
         from adele import Adeles
-        A = Adeles(self.parent().number_field)
+        A = Adeles(self.parent().number_field())
         return A(self).to_modulo_element()
 
     def to_ray_class(self, modulus):
@@ -1021,7 +1083,7 @@ class Idele(MultiplicativeGroupElement):
             sage: u = Jk(None, [2, I], {p7: (1/2, 1), q7: (7*a, 2)})
             sage: m = Modulus(K.ideal(7), [0])
             sage: u.to_ray_class(m).ideal()
-            Fractional ideal (15*a^2 - 5*a - 93)
+            Fractional ideal (8*a^2 - 76*a + 9)
 
         TESTS:
 
@@ -1064,24 +1126,24 @@ class Idele(MultiplicativeGroupElement):
             raise NotImplementedError("to_ray_class() not implemented yet for exact ideles")
 
         J = self.parent()
-        K = J.number_field
+        K = J.number_field()
         G = ray_class_group(K, modulus)
 
         # First we check if the precision of this idele is high enough to have
         # a well-defined image in the ray class group ``G``.
         for i in modulus.infinite_part():
-            if (self.infinite[i] is None
-                    or not (self.infinite[i] <= 0 or self.infinite[i] >= 0)
-                    or self.infinite[i].is_zero()):
+            if (self.infinite(i) is None
+                    or not (self.infinite(i) <= 0 or self.infinite(i) >= 0)
+                    or self.infinite(i).is_zero()):
                 raise ValueError("idele has no well-defined sign at infinite prime {}".format(i))
         for q, e in modulus.finite_factors():
-            if q not in self.finite or self.finite[q][1] < e:
+            if q not in self.finite() or self.finite(q)[1] < e:
                 raise ValueError("idele must be known up to at least U_q^{} at q={}".format(e, q))
 
         v = self
         # Step 1. We make `v` integral at the primes dividing modulus.
         for q, e in modulus.finite_factors():
-            x, i = self.finite[q]
+            x, i = self.finite(q)
             if x not in K.maximal_order():
                 v *= x.denominator()
 
@@ -1091,7 +1153,7 @@ class Idele(MultiplicativeGroupElement):
         values = []
         moduli = []
         for q, e in modulus.finite_factors():
-            x, i = v.finite[q]
+            x, i = v.finite(q)
             f = i + x.valuation(q)
             # v represents x*U_q^i at q, which equals x+q^f\Z_q because
             # i >= modulus.valuation(q) >= 1 and x.valuation(q) >= 0 (so we
@@ -1111,7 +1173,7 @@ class Idele(MultiplicativeGroupElement):
         positive = []
         negative = []
         for i in modulus.infinite_part():
-            if v.infinite[i] >= 0:
+            if v.infinite(i) >= 0:
                 positive.append(i)
             else:
                 negative.append(i)
@@ -1124,7 +1186,7 @@ class Idele(MultiplicativeGroupElement):
         # Our `v` is finished. We can now build up an ideal representing the
         # image of `v` (which is equal to the image of ``self``) in ``G``.
         I = K.unit_ideal()
-        for q, val in v.finite.items():
+        for q, val in v.finite().items():
             I *= q**(val[0].valuation(q))
 
         return G(I)
@@ -1147,29 +1209,29 @@ class Idele(MultiplicativeGroupElement):
             False
             sage: u.is_one_mod_star(Modulus(Q.ideal(5), [0]))
             False
-            sage: u.infinite[0] = RIF(1.2345)
+            sage: u._infinite[0] = RIF(1.2345)
             sage: u.is_one_mod_star(Modulus(Q.ideal(5), [0]))
             True
-            sage: u.infinite[0] = RIF(-1.2345)
+            sage: u._infinite[0] = RIF(-1.2345)
             sage: u.is_one_mod_star(Modulus(Q.ideal(5), [0]))
             False
-            sage: u.exact = Q.one()
+            sage: u._exact = Q.one()
             sage: u.is_one_mod_star(Modulus(Q.ideal(2*3*5*7*11)))
             True
         """
         for q, e in modulus.finite_factors():
-            if not q in self.finite:
+            if not q in self.finite():
                 if not self._has_exact():
                     return False
-                x = self.exact
+                x = self.exact()
             else:
-                x, i = self.finite[q]
+                x, i = self.finite(q)
                 if i < e:
                     return False
             if (x-1).valuation(q) < e:
                 return False
         for i in modulus.infinite_part():
-            x = self.infinite[i]
+            x = self.infinite(i)
             if x is None:
                 return False
             if not (x >= 0):
@@ -1237,27 +1299,27 @@ class Idele(MultiplicativeGroupElement):
             ...
             TypeError: ``q`` should be a prime of `K`, but got None
         """
-        K = self.parent().number_field
+        K = self.parent().number_field()
         if q in K.places():
             i = K.places().index(q)
-            if self.infinite[i] is not None:
+            if self.infinite(i) is not None:
                 phi = completions(K, oo)[i][1] # phi: K --> RIF/CIF
-                return phi(x) in self.infinite[i]
+                return phi(x) in self.infinite(i)
             elif self._has_exact():
-                return x == self.exact
+                return x == self.exact()
             else:
                 # Not stored represents RR* or CC*, which ``x`` always lies in
                 return True
 
         if (K is QQ and q in Primes()) or (K is not QQ and q in K.ideal_monoid() and q.is_prime()):
-            if q in self.finite:
-                y, i = self.finite[q]
+            if q in self.finite():
+                y, i = self.finite(q)
                 if i == ZZ(0):
                     return (x/y).valuation(q) == ZZ(0)
                 else:
                     return (x/y - 1).valuation(q) >= i
             elif self._has_exact():
-                return x == self.exact
+                return x == self.exact()
             else:
                 # Not stored represents Z_q^*: the elements of valuation 0.
                 return x.valuation(q) == 0
@@ -1287,13 +1349,13 @@ class Idele(MultiplicativeGroupElement):
             sage: v._contains(a)
             False
         """
-        if self._has_exact() and x != self.exact:
+        if self._has_exact() and x != self.exact():
             return False
-        K = self.parent().number_field
+        K = self.parent().number_field()
         for phi in K.places():
             if not self._contains_at(x, phi):
                 return False
-        for q in self.finite:
+        for q in self.finite():
             if not self._contains_at(x, q):
                 return False
         return True
@@ -1324,14 +1386,14 @@ class Idele(MultiplicativeGroupElement):
             sage: w.is_principal()
             False
         """
-        K = self.parent().number_field
+        K = self.parent().number_field()
         if self._has_exact():
-            # The only possible ``r`` is ``self.exact``.
-            return self._contains(self.exact)
+            # The only possible ``r`` is ``self.exact()``.
+            return self._contains(self.exact())
 
         # we are not exact.
         r = K.ideal(1)
-        for q, val in self.finite.items():
+        for q, val in self.finite().items():
             x, i = val
             r *= q**(x.valuation(q))
         if not r.is_principal():
@@ -1354,11 +1416,11 @@ class Idele(MultiplicativeGroupElement):
         return False
         r"""
         old:
-        if all([u_oo is None for u_oo in self.infinite]):
+        if all([u_oo is None for u_oo in self.infinite()]):
             # Only finite values stored.
-            if K is QQ and len(self.finite) == 1:
-                p = list(self.finite.keys())[0]
-                x, i = self.finite[p]
+            if K is QQ and len(self.finite()) == 1:
+                p = list(self.finite().keys())[0]
+                x, i = self.finite(p)
                 # The only candidate element is p^e, where:
                 e = x.valuation(p)
                 # Need to find some `z \in \ZZ_p` such that
@@ -1447,7 +1509,7 @@ class Idele(MultiplicativeGroupElement):
 
         The precision of exact values is unchanged::
         
-            sage: u.exact = a+1
+            sage: u._exact = a+1
             sage: p3 = K.prime_above(3)
             sage: u.increase_precision([p2, p3, p5])
             sage: u
@@ -1457,13 +1519,13 @@ class Idele(MultiplicativeGroupElement):
                     (a^2 - 2*a - 1,): 1 * U_q^3
             and which equals exactly a + 1 at all other primes
         """
-        K = self.parent().number_field
+        K = self.parent().number_field()
 
         if primes in K.ideal_monoid() and K.ideal(primes).is_prime():
             # primes is just a single prime ideal, let's call it p.
             p = ZZ(primes) if K is QQ else K.ideal(primes)
-            if p in self.finite:
-                x, i = self.finite[p]
+            if p in self.finite():
+                x, i = self.finite(p)
             elif self._has_exact():
                 # We know the value at p exactly, so we don't change
                 return
@@ -1472,7 +1534,7 @@ class Idele(MultiplicativeGroupElement):
             new_prec = i + prec_increment
             if new_prec < 0:
                 raise ValueError("Trying to give idele negative precision")
-            self.finite[p] = (x, new_prec)
+            self._finite[p] = (x, new_prec)
             return
 
         for p in primes:
@@ -1494,17 +1556,17 @@ class IdeleGroup(UniqueRepresentation, Group):
         from sage.misc.functional import is_field
         if not is_field(K) or not K.absolute_degree() in ZZ:
             raise TypeError("K should be a number field")
-        self.number_field = K
+        self._number_field = K
         Group.__init__(self)
 
     def _repr_(self):
         """
         Return a string representation of ``self``
         """
-        return "Idele Group of {}".format(self.number_field)
+        return "Idele Group of {}".format(self.number_field())
 
     def _latex_(self):
-        return r"\Bold{A}_{" + latex(self.number_field) + "}^*"
+        return r"\Bold{A}_{" + latex(self.number_field()) + "}^*"
 
     def _element_constructor_(self, exact, infinite=None, finite=None):
         #print("DEBUG: IdeleGroup._element_constructor_({}, {}, {})".format(exact, infinite, finite))
@@ -1512,8 +1574,11 @@ class IdeleGroup(UniqueRepresentation, Group):
             x = exact
             if x is None:
                 raise TypeError("No arguments supplied to Idele-constructor")
+            K = self.number_field()
+            if x in K:
+                return self.element_class(self, exact, infinite, finite)
             from adele import Adeles
-            Ak = Adeles(self.number_field)
+            Ak = Adeles(K)
             if Ak.has_coerce_map_from(x.parent()): # conversion A_K --> J_K
                 return self._from_adele(Ak(x))
             if hasattr(x.parent(), "_bnr"): # conversion Cl_m --> J_K
@@ -1561,10 +1626,10 @@ class IdeleGroup(UniqueRepresentation, Group):
             ...
             ValueError: adele is zero at the prime 2
         """
-        K = self.number_field
-        value = adele.finite.numerator.value
-        modulus = adele.finite.numerator.modulus
-        denominator = adele.finite.denominator
+        K = self.number_field()
+        value = adele.finite().numerator().value()
+        modulus = adele.finite().numerator().modulus()
+        denominator = adele.finite().denominator()
 
         exact = None
         if modulus.is_zero():
@@ -1584,7 +1649,7 @@ class IdeleGroup(UniqueRepresentation, Group):
                     raise ValueError("adele is zero at the prime {}".format(q))
                 finite[q] = (value, e-v)
 
-        return self.element_class(self, exact, adele.infinite, finite)
+        return self.element_class(self, exact, adele.infinite(), finite)
 
     def _from_ray_class(self, r):
         r"""
@@ -1658,10 +1723,10 @@ class IdeleGroup(UniqueRepresentation, Group):
                     (-67*a + 109,): a - 1799 * U_q^0
                     (-1507*a - 5011,): a + 1242116 * U_q^0
         """
-        K = self.number_field
+        K = self.number_field()
         G = r.parent()  # ray class group of r
         exact = None
-        infinite = [None for phi in self.number_field.places()]
+        infinite = [None for phi in self.number_field().places()]
         for i in G.modulus().infinite_part():
             infinite[i] = RIF(0, oo)
 
@@ -1671,7 +1736,7 @@ class IdeleGroup(UniqueRepresentation, Group):
 
         if not r.is_one():
             for q, e in factor(r.ideal()):
-                if self.number_field is QQ:
+                if self.number_field() is QQ:
                     finite[q] = (q**e, ZZ(0))
                 else:
                     pi = K.uniformizer(q)
@@ -1683,9 +1748,15 @@ class IdeleGroup(UniqueRepresentation, Group):
         return Infinity
 
     def _coerce_map_from_(self, S):
-        if self.number_field.has_coerce_map_from(S):
+        if self.number_field().has_coerce_map_from(S):
             return True
         return False
+
+    def number_field(self):
+        """
+        Return the base number field of ``self``
+        """
+        return self._number_field
 
 
 

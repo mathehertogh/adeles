@@ -79,16 +79,16 @@ class Adele(CommutativeAlgebraElement):
             raise TypeError("infinite should be a list")
         if len(infinite) != t:
             raise TypeError("infinite should have length {}".format(t))
-        self.infinite = infinite
+        self._infinite = infinite
         for i in range(t):
             val = infinite[i]
             if val not in K_oo[i][0]:
                 raise TypeError("{}th infinite value ({}) should lie in {}".format(i, val, K_oo[i][0]))
-            self.infinite[i] = K_oo[i][0](val)
+            self._infinite[i] = K_oo[i][0](val)
         Khat = ProfiniteNumbers(K)
         if finite not in Khat:
             raise TypeError("finite should lie in {}".format(Khat))
-        self.finite = Khat(finite)
+        self._finite = Khat(finite)
 
     def _repr_(self):
         """
@@ -108,15 +108,15 @@ class Adele(CommutativeAlgebraElement):
         rif_oo = RIF(-oo, oo)
         cif_oo = CIF(rif_oo, rif_oo)
         rep = "("
-        for i in range(len(self.infinite)):
-            x_oo = self.infinite[i]
+        for i in range(len(self.infinite())):
+            x_oo = self.infinite(i)
             if x_oo.endpoints() == rif_oo.endpoints():
                 rep += "RR, "
             elif x_oo.endpoints() == cif_oo.endpoints():
                 rep += "CC, "
             else:
                 rep += repr(x_oo) + ", "
-        rep += repr(self.finite) + ")"
+        rep += repr(self.finite()) + ")"
         return rep
 
     def _richcmp_(self, other, op):
@@ -163,13 +163,13 @@ class Adele(CommutativeAlgebraElement):
         """
         from sage.structure.richcmp import op_EQ, op_NE
         if op == op_EQ:
-            for i in range(len(self.infinite)):
+            for i in range(len(self.infinite())):
                 try:
-                    self.infinite[i].intersection(other.infinite[i])
+                    self.infinite(i).intersection(other.infinite(i))
                 except ValueError:
                     # This indicates the intersection is empty
                     return False
-            return self.finite == other.finite
+            return self.finite() == other.finite()
         if op == op_NE:
             return not self._richcmp_(other, op_EQ)
         raise NotImplementedError("only equality and inequality are implemented")
@@ -200,9 +200,9 @@ class Adele(CommutativeAlgebraElement):
             (-0.80901699437494746? + 1.5877852522924732?*I, 0.30901699437494746? - 0.048943483704846358?*I, (a^2 + a + 5 mod (30))/a)
         """
         infinite = []
-        for i in range(len(self.infinite)):
-            infinite.append(self.infinite[i] + other.infinite[i])
-        finite = self.finite + other.finite
+        for i in range(len(self.infinite())):
+            infinite.append(self.infinite(i) + other.infinite(i))
+        finite = self.finite() + other.finite()
         return self.__class__(self.parent(), infinite, finite)
 
     def _sub_(self, other):
@@ -235,9 +235,9 @@ class Adele(CommutativeAlgebraElement):
             (1.577350269189626?*I, (13/2*a + 5/2 mod (15))/(2*a))
         """
         infinite = []
-        for i in range(len(self.infinite)):
-            infinite.append(self.infinite[i] - other.infinite[i])
-        finite = self.finite - other.finite
+        for i in range(len(self.infinite())):
+            infinite.append(self.infinite(i) - other.infinite(i))
+        finite = self.finite() - other.finite()
         return self.__class__(self.parent(), infinite, finite)
 
     def _mul_(self, other):
@@ -268,9 +268,9 @@ class Adele(CommutativeAlgebraElement):
             (2.598076211353316? + 1.5000000000000000?*I, 2*a + 1 mod (8*a + 8))
         """
         infinite = []
-        for i in range(len(self.infinite)):
-            infinite.append(self.infinite[i] * other.infinite[i])
-        finite = self.finite * other.finite
+        for i in range(len(self.infinite())):
+            infinite.append(self.infinite(i) * other.infinite(i))
+        finite = self.finite() * other.finite()
         return self.__class__(self.parent(), infinite, finite)
 
     def to_modulo_element(self):
@@ -316,14 +316,14 @@ class Adele(CommutativeAlgebraElement):
             sage: d.to_modulo_element()
             Traceback (most recent call last):
             ...
-            ValueError: non-integral adele can't be converted to O/I
+            ValueError: non-integral adele can't be converted to modulo element
         """
-        if self.finite.denominator != 1:
-            raise ValueError("non-integral adele can't be converted to O/I")
+        if not self.finite().is_integral():
+            raise ValueError("non-integral adele can't be converted to modulo element")
         K = self.parent().base()
         O = K.maximal_order()
-        I = self.finite.numerator.modulus
-        x = self.finite.numerator.value
+        I = O.ideal(self.finite().modulus())
+        x = O(self.finite().value())
         if I.is_zero():
             return O(x)
         name = K.variable_name() + "_bar"
@@ -366,7 +366,7 @@ class Adele(CommutativeAlgebraElement):
         K = self.parent().base()
         n = K.absolute_degree()
         
-        finites = self.finite.to_profinite_rational_vector()
+        finites = self.finite().to_profinite_rational_vector()
 
         r, s = K.signature()
         K_oo = infinite_completions(K)
@@ -391,10 +391,10 @@ class Adele(CommutativeAlgebraElement):
         Y = []
         for i in range(r+s):
             if i < r: # Real place
-                Y.append(self.infinite[i])
+                Y.append(self.infinite(i))
             else: # Complex place
-                Y.append(self.infinite[i].real())
-                Y.append(self.infinite[i].imag())
+                Y.append(self.infinite(i).real())
+                Y.append(self.infinite(i).imag())
         Y = vector(Y)
 
         infinites = A.solve_right(Y)
@@ -406,6 +406,36 @@ class Adele(CommutativeAlgebraElement):
             result.append(a)
 
         return vector(result)
+
+    def infinite(self, index=None):
+        """
+        Return the finite part of ``self`` as a list, or a single entry
+
+        INPUT:
+
+        - ``index`` -- integer (optional) such that ``0 <= index < t`` where
+                       ``t`` denotes the number of infinite places of our base
+                       number field
+
+        OUTPUT:
+
+        If ``index`` is not specified, return the infinite part of ``self`` as
+        a list of RIF/CIF elements.
+        Else, return ``self.infinite()[i]``.
+
+        .. WARNING::
+
+            The input ``index`` is not checked for validity.
+        """
+        if index is None:
+            return self._infinite
+        return self._infinite[index]
+
+    def finite(self):
+        """
+        Return the finite part of ``self`` as a profinite number
+        """
+        return self._finite
 
 
 class Adeles(UniqueRepresentation, CommutativeAlgebra):
@@ -523,14 +553,14 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
                 infinite = [phi(x) for L, phi in completions(K, oo)]
                 return self.element_class(self, infinite, x)
             if x.parent() is self: # make copy
-                return self.element_class(self, x.infinite, x.finite)
+                return self.element_class(self, x.infinite(), x.finite())
             Khat = ProfiniteNumbers(K)
             if Khat.has_coerce_map_from(x.parent()):
                 rif_oo = RIF(-oo, oo)
                 cif_oo = CIF(rif_oo, rif_oo) # TODO or should we put ones at infinity...?
                 infinite = [rif_oo if L is RIF else cif_oo for L, phi in completions(K, oo)]
                 return self.element_class(self, infinite, Khat(x))
-            if x.parent()._repr_()[0:11] == 'Idele Group' and x.parent().number_field == K:  # coercion J_K --> A_K
+            if x.parent()._repr_()[0:11] == 'Idele Group' and x.parent().number_field() == K:  # coercion J_K --> A_K
                 # TODO fix the ugly check above
                 return self._from_idele(x)
         return self.element_class(self, x, y)
@@ -605,7 +635,7 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
             raise NotImplementedError("non-matching exact and finite part not implemented yet...")
 
         K_oo = completions(K, oo)
-        infinite = idele.infinite.copy()
+        infinite = idele.infinite().copy()
         for i in range(len(infinite)):
             if infinite[i] is None:
                 if idele._has_exact():
@@ -619,7 +649,7 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
         integral, denominator = idele.integral_split()
         values = []
         moduli = []
-        for q, val in integral.finite.items():
+        for q, val in integral.finite().items():
             x, i = val
             if i == 0:
                 values.append(ZZ(0))
@@ -668,12 +698,12 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
         places = [phi for L, phi in infinite_completions(K)]
         for k in range(len(places)):
             phi = places[k]
-            x_oo = sum([v[i].infinite[0] * phi(K.gen())**i for i in range(n)])
+            x_oo = sum([v[i].infinite(0) * phi(K.gen())**i for i in range(n)])
             infinite.append(x_oo)
-        denominator = lcm([v[i].finite.denominator for i in range(n)])
+        denominator = lcm([v[i].finite().denominator() for i in range(n)])
         v = denominator * v
-        value = sum([v[i].finite.numerator.value * K.gen()**i for i in range(n)])
-        modulus = sum([K.ideal(v[i].finite.numerator.modulus * K.gen()**i) for i in range(n)])
+        value = sum([v[i].finite().numerator().value() * K.gen()**i for i in range(n)])
+        modulus = sum([K.ideal(v[i].finite().numerator().modulus() * K.gen()**i) for i in range(n)])
         finite = ProfiniteNumbers(K)(value, modulus, denominator)
 
         return self.element_class(self, infinite, finite)
