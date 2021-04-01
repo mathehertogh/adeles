@@ -516,6 +516,41 @@ class ProfiniteInteger(CommutativeAlgebraElement):
         e = self.modulus.valuation(p)
         return Zp(p)(self.value, e)
 
+    def is_unit(self):
+        r"""
+        Return whether or not ``self`` could be a unit
+
+        More precisely, we return ``True`` if and only if the subset of 
+        profinite integers that ``self`` represents contians a unit.
+
+        For ``self == x mod m``, this is equivalent to `x \in (O/mO)^*`,
+        where `O` denotes our base ring of integers.
+
+        EXAMPLES::
+
+            sage: Zhat(3, 0).is_unit()
+            False
+            sage: Zhat(-1, 0).is_unit()
+            True
+            sage: Zhat(3, 25).is_unit()
+            True
+            sage: Zhat(5, 25).is_unit()
+            False
+
+        ::
+
+            sage: K.<a> = NumberField(x^3-2)
+            sage: Ohat = ProfiniteIntegers(K)
+            sage: Ohat(3, 8).is_unit()
+            True
+            sage: Ohat(a, 8).is_unit()
+            False
+        """
+        O = self.parent().base()
+        x = O.ideal(self.value)
+        # We check if x is coprime to our modulus:
+        return x + self.modulus == 1
+
 
 class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
     Element = ProfiniteInteger
