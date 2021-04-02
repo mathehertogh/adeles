@@ -606,6 +606,8 @@ class ProfiniteNumbers(UniqueRepresentation, CommutativeAlgebra):
             3 mod 10
             sage: Qhat(3, 10)
             3 mod 10
+            sage: Qhat(3/2, 7/2)
+            (3 mod 7)/2
 
         ::
 
@@ -649,6 +651,11 @@ class ProfiniteNumbers(UniqueRepresentation, CommutativeAlgebra):
                 return self.element_class(self, Ohat(value*d), d)
             if value in Ohat:  # Ohat --> Khat
                 return self.element_class(self, Ohat(value))
+        if denominator is None:
+            if value in K and modulus in K.ideal_monoid():
+                from sage.arith.functions import lcm
+                d = lcm(value.denominator(), modulus.denominator())
+                return self.element_class(self, Ohat(d*value, d*modulus), d)
         return self.element_class(self, Ohat(value, modulus), denominator)
 
     def _coerce_map_from_(self, S):
