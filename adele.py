@@ -631,7 +631,7 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
         K = self.base()
         Khat = ProfiniteNumbers(K)
 
-        if idele._has_exact() and not idele._contains(idele.exact):
+        if idele._has_exact() and not idele._contains(idele.exact()):
             raise NotImplementedError("non-matching exact and finite part not implemented yet...")
 
         K_oo = completions(K, oo)
@@ -640,7 +640,7 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
             if infinite[i] is None:
                 if idele._has_exact():
                     phi = K_oo[i][0]  # phi: K --> RIF/CIF
-                    infinite[i] = phi(idele.exact)
+                    infinite[i] = phi(idele.exact())
                 elif K_oo[i][0] is RIF:
                     infinite[i] = RIF(-oo, oo)
                 else:
@@ -667,7 +667,7 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
         finite = Khat(value, modulus, denominator)
 
         if len(moduli) == 0 and idele._has_exact():
-            finite = idele.exact
+            finite = idele.exact()
 
         return self.element_class(self, infinite, finite)
 
