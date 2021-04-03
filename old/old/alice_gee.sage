@@ -299,3 +299,118 @@ def alice_gee():
 
 CF = ComplexField(prec=53)
 #f = x^7 + 6745*x^6 - 327467*x^5 + 51857115*x^4 -2319299751*x^3 + 41264582513*x^2 - 307873876442*x + 903568991567
+
+
+
+
+
+"""
+
+The action of the matrix
+[2 0]
+[2 1]
+is given by:
+    zeta_3 |--> zeta_3^2
+    gamma_2 |--> zeta_3^2 * gamma_2
+The action of the matrix
+[1 0]
+[1 2]
+is given by:
+    zeta_3 |--> zeta_3^2
+    gamma_2 |--> zeta_3^2 * gamma_2
+
+#####
+# Deduce (by hand) the invarent element alpha = zeta_3 * gamma_2(theta)
+#####
+/home/mathe/adeles/src/ray_class_group.py:105: DeprecationWarning: the PARI/GP function polcoeff is obsolete (2018-05-14)
+  pari_conv = [pari_conv.polcoeff(i).sage() for i in range(pari_conv.poldegree() + 1)]
+
+ux at (a,b,c)=(1,1,18):
+[ 1 mod 18 0 mod 324]
+[ 0 mod 18  1 mod 18]
+The action of the matrix
+[1 0]
+[0 1]
+is given by:
+    zeta_3 |--> zeta_3^1
+    gamma_2 |--> zeta_3^0 * gamma_2
+conjugate of theta is: 3397.16393969323 + 5884.06054518953*I
+this is ideal class 1
+
+ux at (a,b,c)=(2,-1,9):
+[2 mod 18  8 mod 9]
+[9 mod 18  1 mod 9]
+The action of the matrix
+[2 2]
+[0 1]
+is given by:
+    zeta_3 |--> zeta_3^2
+    gamma_2 |--> zeta_3^2 * gamma_2
+conjugate of theta is: -71.3662420531255 - 41.2454668251841*I
+this is ideal class c^6
+
+ux at (a,b,c)=(2,1,9):
+[ 11 mod 18 81 mod 162]
+[  9 mod 18    1 mod 9]
+The action of the matrix
+[2 0]
+[0 1]
+is given by:
+    zeta_3 |--> zeta_3^2
+    gamma_2 |--> zeta_3^0 * gamma_2
+conjugate of theta is: 71.4027430881203 + 41.1822451780438*I
+this is ideal class c
+
+ux at (a,b,c)=(3,-1,6):
+[15 mod 18   1 mod 6]
+[10 mod 18   5 mod 6]
+The action of the matrix
+[0 1]
+[1 2]
+is given by:
+    zeta_3 |--> zeta_3^2
+    gamma_2 |--> zeta_3^1 * gamma_2
+conjugate of theta is: -3.93984949822504 + 18.8877131674094*I
+this is ideal class c^4
+
+ux at (a,b,c)=(3,1,6):
+[  5 mod 6 12 mod 36]
+[  4 mod 6   5 mod 6]
+The action of the matrix
+[2 0]
+[1 2]
+is given by:
+    zeta_3 |--> zeta_3^1
+    gamma_2 |--> zeta_3^2 * gamma_2
+conjugate of theta is: -3.93984949822504 - 18.8877131674094*I
+this is ideal class c^3
+
+ux at (a,b,c)=(4,-3,5):
+[13 mod 36  7 mod 18]
+[ 9 mod 36   1 mod 9]
+The action of the matrix
+[1 1]
+[0 1]
+is given by:
+    zeta_3 |--> zeta_3^1
+    gamma_2 |--> zeta_3^2 * gamma_2
+conjugate of theta is: -6.18167849234476 - 3.79023212969207*I
+this is ideal class c^2
+
+ux at (a,b,c)=(4,3,5):
+[22 mod 36   1 mod 9]
+[ 9 mod 36   1 mod 9]
+The action of the matrix
+[1 1]
+[0 1]
+is given by:
+    zeta_3 |--> zeta_3^1
+    gamma_2 |--> zeta_3^2 * gamma_2
+conjugate of theta is: -0.191598064380957 - 7.24860667724452*I
+this is ideal class c^5
+x^7 + 6745*x^6 - 327467*x^5 + 51857115*x^4 - 2319299751*x^3 + 41264582513*x^2 - 307873876442*x + 903568991567
+
+
+"""
+
+

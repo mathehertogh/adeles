@@ -21,7 +21,7 @@ def weber_f(x):
     zeta48 = CF(exp(2*CF(pi)*CF(I)/48))
     return eta((x+ZZ(1))/ZZ(2)) / (zeta48 * eta(x))
 
-def gamma_2(x):
+def weber_gamma_2(x):
     r"""
     Evaluate Weber's `\gamma_2` function in ``x``
     """
@@ -47,7 +47,7 @@ def connecting_homomorphism(K, x, N=3):
     respect to the basis `(\theta, 1)`.
     """
     Qhat = ProfiniteNumbers(QQ)
-    x = Adeles(K)(x).finite()
+    x = Adeles(K)(x).finite
     t, s = x.to_profinite_rational_vector(enclosure=False)
     C, B, _ = K.gen().minpoly().coefficients()
     return matrix(Qhat, [[t-B*s, -C*s], [s, t]])
@@ -68,7 +68,7 @@ def apply_fractional_linear_transformation(M, tau):
     a, b, c, d = M.list()
     return (a*tau + b) / (c*tau + d)
 
-def action_SL2ZmodN(U, N=3):
+def action_SL2ZmodN(U):
     r"""
     Compute the action of the `SL_2(\ZZ/N\ZZ)`-matrix ``U``on `\gamma_2`
 
@@ -106,7 +106,7 @@ def action_SL2ZmodN(U, N=3):
     """
     return ZZ(e)
 
-def action_iota(S, N=3):
+def action_iota(S):
     r"""
     Compute the action of the matrix ``S`` in the image of `\iota`.
 
@@ -123,25 +123,9 @@ def action_iota(S, N=3):
     An integer `d \in \{0, 1, 2\}` such that `\zeta_3^S = \zeta_3^d`.
     Here `zeta_3` is `exp(2*\pi*i/3)`.
     """
-    return ZZ(Zmod(N)(S[1,1].value()))
+    return ZZ(Zmod(3)(S[1,1].value))
 
-def action_GL2ZmodN(A, N=ZZ(3)):
-    r"""
-    Compute the action of the `GL_2(\ZZ/N\ZZ)`-matrix ``A`` on `\gamma_2`
-
-    OUPTPUT:
-
-    A pair of integers `(d, e)` such that the action of ``A`` is given by:
-        - `\zeta_3 \mapsto \zeta_3^d`
-        - `\gamma_2 \mapsto \zeta_3^e \gamma_2`
-    """
-    U = ~iota(det(A)) * A
-    d = ZZ(det(A))
-    e = action_SL2ZmodN(U)
-    return d, e
-
-
-def action_idele(x, N=ZZ(3)):
+def action_idele(x):
     r"""
     Compute the action on `\gamma_2` of the image of the idele ``x`` under
     Shimura's connecting homomorphism
@@ -156,37 +140,36 @@ def action_idele(x, N=ZZ(3)):
         - `\zeta_3^g(x) = \zeta_3^d
         - `\gamma_2^g(x) = \zeta_3^e \gamma_2 \circ M`
     """
-    K = x.parent().number_field()
+    K = x.parent().number_field
 
     A = connecting_homomorphism(K, x)
-    B, M = GL2Zhat_GL2QQ_factor(A)
+    S, U, M = SUM_factor(A)
 
-    while not (in_GL2Zhat(B) and N.divides(ZZ(matrix_modulus(B)))):
-        ps = primes_missing_precision(B, N)
-        x.increase_precision(ps)
+    while not is_defined_modulo(S, N) or not is_defined_modulo(U, N):
+        s = primes_missing_precision(S, N)
+        t = primes_missing_precision(U, N)
+        x.increase_precision(s.union(t))
         A = connecting_homomorphism(K, x)
-        B, M = GL2Zhat_GL2QQ_factor(A)
+        S, U, M = SUM_factor(A)
 
-    C = matrix_modulo(B, N)
-
-    d = ZZ(det(C))
-    U = ~iota(det(C)) * C
+    d = action_iota(S)
+    U = matrix_modulo(U, N)
     e = action_SL2ZmodN(U)
-
     return d, e, M
 
-def print_action(d, e, M, x=None):
+def print_action(d, e, M):
     r"""
-    Print a description of the action given by ``d`` and ``e`` as returend by
-    action_idele().
+    Print a description of the action given by ``d``, ``e`` and ``M`` as
+    returend by action_idele()
     """
-    if x is None:
-        print("Action given by:")
-    else:
-        print("Action of {} given by:".format(x))
-    print("  d={};  zeta_3  ]--> zeta_3^{}".format(d, d))
-    print(r"  e={};  gamma_2 ]--> zeta_3^{} * gamma_2 \circ M".format(e, e))
-    print("where M equals:\n{}".format(M))
+    print("Action given by: d={}, e={}, M=\n{}".format(d, e, M))
+
+# def compute_action(K, N, x):
+#     gx = connecting_homomorphism(K, x)
+#     gx_modN = matrix_modulo(gx, N)
+#     compute_action_GL2ZmodN(gx_modN, N)
+
+
 
 
 
@@ -195,14 +178,13 @@ def print_action(d, e, M, x=None):
 ###########################
 CF = ComplexField(prec=100)
 zeta3 = CF(exp(2*CF(pi)*CF(I)/3))
-
 R = ZZ['x'];
-x = R.gen()
+(x,) = R._first_ngens(1)
 D = ZZ(-71) # discriminant of our imaginary quadratic field K
 N = ZZ(3) # level of our modular function gamma_2
 B, C = ZZ(1), ZZ(18) 
-K = NumberField(x**2  + B*x + C, 'theta')
-theta = K.gen()
+K = NumberField(x**2  + B*x + C, names=('theta',))
+(theta,) = K._first_ngens(1)
 O = K.maximal_order()
 sqrtD = 2*theta + 1 
 theta_complex = K.embeddings(CF)[1].im_gens()[0] # the image of theta in CF with positive imaginary part
@@ -214,15 +196,15 @@ J = IdeleGroup(K)
 ######################################
 OmodN = O.quotient_ring(N, 'b')
 OmodNstar = K.ideal(N).idealstar(flag=2) # flag=2 means compute generators
-"""
+
 for x in OmodNstar.gens_values():
     x = OmodN(x)
-    d, e, M = action_idele(J(x))
-    print(); print_action(d, e, M, x)
-    tau = apply_fractional_linear_transformation(M, theta_complex)
-    conjugate_theta = zeta3**ZZ(e) * gamma_2(tau) # TODO: e or e+d??
-    conjugate_alpha = zeta3**ZZ(d) * conjugate_theta
-    print("alpha^{} = {}".format(x, conjugate_alpha))
+    gx = connecting_homomorphism(K, J(x))
+    A = matrix_modulo(gx, N)
+    d = ZZ(det(A))
+    U = ~iota(det(A)) * A
+    e = action_SL2ZmodN(U)
+    print("x = {}:\n  d = {}\n  e = {}".format(x, d, e))
 
 print("\n#####\n# Deduce (by hand) the invarent element alpha = zeta_3 * gamma_2(theta)\n#####")
 
@@ -232,16 +214,16 @@ print("\n#####\n# Deduce (by hand) the invarent element alpha = zeta_3 * gamma_2
 conjugates = []
 Cl = ray_class_group(K, Modulus(K.ideal(1))) # ray class group of modulus 1, i.e. ideal class group
 for a in Cl:
-    print("\ncomputing alpha^{}".format(a))
+    print("computing alpha^{}".format(a))
     x = J(a)
+    print("idele: {}".format(x))
+"""
     d, e, M = action_idele(x)
-    print_action(d, e, M)
 
-    tau = apply_fractional_linear_transformation(M, theta_complex)
-    conjugate_theta = zeta3**ZZ(e) * gamma_2(tau) # TODO: e or e+d??
+    tau = apply_fractional_linear_transformation(M, theta)
+    conjugate_theta = zeta3**ZZ(e+d) * weber_gamma_2(complex_embedding(tau)) # TODO: e or e+d??
     conjugate_alpha = zeta3**ZZ(d) * conjugate_theta
     conjugates.append(conjugate_alpha)
-    print("alpha^{} = {}".format(a, conjugate_alpha))
 
 ##################################################################
 # Phase 4. Compute the minimal polynomial of our class invariant #
@@ -258,5 +240,4 @@ except TypeError:
 #if not NumberField(f, 'a').is_isomorphic(NumberField(hilbert_class_polynomial(D), 'b')):
     #raise ValueError("Computed hibert class field differs from the standard sage one!")
 #print(f)
-
 """
