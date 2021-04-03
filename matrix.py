@@ -326,6 +326,10 @@ def GL2Qhat_factor(A, detA):
     M = matrix(QQ, [[1, 0], [0, detA]])
     B = A * ~M
     if printing: print("multiply with\n{}\nto obtain\n{}".format(~M, B))
+    
+    if det(A).value().is_zero():
+        # We don't know A up to high enough precision. Give up immediatly
+        return B, M
 
     # Make top-right entry zero:
     if B[0,0].value().is_zero():
