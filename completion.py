@@ -5,6 +5,8 @@ from sage.rings.real_mpfi import RIF
 from sage.rings.complex_interval_field import ComplexIntervalField
 from sage.categories.homset import Hom
 from sage.arith.misc import factor
+from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
+from sage.rings.padics.factory import Qp
 
 CC = ComplexField()
 CIF = ComplexIntervalField()
