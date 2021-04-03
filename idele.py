@@ -1455,8 +1455,7 @@ class Idele(MultiplicativeGroupElement):
         INPUT:
 
         - ``primes`` -- an iterable containing prime ideals of our number field
-                        and/or rational prime numbers, or a prime ideal of our
-                        number field
+                        and/or rational prime numbers, or a single prime
         - ``prec_increment`` -- integer (default = 1); the amount by which we
                                 increase the precision at each prime in
                                 ``primes``
@@ -1535,6 +1534,12 @@ class Idele(MultiplicativeGroupElement):
             if new_prec < 0:
                 raise ValueError("Trying to give idele negative precision")
             self._finite[p] = (x, new_prec)
+            return
+
+        if primes in Primes():
+            p = primes
+            for q in K.primes_above(p):
+                self.increase_precision(q, prec_increment)
             return
 
         for p in primes:
