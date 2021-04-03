@@ -108,7 +108,7 @@ class ProfiniteNumber(CommutativeAlgebraElement):
             denominator = O.one()
         if numerator not in Ohat:
             raise TypeError("numerator should be an element of {}".format(Ohat))
-        if denominator not in O or denominator.is_zero():
+        if denominator not in O or denominator == 0:
             raise TypeError("denominator should be a non-zero element of {}".format(O))
         self._numerator = Ohat(numerator)
         self._denominator = O(denominator)
@@ -654,7 +654,11 @@ class ProfiniteNumbers(UniqueRepresentation, CommutativeAlgebra):
         if denominator is None:
             if value in K and modulus in K.ideal_monoid():
                 from sage.arith.functions import lcm
-                d = lcm(value.denominator(), modulus.denominator())
+                if K is QQ:
+                    den = QQ(modulus).denominator()
+                else:
+                    _, den = K.ideal(modulus).integral_split()
+                d = lcm(K(value).denominator(), den)
                 return self.element_class(self, Ohat(d*value, d*modulus), d)
         return self.element_class(self, Ohat(value, modulus), denominator)
 
