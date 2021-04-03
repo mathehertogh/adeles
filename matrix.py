@@ -1,5 +1,4 @@
 
-from profinite_integer import ProfiniteInteger, ProfiniteIntegers
 from sage.categories.homset import Hom
 from sage.arith.functions import lcm
 from sage.arith.misc import gcd
@@ -12,16 +11,17 @@ from sage.rings.finite_rings.integer_mod_ring import Zmod
 from sage.modular.arithgroup.congroup_sl2z import SL2Z
 from sage.groups.free_group import FreeGroup
 
+from profinite_integer import ProfiniteInteger, ProfiniteIntegers, Zhat
+from profinite_number import Qhat
+
 
 def matrix_modulus(A):
-    if isinstance(A.parent().base_ring(), ProfiniteIntegers):
-        return gcd([a.modulus for a in A.list()])
     return gcd([a.modulus() for a in A.list()])
 
 def matrix_denominator(A):
     if isinstance(A.parent().base_ring(), ProfiniteIntegers):
         return ZZ(1) 
-    return lcm([a.denominator for a in A.list()])
+    return lcm([a.denominator() for a in A.list()])
 
 def is_defined_modulo(A, N):
     return gcd(N, matrix_denominator(A)) == 1 and matrix_modulus(A) / N in ZZ
@@ -31,7 +31,7 @@ def primes_missing_precision(A, N):
     Compute the primes at which ``A`` needs more precision to be defined modulo
     ``N``
     """
-    s = set(gcd(N, matrix_denominator(A)).prime_divisors())
+    s = set(matrix_denominator(A).prime_divisors())
     t = set((matrix_modulus(A) / N).denominator().prime_divisors())
     return s.union(t)
 
@@ -44,25 +44,35 @@ def matrix_modulo(A, N):
     - ``A`` -- a matrix with entries *integral* elements of `\hat{\QQ}`
     - ``N`` -- an integer
     """
-    def val(a):
-        if isinstance(a, ProfiniteInteger):
-            return a.value
-        return a.value()
-    def mod(a):
-        if isinstance(a, ProfiniteInteger):
-            return a.modulus
-        return a.modulus()
     rows_modN = []
     for row in A:
         row_modN = []
         for a in row:
-            if not N.divides(mod(a)):
+            if not N.divides(a.modulus()):
                 raise ValueError("not every entry of A is defined modulo {}".format(N))
-            a_modN = Zmod(N)(val(a))
+            a_modN = Zmod(N)(a.value())
             row_modN.append(a_modN)
         rows_modN.append(row_modN)
     return matrix(Zmod(N), rows_modN)
 
+def in_GL2Zhat(A):
+    r"""
+    Return whether or not `A \in GL_2(\hat{\ZZ})` holds
+
+    INPUT:
+
+    - ``A`` -- a matrix in `\hat{\QQ}`
+    """
+    for a in A.list():
+        if a not in Zhat:
+            return False
+    return Zhat(det(A)).is_unit()
+
+def increase_matrix_precision(A, N):
+    """
+    Increase the modulus of ``A`` by a factor ``N``
+    """
+    return MatrixSpace(Qhat, 2)([Qhat(a.value(), N*a.modulus()) for a in A.list()])
 
 def ST_factor(A, return_homomorphism=False):
     r"""
@@ -109,10 +119,10 @@ def ST_factor(A, return_homomorphism=False):
     f = Hom(G, M)([Sm, Tm])
     return factorization, f
 
-
-def SUM_factor(A):
+def GL2Zhat_GL2QQ_factor(A):
     r"""
-    Compute the SUM-factorization of the `GL_2(\hat{\QQ})`-matrix ``A``
+    Factor the `GL_2(\hat{\QQ})`-matrix ``A`` into an integral and rational
+    matrix
 
     INPUT:
 
@@ -120,90 +130,258 @@ def SUM_factor(A):
 
     OUTPUT:
 
-    A triple (S, U, M) satisfying:
-    - S*U*M == A
-    - S = (1, 0; 0, d) with `d \in \hat{\ZZ}^*`
-    - U in `SL_2(\hat{\ZZ})`
+    We *try* to output a pair (B, M) satisfying:
+    - B*M == A
+    - B in `GL_2(\hat{\ZZ})`
     - M in `GL_2^+(\QQ)`
+    
+    However, if the input matrix ``A`` is not known up to a high enough
+    precision, this may be impossible.  In that case, the matrix `B` will not
+    be integral, but lies in `GL_2(\hat{\QQ})` as well. From the denominator of
+    `B` one can see at which primes ``A`` lacks precision.
 
     Increasing the precision of ``A`` at a prime `p` will ultimately increase
-    the precision of the returned ``S`` and ``U`` at `p`.
+    the precision of the returned `B` at `p`.
     """
     Zhat = ProfiniteIntegers()
     #print(A); print()
 
     # Make all of A's entries integral.
     #print("# Make all of A's entries integral.")
-    denominator = lcm([a.denominator for a in A.list()])
+    denominator = matrix_denominator(A)
     omega = matrix(QQ, [[denominator, 0], [0, denominator]])
     A = A * omega
     M = ~omega
-    A = MatrixSpace(Zhat, 2)(A)
     #A = matrix(Zhat, [[Zhat._from_profinite_number(A[0,0]), Zhat._from_profinite_number(A[0,1])], [Zhat._from_profinite_number(A[1,0]), Zhat._from_profinite_number(A[1,1])]])
     #print(A); print()
+    print(omega); print()
 
     # Create a zero at the bottom-left entry of A.
     #print("# Create a zero at the bottom-left entry of A.")
-    while A[1,0].value != 0:
-        if A[1,1].value.abs() < A[1,0].value.abs():
-            alpha = matrix(ZZ, [[0, 1], [1, 0]])
+    while A[1,0].value() != 0:
+        if A[1,1].value().abs() < A[1,0].value().abs():
+            alpha = matrix(QQ, [[0, 1], [1, 0]])
             A = A * alpha # swap columns
             M = ~alpha * M
             #print(A); print()
-            if A[1,0].value.is_zero():
+            print(alpha); print()
+            if A[1,0].value().is_zero():
                 break
-        scalar = A[1,1].value // A[1,0].value
-        alpha = matrix(ZZ, [[1, -scalar], [0, 1]])
+        scalar = A[1,1].value() // A[1,0].value()
+        alpha = matrix(QQ, [[1, -scalar], [0, 1]])
         A = A * alpha
         M = ~alpha * M
         #print(A); print()
+        print(alpha); print()
 
     # Make top-left entry of A an element of `\hat{\ZZ}^*` (i.e. make its value
     # coprime to its modulus).
     #print(r"# Make top-left entry of A an element of `\hat{\ZZ}^*`")
-    g = gcd(A[0,0].modulus, A[0,0].value)
+    g = gcd(A[0,0].modulus(), A[0,0].value())
     beta = matrix(QQ, [[1/g, 0], [0, 1]])
-    # We program the statement A = A * beta ad hoc:
-    A[0,0].value //= g
-    A[0,0].modulus //= g
-    A[1,0].value //= g
-    A[1,0].modulus //= g
+    A = A * beta
     M = ~beta * M
     #print(A); print()
+    print(beta); print()
 
     # Make top-right entry of A zero.
     #print("# Make top-right entry of A zero.")
-    f = A[0,0].value.inverse_mod(A[0,0].modulus)
-    gamma = matrix(ZZ, [[1, -f*A[0,1].value], [0, 1]])
+    f = ZZ(A[0,0].value()).inverse_mod(ZZ(A[0,0].modulus()))
+    gamma = matrix(QQ, [[1, -f*A[0,1].value()], [0, 1]])
     A = A * gamma
     M = ~gamma * M
     #print(A); print()
+    print(gamma); print()
 
     # Make bottem-right entry of A an element of `\hat{\ZZ}^*` (i.e. make its
     # value coprime to its modulus).
     #print(r"# Make bottem-right entry of A an element of `\hat{\ZZ}^*`")
-    g = gcd(A[1,1].modulus, A[1,1].value)
+    g = gcd(A[1,1].modulus(), A[1,1].value())
     delta = matrix(QQ, [[1, 0], [0, 1/g]])
-    # We program the statement A = A * delta ad hoc:
-    A[0,1].value //= g
-    A[0,1].modulus //= g
-    A[1,1].value //= g
-    A[1,1].modulus //= g
+    A = A * delta
     M = ~delta * M
     #print(A); print()
+    print(delta); print()
 
     # Make sure M has positive determinant.
     if det(M) < 0:
-        epsilon = matrix(ZZ, [[1, 0], [0, -1]])
+        epsilon = matrix(QQ, [[1, 0], [0, -1]])
         A = A * epsilon
         M = epsilon * M # We have ~epsilon==epsilon
+        print(epsilon); print()
 
     # Compute S = iota(det(A)) and U, the left-over with determinant 1
-    S = matrix(Zhat, [[1, 0], [0, det(A)]])
-    x, m = det(A).value, det(A).modulus
-    detA_inv = Zhat(x.inverse_mod(m), m)
-    S_inv = matrix(Zhat, [[1, 0], [0, detA_inv]])
-    U = S_inv * A
+    #S = matrix(Zhat, [[1, 0], [0, det(A)]])
+    #x, m = det(A).value, det(A).modulus
+    #detA_inv = Zhat(x.inverse_mod(m), m)
+    #S_inv = matrix(Zhat, [[1, 0], [0, detA_inv]])
+    #U = S_inv * A
 
-    return S, U, M
+    return A, M
 
+def random_GL2Qhat_element():
+    A = matrix(Qhat, [[0, 0], [0, 0]])
+    while det(A).value().is_zero():
+        a = QQ.random_element()
+        b = QQ.random_element()
+        c = QQ.random_element()
+        d = QQ.random_element()
+        base_modulus = ZZ.random_element()
+        while base_modulus == 0 or base_modulus == -1:
+            base_modulus = ZZ.random_element()
+        k = base_modulus * QQ.random_element()
+        l = base_modulus * QQ.random_element()
+        m = base_modulus * QQ.random_element()
+        n = base_modulus * QQ.random_element()
+        A = matrix(Qhat, [[Qhat(a, k), Qhat(b, l)], [Qhat(c, m), Qhat(d, n)]])
+    return A
+
+def test_continuity(n_tests=100):
+    r"""
+    Test that the matrix factor methods acts "continuously"
+
+    We do the following ``n_tests`` times:
+    
+    - Generate a random matrix `A` in `GL_2(\hat{\QQ})`.
+    - Fix the "real" determinant of the matrix that `A` represents.
+    - Generate a random integer `N`: our desired precision.
+    - Keep increasing the precision of `A` until the factor method returns a
+      `B \in GL_2(\hat{ZZ})` that is defined modulo `N`.
+    - During this, for each returned factorisation `(B, M)` of `A` we assert
+      that ``A == B * M`` holds as well as `det(B) \in \hat{\ZZ}^*`.
+
+    Note that failing continuity will lead to an infinite loop inside this
+    function.
+    """
+    for i in range(n_tests):
+        if i < len(failed_examples()):
+            A = failed_examples()[i]
+        else:
+            A = random_GL2Qhat_element()
+        detA = A[0,0].value()*A[1,1].value()-A[0,1].value()*A[1,0].value()
+        assert(det(A) == detA)
+
+        N = ZZ.random_element()
+        while N in [0, -1, 1]:
+            N = ZZ.random_element()
+
+        B, M = new_mathe_GL2Qhat_factor(A, detA)
+        while not (in_GL2Zhat(B) and N.divides(ZZ(matrix_modulus(B)))):
+            P = matrix_denominator(B) * (matrix_modulus(B)*matrix_denominator(B)/N).denominator()
+            A = increase_matrix_precision(A, P)
+            assert det(A) == detA
+            B, M = new_mathe_GL2Qhat_factor(A, detA)
+
+        if i % 100 == 0:
+            print("continuity test {} passed".format(i))
+
+def failed_examples():
+    return [
+        matrix(Qhat, [[Qhat(0, 2, 3), ZZ(-1)/ZZ(16)],
+                      [Qhat(1, 6, 42), Qhat(0, 1, 2)]]),
+
+        matrix(Qhat, [[Qhat(6, 7), ZZ(7)/9],
+                      [Qhat(0, 7, 2), Qhat(2, 10066, 719)]]),
+
+        matrix(Qhat, [[Qhat(1, 3, 5), Qhat(4, 45, 3)],
+                      [Qhat(7, 9), Qhat(0, 1)]]),
+
+        matrix(Qhat, [[Qhat(6, 77, 3), Qhat(43, 44, 4)],
+                      [Qhat(3, 11, 3), ZZ(1)]]),
+
+        matrix(Qhat, [[ZZ(-2), Qhat(1, 4, 2)],
+                      [ZZ(2),  Qhat(0, 4, 9)]]),
+
+        matrix(Qhat, [[Qhat(23, 47, 4), Qhat(5, 94, 2)],
+                      [ZZ(0), Qhat(2443, 2444)]]),
+
+        matrix(Qhat, [[ZZ(-267), Qhat(17, 18, 2)],
+                      [ZZ(1), Qhat(5, 9, 2)]])
+    ]
+
+def GL2Qhat_factor(A, detA):
+    r"""
+    INPUT:
+
+    - ``A`` -- matrix in `GL_2(\hat{\QQ})`
+    - ``detA`` -- a rational number with the same valuations as the determinant
+                  of the actual (exact) matrix that ``A`` represents
+
+    OUPUT:
+
+    *Try* to return a pair `(B, M)` with `B \in GL_2(\hat{\ZZ})` and
+    `M \in \GL_2^+(\QQ)`.
+
+    .. WARNING::
+
+        Upon low precision of ``A``, the ouput matrix `B` will *not* be
+        integral, but lie in `GL_2(\hat{\QQ})`.
+        Increasing ``A``'s precision at a prime `p` will ultimately lead to a
+        `B` of arbitrary high precision at `p`.
+    """
+    printing = False
+    if printing: print("start with matrix:\n{}".format(A))
+
+    # Make det(A) lie in Zhat^* (we make it one right? TODO)
+    M = matrix(QQ, [[1, 0], [0, detA]])
+    B = A * ~M
+    if printing: print("multiply with\n{}\nto obtain\n{}".format(~M, B))
+
+    # Make top-right entry zero:
+    if B[0,0].value().is_zero():
+        # Swap columns
+        T = matrix(QQ, [[0, 1], [1, 0]])
+    else:
+        b = -B[0,1].value() / B[0,0].value()
+        T = matrix(QQ, [[1, b], [0, 1]])
+    B = B * T
+    M = ~T * M
+    if printing: print("multiply with\n{}\nto obtain\n{}".format(T, B))
+
+    # Erase the denominators from te diagonal.
+    # TODO extra explanation why this does not induce denominators on the
+    #      opposite site
+    a = B[0,0].value().denominator()
+    d = B[1,1].value().denominator()
+    T = matrix(QQ, [[a/d, 0], [0, d/a]])
+    B = B * T
+    M = ~T * M
+    if printing: print("multiply with\n{}\nto obtain\n{}".format(T, B))
+
+    # Make bottom-left entry zero:
+    # We now now for sure that the bottom-right entry B[1,1] is non-zero, since
+    # det(B) = B[0,0]*B[1,1] != 0
+    # TODO: couldn't it be, due to low precision, that we actually do have B[1,1].value()==0...?
+    if B[1,1].value() in ZZ:
+        d = ZZ(B[1,1].value())
+        a = B[1,0].numerator().value()
+        m = B[1,0].denominator()
+        g = gcd(d, m)
+        G = ZZ(1)
+        while g != 1:
+            G *= g
+            d = d // g
+            g = gcd(d, m)
+        f = ZZ(-d).inverse_mod(m)
+        #c = -B[1,0].value() / B[1,1].value()
+        T = matrix(QQ, [[1, 0], [a*f/(G*m), 1]])
+        B = B * T
+        M = ~T * M
+        if printing: print("multiply with\n{}\nto obtain\n{}".format(T, B))
+    else:
+        # A needs to have higher precision.
+        # We just leave the possible denominator in the bottom-left entry.
+        pass
+
+    if det(M) < 0:
+        T = matrix(QQ, [[0, 1], [1, 0]])
+        B = B * T
+        M = ~T * M
+        if printing: print("multiply with\n{}\nto obtain\n{}".format(T, B))
+
+    assert det(M) == abs(detA)
+    assert A == B * M
+    if det(B) in Zhat:
+        assert det(B).is_unit()
+
+    return B, M
