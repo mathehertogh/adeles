@@ -265,12 +265,12 @@ def test_continuity(n_tests=100):
         while N in [0, -1, 1]:
             N = ZZ.random_element()
 
-        B, M = new_mathe_GL2Qhat_factor(A, detA)
+        B, M = GL2Qhat_factor(A, detA)
         while not (in_GL2Zhat(B) and N.divides(ZZ(matrix_modulus(B)))):
             P = matrix_denominator(B) * (matrix_modulus(B)*matrix_denominator(B)/N).denominator()
             A = increase_matrix_precision(A, P)
             assert det(A) == detA
-            B, M = new_mathe_GL2Qhat_factor(A, detA)
+            B, M = GL2Qhat_factor(A, detA)
 
         if i % 100 == 0:
             print("continuity test {} passed".format(i))
@@ -328,7 +328,11 @@ def GL2Qhat_factor(A, detA):
     if printing: print("multiply with\n{}\nto obtain\n{}".format(~M, B))
     
     if det(A).value().is_zero():
-        # We don't know A up to high enough precision. Give up immediatly
+        # We don't know A up to high enough precision. Give up immediatly.
+        return B, M
+
+    if not matrix_modulus(B) in ZZ:
+        # We don't know B up to high enough precision. Give up immediatly.
         return B, M
 
     # Make top-right entry zero:
@@ -336,11 +340,25 @@ def GL2Qhat_factor(A, detA):
         # Swap columns
         T = matrix(QQ, [[0, 1], [1, 0]])
     else:
-        b = -B[0,1].value() / B[0,0].value()
-        T = matrix(QQ, [[1, b], [0, 1]])
+        #lamb = -B[0,1].value() / B[0,0].value()
+        d = lcm(B[0,0].denominator(), B[0,1].denominator())
+        a = ZZ(d * B[0,0].value())
+        b = ZZ(d * B[0,1].value())
+        n = ZZ(d * B[0,1].modulus())
+        g = gcd(a, n)
+        G = ZZ(1)
+        while g != 1:
+            G *= g
+            a = a // g
+            g = gcd(a, n)
+        f = a.inverse_mod(n)
+        mu = -b * f
+        lamb = mu / G
+        T = matrix(QQ, [[1, lamb], [0, 1]])
     B = B * T
     M = ~T * M
     if printing: print("multiply with\n{}\nto obtain\n{}".format(T, B))
+    assert B[0,1].value() == 0
 
     # Erase the denominators from te diagonal.
     # TODO extra explanation why this does not induce denominators on the
