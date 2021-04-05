@@ -102,7 +102,7 @@ def pari_real_places_to_sage(K):
     except AttributeError:
         pass
     pari_conv = K._pari_absolute_structure()[1].lift()
-    pari_conv = [pari_conv.polcoeff(i).sage() for i in range(pari_conv.poldegree() + 1)]
+    pari_conv = [pari_conv.polcoef(i).sage() for i in range(pari_conv.poldegree() + 1)]
     R = K.defining_polynomial().parent()
     pari_conv = R(pari_conv)
     pari_roots = [pari_conv(r.sage()) for r in K.pari_nf()[5][:K.signature()[0]]]
@@ -813,7 +813,7 @@ class RayClassGroup(AbelianGroup_class):
         nf = F.pari_nf()
         f = nf.rnfpolredbest(f)
         d = f.poldegree()
-        cs = [F(f.polcoeff(i)) for i in range(d+1)]
+        cs = [F(f.polcoef(i)) for i in range(d+1)]
         from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
         f = PolynomialRing(F, 'x')(cs)
         return F.extension(f, names=names)
