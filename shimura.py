@@ -118,9 +118,9 @@ def connecting_homomorphism_integral(x, N=None):
     INPUT:
 
     - ``x`` -- an idele which is a unit at every prime (i.e. has valuation zero
-               at every finite prime)
+      at every finite prime)
     - ``N`` -- non-zero integer (optional); if specified, we will produce an
-               an image matrix whose modulus is divisible (over `\ZZ`) by ``N``.
+      an image matrix whose modulus is divisible (over `\ZZ`) by ``N``.
 
     Note that the fact that ``x`` is a unit at every prime means that
     `x \in \hat{\mathcal{O}}^*`, whichs maps to `GL_2(\hat{\ZZ})`. So increasing
@@ -212,7 +212,7 @@ def action_SL2ZmodN(U):
     INPUT:
 
     - ``U`` -- a matrix in `SL_2(\ZZ/N\ZZ)`, where `N` is some integer divisible
-               by 3 (the level of `\gamma_3`)
+      by 3 (the level of `\gamma_3`)
 
     OUTPUT:
 

@@ -409,13 +409,11 @@ class ProfiniteNumber(CommutativeAlgebraElement):
         INPUT:
 
         - ``enclosure`` -- boolean (default: ``True``); whether or not to return
-                           an enclosure of the exact result `u`. We cannot in
-                           general represent `u`. Hence we must choose to either
-                           return an enclosure `v` of `u`, meaning `v` 
-                           represents at least all profinite numbers that `u`
-                           represents; or return a vector with "too much"
-                           precision: some `w` that represents at most all
-                           profinite numbers that `u` represents.
+          an enclosure of the exact result `u`. We cannot in general represent
+          `u`. Hence we must choose to either return an enclosure `v` of `u`,
+          meaning `v` represents at least all profinite numbers that `u`
+          represents; or return a vector with "too much" precision: some `w`
+          that represents at most all profinite numbers that `u` represents.
 
         EXAMPLES::
 
@@ -515,7 +513,7 @@ class ProfiniteNumbers(UniqueRepresentation, CommutativeAlgebra):
 
         INPUT:
 
-        - ``K`` -- a number field(default: ``QQ``)
+        - ``K`` -- a number field (default: ``QQ``)
 
         EXAMPLES::
 

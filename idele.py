@@ -679,8 +679,7 @@ class Idele(MultiplicativeGroupElement):
         INPUT:
 
         - ``index`` -- integer (optional) such that ``0 <= index < t`` where
-                       ``t`` denotes the number of infinite places of our base
-                       number field
+          ``t`` denotes the number of infinite places of our base number field
 
         OUTPUT:
 
@@ -1455,10 +1454,9 @@ class Idele(MultiplicativeGroupElement):
         INPUT:
 
         - ``primes`` -- an iterable containing prime ideals of our number field
-                        and/or rational prime numbers, or a single prime
+          and/or rational prime numbers, or a single prime
         - ``prec_increment`` -- integer (default = 1); the amount by which we
-                                increase the precision at each prime in
-                                ``primes``
+          increase the precision at each prime in ``primes``
 
         Let `p` be a prime ideal in ``primes``. Suppose ``self`` represents the
         open subset `x * U_p^i` at `p`. Then after calling this method, ``self``

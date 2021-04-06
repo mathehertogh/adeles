@@ -4,9 +4,9 @@ References
 --------------------
 
 - [GS1998] -- Gee A., Stevenhagen P. (1998) Generating class fields using
-              Shimura reciprocity. In: Buhler J.P. (eds) Algorithmic Number
-              Theory. ANTS 1998. Lecture Notes in Computer Science, vol 1423.
-              Springer, Berlin, Heidelberg. https://doi.org/10.1007/BFb0054883
+  Shimura reciprocity. In: Buhler J.P. (eds) Algorithmic Number
+  Theory. ANTS 1998. Lecture Notes in Computer Science, vol 1423.
+  Springer, Berlin, Heidelberg. https://doi.org/10.1007/BFb0054883
 
 
 
@@ -308,6 +308,7 @@ over `K`::
 
     This polynomial differs considerably from the one in [GS1998]. Why?
     (tried with prec=1000, got the same answer)
+    The polynomial above is reducible! So clearly wrong.
 
 .. TODO::
 

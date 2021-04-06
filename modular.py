@@ -46,7 +46,7 @@ def print_action_on_gamma_2(STs):
     INPUT:
 
     - ``STs`` -- an element of the free group on {S, T}; usually obtained from
-                 an `SL_2(\ZZ/3\ZZ)`-matrix passed into :func:`ST_factor`
+      an `SL_2(\ZZ/3\ZZ)`-matrix passed into :func:`ST_factor`
 
     OUTPUT:
 
@@ -82,7 +82,7 @@ def print_action_on_f2(STs):
     INPUT:
 
     - ``STs`` -- an element of the free group on {S, T}; usually obtained from
-                 an `SL_2(\ZZ/48\ZZ)`-matrix passed into :func:`ST_factor`
+      an `SL_2(\ZZ/48\ZZ)`-matrix passed into :func:`ST_factor`
 
     OUTPUT:
 

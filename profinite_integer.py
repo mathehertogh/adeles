@@ -731,7 +731,7 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
         INPUT:
 
         - ``element`` -- an element of `O/I`, where `O` is our base ring of
-                         integers and `I` is an ideal of `O`
+          integers and `I` is an ideal of `O`
 
         EXAMPLES::
 

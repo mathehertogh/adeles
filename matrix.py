@@ -85,8 +85,7 @@ def ST_factor(A, return_homomorphism=False):
 
     - ``A`` -- a matrix in `SL_2(\ZZ/N\ZZ)` for some integer `N`
     - ``return_homomorphism`` -- boolean (default: ``False``); whether or not to
-                                 return the homomorphism `f` described below as
-                                 well
+      return the homomorphism `f` described below as well
 
     OUPUT:
 
@@ -305,7 +304,7 @@ def GL2Qhat_factor(A, detA):
 
     - ``A`` -- matrix in `GL_2(\hat{\QQ})`
     - ``detA`` -- a rational number with the same valuations as the determinant
-                  of the actual (exact) matrix that ``A`` represents
+      of the actual (exact) matrix that ``A`` represents
 
     OUPUT:
 

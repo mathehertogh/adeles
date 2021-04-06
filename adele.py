@@ -414,8 +414,7 @@ class Adele(CommutativeAlgebraElement):
         INPUT:
 
         - ``index`` -- integer (optional) such that ``0 <= index < t`` where
-                       ``t`` denotes the number of infinite places of our base
-                       number field
+          ``t`` denotes the number of infinite places of our base number field
 
         OUTPUT:
 
