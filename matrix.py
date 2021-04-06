@@ -404,6 +404,6 @@ def GL2Qhat_factor(A, detA):
     assert det(M) == abs(detA)
     assert A == B * M
     if det(B) in Zhat:
-        assert det(B).is_unit()
+        assert Zhat(det(B)).is_unit()
 
     return B, M
