@@ -3,6 +3,7 @@ from sage.rings.complex_mpfr import ComplexField
 from sage.functions.log import exp
 from sage.symbolic.constants import pi, I
 from sage.misc.functional import eta
+from sage.functions.other import sqrt
 
 def weber_f(x, prec=53):
     r"""
@@ -40,7 +41,7 @@ def gamma_2(x, prec=53):
 
 def print_action_on_gamma_2(STs):
     r"""
-    Print the action of ST-product (as returned by ST_factor()) on gamma_2
+    Print the action of an ST-product (as returned by ST_factor()) on gamma_2
 
     INPUT:
 
@@ -96,11 +97,12 @@ def print_action_on_f2(STs):
     - `S: (f, f_1, f_2) \mapsto (f, f_2, f_1)`;
     - `T: (f, f_1, f_2) \mapsto (\zeta_48^{-1} f_1, \zeta_48^{-1} f, \zeta_48^2 f_2)`.
     """
-    from sage.rings.finite_rings.integer_mod_ring import Zmod
-    from sage.functions.generalized import sign
+    from sage.groups.free_group import FreeGroup
+    from sage.categories.homset import Hom
+    from sage.rings.integer_ring import ZZ
     G = STs.parent()
-    F = FreeGroup(['zeta48', 'f', 'f1', 'f2'], abelian=True)
-    F.inject_variables()
+    F = FreeGroup(['zeta48', 'f', 'f1', 'f2'])
+    zeta48, f, f1, f2 = F.gens()
     phi_S = Hom(F, F)([zeta48, f, f2, f1])
     phi_T = Hom(F, F)([zeta48, zeta48**ZZ(-1)*f1, zeta48**ZZ(-1)*f, zeta48**ZZ(2)*f2])
     phi_T_inv = Hom(F, F)([zeta48, zeta48*f1, zeta48*f, zeta48**ZZ(-2)*f2])
