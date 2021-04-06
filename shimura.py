@@ -129,17 +129,11 @@ def connecting_homomorphism_integral(x, N=None):
 
     OUTPUT:
 
-    If ``N`` is not specified, the image matrix in `GL_2(\hat{\ZZ})`.
-    If ``N`` is specified, the projection of the image matrix in
+    The image matrix in `GL_2(\hat{\ZZ})`.
     `GL_2(\ZZ/N\ZZ)`.
     """
     if N is None:
-        project = False
         N = ZZ(1)
-    elif N in ZZ and N != 0:
-        project = True
-    else:
-        raise ValueError("N must be a non-zero integer")
 
     J = x.parent()
     y = J(x) # We don't want to change the precision of ``x`` itself
@@ -150,8 +144,6 @@ def connecting_homomorphism_integral(x, N=None):
             y.increase_precision(p, e)
         A = connecting_homomorphism(y)
 
-    if project:
-        return matrix_modulo(A, N)
     return A  # TODO: return A with entries in Qhat or Zhat?
 
 def action_idele(x, N):
