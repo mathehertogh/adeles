@@ -117,4 +117,4 @@ def print_action_on_f2(STs):
         else: # R == T^-1
             f2_image = phi_T_inv(f2_image)
 
-    print("  f2 ]--> {}".format(f2_image))
+    print("  f2       ]--> {}".format(f2_image))
