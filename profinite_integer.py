@@ -660,6 +660,7 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
             sage: latex(Ohat)
              \widehat{ \mathcal{O}_{ \Bold{Q}[a]/(a^{2} + 14) } }
         """
+        from sage.misc.latex import latex
         K = self.number_field()
         return r" \widehat{ \mathcal{O}_{" + latex(K) + "} } "
 

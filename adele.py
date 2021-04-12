@@ -508,6 +508,7 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
             sage: latex(Adeles(K))
              \Bold{A}_{ \Bold{Q}[a]/(a^{2} + 14) }
         """
+        from sage.misc.latex import latex
         return r" \Bold{A}_{" + latex(self.base()) + "} "
 
     def characteristic(self):

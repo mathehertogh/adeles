@@ -1569,6 +1569,7 @@ class IdeleGroup(UniqueRepresentation, Group):
         return "Idele Group of {}".format(self.number_field())
 
     def _latex_(self):
+        from sage.misc.latex import latex
         return r"\Bold{A}_{" + latex(self.number_field()) + "}^*"
 
     def _element_constructor_(self, exact, infinite=None, finite=None):

@@ -576,6 +576,7 @@ class ProfiniteNumbers(UniqueRepresentation, CommutativeAlgebra):
             sage: latex(Khat)
              \widehat{ \Bold{Q}[a]/(a^{2} + 14) }
         """
+        from sage.misc.latex import latex
         return r" \widehat{" + latex(self.base()) + "} "
 
     def characteristic(self):
