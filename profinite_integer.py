@@ -849,4 +849,43 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
         """
         return False
 
+    def random_element(self):
+        """
+        Return a random profinite integer
+        """
+        O = self.base()
+
+        value = O.random_element()
+        
+        if O is ZZ:
+            modulus = ZZ.random_element()
+            while modulus == -1:
+                modulus = ZZ.random_element()
+        else:
+            from sage.misc.prandom import choice
+            from sage.arith.misc import factor
+            n_primes = ZZ.random_element()
+            while n_primes < 0:
+                n_primes = ZZ.random_element()
+
+            modulus = O.ideal(1)
+            for i in range(n_primes):
+                I = O.ideal(O.random_element())
+                while I.is_one() or I.is_zero():
+                    I = O.ideal(O.random_element())
+
+                # We pick individual primes, so that we can end up with
+                # non-principal ideals as modulus.
+                p, e = choice(factor(I))  
+                modulus *= p**e
+
+        multiplier = ZZ.random_element()
+        while multiplier <= 0:
+            multiplier = ZZ.random_element()
+
+        modulus *= multiplier
+            
+        return self.element_class(self, value, modulus)
+
+
 Zhat = ProfiniteIntegers(ZZ)

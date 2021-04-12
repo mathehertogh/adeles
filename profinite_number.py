@@ -709,4 +709,42 @@ class ProfiniteNumbers(UniqueRepresentation, CommutativeAlgebra):
         """
         return self.base()
 
+    def random_element(self):
+        """
+        Return a random profinite number
+        """
+        K = self.base()
+
+        value = K.random_element()
+        
+        if K is QQ:
+            modulus = QQ.random_element()
+            while modulus == -1:
+                modulus = QQ.random_element()
+        else:
+            from sage.misc.prandom import choice
+            from sage.arith.misc import factor
+            n_primes = ZZ.random_element()
+            while n_primes < 0:
+                n_primes = ZZ.random_element()
+
+            modulus = K.ideal(1)
+            for i in range(n_primes):
+                I = K.ideal(K.random_element())
+                while I.is_one() or I.is_zero():
+                    I = K.ideal(K.random_element())
+
+                # We pick individual primes, so that we can end up with
+                # non-principal ideals as modulus.
+                p, e = choice(factor(I))  
+                modulus *= p**e
+
+        multiplier = ZZ.random_element()
+        while multiplier <= 0:
+            multiplier = ZZ.random_element()
+
+        modulus *= multiplier
+            
+        return self(value, modulus)
+
 Qhat = ProfiniteNumbers(QQ)
