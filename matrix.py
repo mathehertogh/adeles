@@ -14,6 +14,13 @@ from sage.groups.free_group import FreeGroup
 from profinite_integer import ProfiniteInteger, ProfiniteIntegers, Zhat
 from profinite_number import Qhat
 
+def value_matrix(A):
+    value_rows = []
+    for row in A:
+        value_rows.append([a.value() for a in row])
+    return matrix(value_rows)
+
+
 
 def matrix_modulus(A):
     return gcd([a.modulus() for a in A.list()])
@@ -406,3 +413,146 @@ def GL2Qhat_factor(A, detA):
         assert Zhat(det(B)).is_unit()
 
     return B, M
+
+
+
+def random_symmetric_matrix(R, n):
+    """
+    Return a random `n \times n` symmetric matrix over the ring ``R``
+
+    Entries are obtained from calls to ``R.random_element()``.
+    """
+    A = [[None for j in range(n)] for i in range(n)]
+    for i in range(n):
+        for j in range(i+1):
+            a = R.random_element() # TODO implement random_element() for Ohat,Khat,Ak,Jk
+            A[i][j] = a
+            A[j][i] = a
+    return MatrixSpace(R, n)(A)
+
+def block_matrix(blocks):
+    """
+    Construct a matrix out of the blocks ``blocks``
+
+    EXAMPLE::
+
+        sage: A = matrix(ZZ, [[1,2],[3,4]])
+        sage: I = matrix(ZZ, [[1,0],[0,1]])
+        sage: block_matrix([[A, I, A], [I, I, A]])
+        [1 2 1 0 1 2]
+        [3 4 0 1 3 4]
+        [1 0 1 0 1 2]
+        [0 1 0 1 3 4]
+        sage: B = matrix(QQ, [[1/2], [1/2]])
+        sage: R.<x> = ZZ[]
+        sage: C = matrix(R, [[x, -x]])
+        sage: D = matrix(ZZ, [[0]])
+        sage: E = block_matrix([[A, B], [C, D]]); E
+        [  1   2 1/2]
+        [  3   4 1/2]
+        [  x  -x   0]
+        sage: E.parent()
+        Full MatrixSpace of 3 by 3 dense matrices over Univariate Polynomial Ring in x over Rational Field
+    """
+    common_element = ZZ(1)
+    for row in blocks:
+        for block in row:
+            common_element *= block[0,0]
+    common_base = common_element.parent()
+
+    result = []
+    for row in blocks:
+        for i in range(row[0].nrows()):
+            long_row = []
+            for block in row:
+                long_row += list(block[i])
+            result.append(long_row)
+
+    return matrix(common_base, result)
+
+def random_symplectic_translation(R, g):
+    """
+    Return a random symplectic matrix over the ring ``R`` of the form
+    `(I, S; 0, I)` in terms of `g \times g`-blocks, with `S` symmetric.
+    """
+    Z = MatrixSpace(R, g).zero()
+    I = MatrixSpace(R, g).one()
+    S = random_symmetric_matrix(R, g)
+    A_top = [list(I[i]) + list(S[i]) for i in range(g)]
+    A_bottom = [list(Z[i]) + list(I[i]) for i in range(g)]
+    return MatrixSpace(R, 2*g)(A_top + A_bottom)
+
+def random_symplectic_rotation(R, g):
+    r"""
+    Return a random symplectic matrix over the ring ``R`` of the form
+    `(U, 0; (U^T)^{-1}, 0)`, with `U \in GL(g, R)`
+    """
+    if R is not Qhat or g != 2:
+        raise NotImplementedError("Only implemented for R=Qhat and g=2")
+    Z = MatrixSpace(R, g).zero()
+    U = random_GL2Qhat_element()
+    Ut = U.transpose()
+    d = det(Ut).value()  # Take a rational representant of the determinant
+    Utinv = 1/d * Ut.adjugate()
+    A_top = [list(U[i]) + list(Z[i]) for i in range(g)]
+    A_bottom = [list(Z[i]) + list(Utinv[i]) for i in range(g)]
+    return MatrixSpace(R, 2*g)(A_top + A_bottom)
+
+def Omega(g):
+    r"""
+    Return the `\ZZ`-matrix given in `g \times g`-blocks as `(0, I, -I, 0)`
+    """
+    Z = MatrixSpace(ZZ, g).zero()
+    I = MatrixSpace(ZZ, g).one()
+    Omega_top = [list(Z[i]) + list(I[i]) for i in range(g)]
+    Omega_bottom = [list(-I[i]) + list(Z[i]) for i in range(g)]
+    return MatrixSpace(ZZ, 2*g)(Omega_top + Omega_bottom)
+
+def random_symplectic_matrix(R, g):
+    m = 3
+    Z = MatrixSpace(Qhat, 2).zero()
+    I = MatrixSpace(Qhat, 2).one()
+    S = matrix(Qhat, [[ Qhat(7, m*180, 3), Qhat(13, m*120, 2)],
+                      [Qhat(13, m*120, 2), Qhat(-1, m*180, 3)]])
+    T = block_matrix([[I, S],
+                      [Z, I]])
+    J = Omega(2)
+    U = matrix(Qhat, [[Qhat(3, m*120, 2), Qhat(11, m*120, 1)],
+                      [Qhat(1, m*120, 1),  Qhat(8, m*120, 1)]])
+    Utinv = U.transpose().inverse()
+    R = block_matrix([[U,     Z],
+                      [Z, Utinv]])
+    A = T * J * R * T * J**(-1)
+    return A
+
+def make_top_right_zero(A):
+    from sage.modules.free_module_element import vector
+    from sage.arith.functions import lcm
+    N = A[0,3].modulus()
+    M = A[1,3].modulus()
+    abcd = value_matrix(A[0:2,0:2])
+    a, b, c, d = abcd.list()
+    rstu = value_matrix(A[0:2,2:4])
+    r, s, t, u = rstu.list()
+    e, f = abcd.solve_right(vector([r, t]))
+    alpha = c
+    beta = a*f-s
+    den = lcm(alpha.denominator(), beta.denominator())
+    alpha *= den
+    beta *= den
+    N *= den
+    # Now alpha, beta and N are all integers and we want to solve
+    #   `alpha * g \equiv -beta \mod N
+    # for g.
+    gamma = d
+    delta = c*f-u
+    den = lcm(gamma.denominator(), delta.denominator())
+    gamma *= den
+    delta *= den
+    M *= den
+    # Now gamma, delta and M are all integers and we also want to solve
+    #   `gamma * g \equiv -delta \mod M
+    # for g.
+    print("end up with the equations:")
+    print("{}*g = {} mod {}".format(alpha, beta, N))
+    print("{}*g = {} mod {}".format(gamma, delta, M))

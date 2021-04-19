@@ -189,7 +189,7 @@ def action_idele(x, N):
 
     return d, T
 
-'''
+r'''
 def action_GL2ZmodN(A):
     r"""
     Compute the action of the `GL_2(\ZZ/N\ZZ)`-matrix ``A`` on `\gamma_2`

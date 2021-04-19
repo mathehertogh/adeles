@@ -207,18 +207,19 @@ class ProfiniteNumber(CommutativeAlgebraElement):
             sage: Khat(a-1, K.ideal(4, 2*a+2), 2*a-5)
             (-a + 1 mod (4, 2*a + 2))/(2*a - 5)
         """
-        if self.denominator() == 1:
-            return repr(self.numerator())
-        numerator = repr(self.numerator())
-        if (not self.numerator().modulus().is_zero() or
-                sum([not c.is_zero() for c in self.numerator().value().list()]) > 1):
-            numerator = "(" + numerator + ")"
-        denominator = repr(self.denominator())
-        if not (self.denominator() in QQ or
-                (sum([not c.is_zero() for c in self.denominator().list()]) == 1
-                    and sum([c for c in self.denominator().list()]) == 1)):
-            denominator = "(" + denominator + ")"
-        return numerator + "/" + denominator
+        # if self.denominator() == 1:
+        #     return repr(self.numerator())
+        # numerator = repr(self.numerator())
+        # if (not self.numerator().modulus().is_zero() or
+        #         sum([not c.is_zero() for c in self.numerator().value().list()]) > 1):
+        #     numerator = "(" + numerator + ")"
+        # denominator = repr(self.denominator())
+        # if not (self.denominator() in QQ or
+        #         (sum([not c.is_zero() for c in self.denominator().list()]) == 1
+        #             and sum([c for c in self.denominator().list()]) == 1)):
+        #     denominator = "(" + denominator + ")"
+        # return numerator + "/" + denominator
+        return str(self.value()) + " mod " + str(self.modulus())
 
     def _richcmp_(self, other, op):
         r"""
