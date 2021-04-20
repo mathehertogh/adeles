@@ -291,14 +291,14 @@ This time we use the fact that the standard generators `S` and `T` of
     ....:     STs = ST_factor(U)
     ....:     print("The action of {} on QQ(zeta_48, f2) is given by:".format(x))
     ....:     print("  zeta_48  ]--> zeta_48^{}".format(d))
-    ....:     print_action_on_f2(STs)
+    ....:     print_action_on_f2(d, STs)
     ....:
     The action of -12*theta + 13 on QQ(zeta_48, f2) is given by:
       zeta_48  ]--> zeta_48^37
-      f2       ]--> zeta48^84*f2
+      f2       ]--> zeta48^108*f2
     The action of 12*theta - 23 on QQ(zeta_48, f2) is given by:
       zeta_48  ]--> zeta_48^37
-      f2       ]--> zeta48^84*f2
+      f2       ]--> zeta48^108*f2
     The action of 6*theta + 19 on QQ(zeta_48, f2) is given by:
       zeta_48  ]--> zeta_48^31
       f2       ]--> zeta48^66*f2
@@ -317,19 +317,13 @@ Let us write down these results a bit better readable:
 =================   =========================   =================================
 `x`                 `\zeta_{48}^x/\zeta_{48}`   `\mathfrak{f}_2^x/\mathfrak{f}_2`
 =================   =========================   =================================
-`-12 \theta + 13`   `\zeta_{48}^{36}`             `\zeta_{48}^{36}`
-`12 \theta - 23`    `\zeta_{48}^{36}`             `\zeta_{48}^{36}`
+`-12 \theta + 13`   `\zeta_{48}^{36}`             `\zeta_{48}^{12}`
+`12 \theta - 23`    `\zeta_{48}^{36}`             `\zeta_{48}^{12}`
 `6 \theta + 19`     `\zeta_{48}^{30}`             `\zeta_{48}^{18}`
 `-6 \theta + 13`    `\zeta_{48}^{30}`             `\zeta_{48}^{18}`
 `-16 \theta + 1`    `\zeta_{48}^{16}`             `\zeta_{48}^{32}`
 `16 \theta + 17`    `\zeta_{48}^{16}`             `\zeta_{48}^{32}`
 =================   =========================   =================================
-
-ERROR We should find that `x` leaves `\zeta_{48} \mathfrak{f}_2` invariant.
-But we don't! This table is considarably different from the one in the paper.
-TODO
-
-...
 
 So this time we find as our class invariant `\alpha = \zeta_{48} \mathfrak{f}(\theta)`.
 
@@ -338,19 +332,21 @@ Next we compute the conjugates of this `\alpha` over `K`::
     sage: zeta48 = CF(exp(2*CF(pi)*CF(I)/48))
     sage: conjugates = []
     sage: for a in Cl:
-    sage:     y = J(a)
-    sage:     d, T = action_idele(y, level)  # gamma_2^x ]--> zeta_48^d * f2 \circ T
-    sage:     tau = apply_fractional_linear_transformation(T, theta)
-    sage:     conjugate_alpha = zeta48**d * weber_f2(phi(tau), prec)
-    sage:     conjugates.append(conjugate_alpha)
+    ....:     y = J(a)
+    ....:     d, T = action_idele(y, level)  # f2^y == f2^(iota(d) * T)
+    ....:     tau = apply_fractional_linear_transformation(T, theta)
+    ....:     conjugate_alpha = zeta48**d * weber_f2(phi(tau), prec)
+    ....:     if d % 8 in [3, 5]:
+    ....:         conjugate_alpha *= -1
+    ....:     conjugates.append(conjugate_alpha)
     sage: conjugates
-    [2600.0767134974195033970857763 + 6277.1404649359343654150037131*I,
-     31.577442310543684029200292961 + 76.139307690160273082004722187*I,
-     5.6340688083814056275219748805 + 4.5646771235314497135468227248*I,
-     -14.623804018160446945446221633 - 12.586201921208127469473293719*I,
-     -19.240379715853729484184145882 - 1.4408022601138523036482590645*I,
-     -0.75617411210479611201508049423 + 7.2116024080519666543075267921*I,
-     31.577442311588647255621639333 - 76.139307689728491384058573080*I]
+    [0.46934985188028072404868708487 + 4.9303806576313237838233035330e-32*I,
+     -1.3100509463724034874071664118 + 0.12777784412349129206137042647*I,
+     -0.34481956767016108959807371471 + 1.0787151647032596770722167765*I,
+     0.92019558810242421493511346058 + 0.33479097123881044615212608503*I,
+     0.92019558810242662822461891407 - 0.33479097123880374817302036574*I,
+     -0.34481956767014232858225163729 - 1.0787151647032821566490422829*I,
+     -1.3100509463722659150544615130 - 0.12777784412463738678287924211*I]
 
 And finally, these conjugates give us the minimal polynomial `f` of `\alpha`
 over `K`::
@@ -360,14 +356,12 @@ over `K`::
     sage: coefficients = [round(c.real()) + round(c.imag())*I for c in minimal_polynomial.coefficients()]
     sage: R = ZZ['X']; X = R.gen()
     sage: f = R(coefficients); f
-    X^7 - X^6 - X^5 - X^4 + 2*X^2 + X - 1
+    X^7 + X^6 - X^5 - X^4 - X^3 + X^2 + 2*X - 1
 
+.. NOTE::
 
-.. TODO::
-
-    This polynomial differs considerably from the one in [GS1998]. Why?
-    (tried with prec=1000, got the same answer)
-    The polynomial above is reducible! So clearly wrong.
+    This polynomial also differs from the one in [GS1998]:
+    the constant term has opposite sign.
 
 .. TODO::
 

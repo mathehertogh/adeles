@@ -74,32 +74,42 @@ def print_action_on_gamma_2(STs):
     else:
         print("  gamma_2 ]--> zeta_3^2 * gamma_2")
 
-def print_action_on_f2(STs):
+def print_action_on_f2(d, STs):
     r"""
-    Print the action of ST-product (as returned by ST_factor()) on Weber's f_2
-    modular function
+    Print the action of iota(d)*STs on Weber's f_2 modular function
 
     INPUT:
 
+    - ``d`` -- element of `(\ZZ/48\ZZ)^*`
     - ``STs`` -- an element of the free group on {S, T}; usually obtained from
       an `SL_2(\ZZ/48\ZZ)`-matrix passed into :func:`ST_factor`
 
     OUTPUT:
 
     Does not return anything.
-    Prints a string describing the action.
+    Prints a string describing the action of iota(d)*STs on Weber's f_2
+    function. Here `\iota(d) = (1, 0; 0, d) \in GL_2(\ZZ/48\ZZ)` and `S, T \in
+    SL_2(\ZZ)` are given by `S = (0, -1; 1, 0)` and `T = (1, 1; 0, 1)`.
 
     ALGORITHM:
 
     We use the fact that `S` and `T` act as follows on
-    `\QQ(\zeta_48, f, f_1, f_2)`, with `\zeta_3 = exp(2i\pi/48)`:
+    `\QQ(\zeta_48, f, f_1, f_2)`, with `\zeta_48 = exp(2i\pi/48)`:
 
     - `S: (f, f_1, f_2) \mapsto (f, f_2, f_1)`;
     - `T: (f, f_1, f_2) \mapsto (\zeta_48^{-1} f_1, \zeta_48^{-1} f, \zeta_48^2 f_2)`.
+
+    Also we have `f_2(z) = \sqrt(2) \eta(2z)/\eta(z)` with
+    `\eta = \zeta_{48} \prod_{n=1}^\infty (1-q^n)` Dedekind's `\eta`-function.
+    Hence `\iota(d)`, which acts by `\zeta_{48} \mapsto \zeta_{48}^d`, acts
+    on `f_2` as `f_2 \mapsto f_2 \sqrt(2)^{\iota(d)}/\sqrt(2)`.
+    As `\sqrt(2) = \zeta_8 + \zeta_8^{-1}`, this is just `\pm 1` depending on
+    `d`.
     """
     from sage.groups.free_group import FreeGroup
     from sage.categories.homset import Hom
-    from sage.rings.integer_ring import ZZ
+    from sage.rings.integer_ring import Z
+
     G = STs.parent()
     F = FreeGroup(['zeta48', 'f', 'f1', 'f2'])
     zeta48, f, f1, f2 = F.gens()
@@ -109,6 +119,12 @@ def print_action_on_f2(STs):
     # Note that the inverse "phi_S_inv" is equal to phi_S itself
 
     f2_image = f2
+
+    # iota(d) acts as multiplication by -1 if d = 3,5 mod 8 and as the identity
+    # otherwise.
+    if d.lift() % 8 in [3, 5]:
+        f2_image = zeta48**ZZ(24) * f2
+
     for R in STs.Tietze():
         if R in [1, -1]: # R == S^+/-1
             f2_image = phi_S(f2_image)
