@@ -368,6 +368,52 @@ over `K`::
     In our computations of minimal polynomials of `\alpha` over `K`, we
     assume the polynomial will lie in `\ZZ[X]`. Why not `\mathcal{O}[X]`?
     Think of a clean way to do it over `\mathcal{O}[X]` in general.
+
+
+Example 2 - `K = \QQ(\sqrt{-145})` and `f = \mathfrak{f}`
+---------------------------------------------------------
+
+Next up, example 2::
+
+    sage: R = ZZ['x']; x = R.gen()
+    sage: K.<theta> = NumberField(x**2+145)
+    sage: K.discriminant()
+    -580
+    sage: O = K.maximal_order()
+    sage: O.basis()
+    [1, theta]
+    sage: J = IdeleGroup(K)
+    sage: level = 48
+    sage: Omod48 = O.quotient_ring(48, 'b')
+    sage: Omod48star = K.ideal(48).idealstar(flag=2)
+    sage: for x in Omod48star.gens_values():
+    ....:     y = J(Omod48(x))
+    ....:     A = connecting_homomorphism_integral(y, level)
+    ....:     Amod48 = matrix_modulo(A, level)
+    ....:     d = det(Amod48) # A acts on zeta_48 by d-th powering
+    ....:     U = ~iota(d) * Amod48 # U lies in SL_2(\ZZ/48\ZZ)
+    ....:     STs = ST_factor(U)
+    ....:     print("The action of {} on QQ(zeta_48, f) is given by:".format(x))
+    ....:     print("  zeta_48 ]--> zeta_48^{}".format(d))
+    ....:     print_action_on_f(STs)
+    ....:
+    The action of 18*theta + 1 on QQ(zeta_48, f) is given by:
+      zeta_48 ]--> zeta_48^37
+      f       ]--> zeta48^12*f
+    The action of 16*theta + 17 on QQ(zeta_48, f) is given by:
+      zeta_48 ]--> zeta_48^17
+      f       ]--> f
+    The action of 15*theta + 16 on QQ(zeta_48, f) is given by:
+      zeta_48 ]--> zeta_48^1
+      f       ]--> zeta48^-48*f
+    The action of 19 on QQ(zeta_48, f) is given by:
+      zeta_48 ]--> zeta_48^25
+      f       ]--> f
+
+We conclude that `\mathfrak{f}^2 / \sqrt{2}` is invariant.
+We determine the minimal polynomial of `\mathfrak{f}^2(\theta) / \sqrt{2}`::
+
+
 """
 
 
