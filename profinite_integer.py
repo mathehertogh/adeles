@@ -6,6 +6,8 @@ Profinite Integers of Number Fields
     Write documentation for this module
 """
 
+from sage.categories.integral_domains import IntegralDomains
+from sage.categories.rings import Rings
 from sage.structure.unique_representation import UniqueRepresentation
 from sage.rings.ring import CommutativeAlgebra
 from sage.structure.element import CommutativeAlgebraElement
@@ -633,6 +635,17 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
             Traceback (most recent call last):
             ...
             TypeError: R should be (the maximal order of) a number field
+
+        TESTS:
+
+        Pickling works::
+
+            sage: import __main__
+            sage: __main__.ProfiniteIntegers = ProfiniteIntegers
+            sage: loads(dumps(ProfiniteIntegers(QQ))) is ProfiniteIntegers(QQ)
+            True
+            sage: loads(dumps(ProfiniteIntegers(K))) is ProfiniteIntegers(K)
+            True
         """
         CommutativeAlgebra.__init__(self, O)
 
@@ -695,7 +708,7 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
         return ZZ(0)
 
     def _element_constructor_(self, value, modulus=None):
-        """
+        r"""
         Construct an element "``value`` mod ``modulus``" of ``self``
 
         EXAMPLES::
@@ -709,6 +722,25 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
             a^2 + 1
             sage: Ohat(a^2+1, 4*a)
             a^2 + 1 mod (4*a)
+
+        If we have a field extension `K \subset L`, then there is a coercion
+        between the corresponding profinite integer rings::
+
+            sage: R.<X> = PolynomialRing(ZZ)
+            sage: K.<a> = NumberField(X^4 + 27*X^2 + 52)
+            sage: Ohat = ProfiniteIntegers(K)
+            sage: x = Zhat(3, 10)
+            sage: Ohat(x)
+            -5/2*a^3 - 5/2*a - 2 mod (10)
+            sage: 3 - (-5/2*a^3 - 5/2*a - 2) in K.ideal(10)
+            True
+
+        And we implemented a construction functor, to allow for example::
+
+            sage: f = X^2-7
+            sage: b = Ohat(a^2, -17*a)
+            sage: f+b
+            X^2 + a^2 - 7 mod (17*a)
         """
         from sage.rings.quotient_ring import is_QuotientRing
         if modulus is None:
@@ -722,6 +754,10 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
                 if (P._repr_()[0:17] == 'Profinite Numbers'
                         and self.number_field().has_coerce_map_from(P.base())):
                     return self._from_profinite_number(value)
+                if (isinstance(P, ProfiniteIntegers)
+                        and self.base().has_coerce_map_from(P.base())):
+                    return self.element_class(self, value.value(), value.modulus())
+
             modulus = ZZ(0) if self.base() is ZZ else self.base().ideal(0)
         return self.element_class(self, value, modulus)
 
@@ -812,7 +848,7 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
         .. TODO::
 
             This does not work very nice right now...
-            We would like to make whole K coerce into self, so that things like
+            We would like to make whole O coerce into self, so that things like
             ``a*Ohat(a^2+1, 120)`` or ``a^3+1 == Ohat(a^3+1, 100)`` work.
             They do not right now, since the parent of a^3+1 is not O, but K...
             ``O(a)*Ohat(a^2+1, 120)`` does work, but yeah...
@@ -886,6 +922,34 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
         modulus *= multiplier
             
         return self.element_class(self, value, modulus)
+
+    def construction(self):
+        return ProfiniteIntegersFunctor(self._reduction[1][1:], self._reduction[2]), self.base()
+
+
+from sage.categories.pushout import ConstructionFunctor
+class ProfiniteIntegersFunctor(ConstructionFunctor):
+    rank = 5
+
+    def __init__(self, args=None, kwds=None):
+        """
+        Create a ProfiniteIntegersConstructor
+
+        EXAMPLES::
+
+            sage: ProfiniteIntegersFunctor()
+            ProfiniteIntegersFunctor
+        """
+        self.args = args or ()
+        self.kwds = kwds or {}
+        ConstructionFunctor.__init__(self, IntegralDomains(), Rings())
+
+    def _apply_functor(self, R):
+        return ProfiniteIntegers(R,*self.args,**self.kwds)
+
+    # def merge(self, other):
+    #     if isinstance(other, (type(self), sage.categories.pushout.FractionField)):
+    #         return self
 
 
 Zhat = ProfiniteIntegers(ZZ)
