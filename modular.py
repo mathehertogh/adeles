@@ -108,7 +108,7 @@ def print_action_on_f2(d, STs):
     """
     from sage.groups.free_group import FreeGroup
     from sage.categories.homset import Hom
-    from sage.rings.integer_ring import Z
+    from sage.rings.integer_ring import ZZ
 
     G = STs.parent()
     F = FreeGroup(['zeta48', 'f', 'f1', 'f2'])
@@ -134,3 +134,52 @@ def print_action_on_f2(d, STs):
             f2_image = phi_T_inv(f2_image)
 
     print("  f2       ]--> {}".format(f2_image))
+
+
+def print_action_on_f(STs):
+    r"""
+    Print the action of ``STs`` on Weber's `\mathfrak{f}` modular function
+
+    INPUT:
+
+    - ``STs`` -- an element of the free group on {S, T}; usually obtained from
+      an `SL_2(\ZZ/48\ZZ)`-matrix passed into :func:`ST_factor`
+
+    OUTPUT:
+
+    Does not return anything.
+    Prints a string describing the action of ``STs`` on Weber's f_2
+    function. Here `S, T \in SL_2(\ZZ)` are given by `S = (0, -1; 1, 0)` and
+    `T = (1, 1; 0, 1)`.
+
+    ALGORITHM:
+
+    We use the fact that `S` and `T` act as follows on
+    `\QQ(\zeta_48, f, f_1, f_2)`, with `\zeta_48 = exp(2i\pi/48)`:
+
+    - `S: (f, f_1, f_2) \mapsto (f, f_2, f_1)`;
+    - `T: (f, f_1, f_2) \mapsto (\zeta_48^{-1} f_1, \zeta_48^{-1} f, \zeta_48^2 f_2)`.
+    """
+    from sage.groups.free_group import FreeGroup
+    from sage.categories.homset import Hom
+    from sage.rings.integer_ring import ZZ
+
+    G = STs.parent()
+    F = FreeGroup(['zeta48', 'f', 'f1', 'f2'])
+    zeta48, f, f1, f2 = F.gens()
+    phi_S = Hom(F, F)([zeta48, f, f2, f1])
+    phi_T = Hom(F, F)([zeta48, zeta48**ZZ(-1)*f1, zeta48**ZZ(-1)*f, zeta48**ZZ(2)*f2])
+    phi_T_inv = Hom(F, F)([zeta48, zeta48*f1, zeta48*f, zeta48**ZZ(-2)*f2])
+    # Note that the inverse "phi_S_inv" is equal to phi_S itself
+
+    f_image = f
+
+    for R in STs.Tietze():
+        if R in [1, -1]: # R == S^+/-1
+            f_image = phi_S(f_image)
+        elif R == 2: # R == T
+            f_image = phi_T(f_image)
+        else: # R == T^-1
+            f_image = phi_T_inv(f_image)
+
+    print("  f       ]--> {}".format(f_image))
