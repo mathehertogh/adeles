@@ -707,6 +707,67 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
         """
         return ZZ(0)
 
+    def is_exact(self):
+        """
+        Return ``False``, indicating that doing arithmetic can lead to precision
+        loss
+
+        EXAMPLE::
+
+            sage: Zhat.is_exact()
+            False
+        """
+        return False
+
+    def is_field(self, proof=True):
+        """
+        Return ``False``, indicating that this ring is not a field (we have zero
+        divisors)
+
+        EXAMPLE::
+
+            sage: Zhat.is_field()
+            False
+        """
+        return False
+
+    def is_integral_domain(self, proof=None):
+        r"""
+        Return ``False``, indicating that this ring is not an integral domain
+
+        This follows from the fact that ``self`` is equal/isomorphic to the
+        product of the `\mathfrak{p}`-adic integer rings, where
+        `\mathfrak{p}` runs over all prime ideals of ``self.base()``.
+
+        EXAMPLES::
+
+            sage: Zhat = ProfiniteIntegers()
+            sage: Zhat.is_integral_domain()
+            False
+        """
+        return False
+
+    def order(self):
+        """
+        Return ``Infinity``, indicating that this ring has infinitely many
+        elements
+
+        EXAMPLE:
+
+            sage: Zhat.order()
+            +Infinity
+        """
+        from sage.rings.infinity import Infinity
+        return Infinity
+
+    # def is_noetherian(self):
+    #     TODO: are we noetherian?
+    #
+    # def krull_dimension(self):
+    #     TODO: what is our krull dimension?
+    #
+    # TODO: check that there are no "canonical" generators of self
+
     def _element_constructor_(self, value, modulus=None):
         r"""
         Construct an element "``value`` mod ``modulus``" of ``self``
@@ -866,6 +927,8 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
         """
         if self.base().has_coerce_map_from(S):
             return True
+        if isinstance(S, ProfiniteIntegers):
+            return self.base().has_coerce_map_from(S.base())
         from sage.rings.quotient_ring import is_QuotientRing
         if is_QuotientRing(S):
             I = S.defining_ideal()
@@ -873,17 +936,32 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
                 return True
         return False
 
-    def is_integral_domain(self, proof=None):
+    def _an_element_(self):
         """
-        Return ``False``, indicating that ``self`` is not an integral domain
+        Return a typical element of this ring
 
-        EXAMPLES::
+        EXAMPLE::
 
-            sage: Zhat = ProfiniteIntegers()
-            sage: Zhat.is_integral_domain()
-            False
+            sage: Zhat.an_element()
+            2 mod 6
+            sage: K.<a> = NumberField(x^3-2)
+            sage: ProfiniteIntegers(K).an_element()
+            8*a^2 mod (7*a^2 - 1)
         """
-        return False
+        g = self.base().gens()[-1]
+        return self.element_class(self, g+1, 7*g-1)
+
+    def some_elements(self):
+        """
+        Return some elements of this ring
+        
+        EXAMPLE::
+
+            sage: Zhat.some_elements()
+            [0, 2 mod 6, 1, 97, 66 mod 79]
+        """
+        return [self.zero(), self.an_element(), self.one(), self(97),
+                self.element_class(self, -13, 79)]
 
     def random_element(self):
         """
@@ -945,7 +1023,7 @@ class ProfiniteIntegersFunctor(ConstructionFunctor):
         ConstructionFunctor.__init__(self, IntegralDomains(), Rings())
 
     def _apply_functor(self, R):
-        return ProfiniteIntegers(R,*self.args,**self.kwds)
+        return ProfiniteIntegers(R, *self.args, **self.kwds)
 
     # def merge(self, other):
     #     if isinstance(other, (type(self), sage.categories.pushout.FractionField)):
