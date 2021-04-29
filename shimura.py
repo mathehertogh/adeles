@@ -54,7 +54,8 @@ def connecting_homomorphism(x, determinant=False):
 
     INPUT:
 
-    - ``x`` -- an idele over a quadratic imaginary field ``K``
+    - ``x`` -- an idele over a quadratic imaginary field ``K``, such that
+      ``K.gen()`` is a generator of the ring of integers of ``K``
     - ``determinant`` - TODO
 
     OUTPUT:
@@ -69,7 +70,7 @@ def connecting_homomorphism(x, determinant=False):
     Ak = Adeles(K)
 
     t, s = Ak(x).finite().to_profinite_rational_vector(enclosure=False)
-    C, B, _ = theta.minpoly().coefficients()
+    C, B, _ = theta.minpoly().list()
     x_image = matrix(Qhat, [[t-B*s, -C*s], [s, t]])
 
     if not determinant:
