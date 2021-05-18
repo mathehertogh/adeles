@@ -46,7 +46,7 @@ field together with its idele group. ::
     sage: O = K.maximal_order()
     sage: O.basis()  # Check that theta indeed generates the ring of integers
     [1, theta]
-    sage: J = IdeleGroup(K)
+    sage: J = Ideles(K)
     sage: level = 3  # the level of our modular function gamma_2
 
 Finding the class invariant
@@ -382,7 +382,7 @@ Next up, example 2::
     sage: O = K.maximal_order()
     sage: O.basis()
     [1, theta]
-    sage: J = IdeleGroup(K)
+    sage: J = Ideles(K)
     sage: level = 48
     sage: Omod48 = O.quotient_ring(48, 'b')
     sage: Omod48star = K.ideal(48).idealstar(flag=2)
@@ -431,7 +431,7 @@ x = R.gen()
 N = ZZ(3)  # level of our modular function gamma_2
 K = NumberField(x**2 + x + 18, 'theta')
 theta = K.gen()
-J = IdeleGroup(K)
+J = Ideles(K)
 
 ######################################
 # Phase 2. Compute a class invariant #

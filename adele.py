@@ -578,8 +578,8 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
         EXAMPLES::
 
             sage: A = Adeles(QQ)
-            sage: from idele import IdeleGroup
-            sage: J = IdeleGroup(QQ)
+            sage: from idele import Ideles
+            sage: J = Ideles(QQ)
             sage: u = J(None, None, {2: (1/4, 1), 3: (3/5, 2)})
             sage: v = J(None, [-1], {2: (4, 2), 3: (1/4, 1), 5: (3, 0)})
             sage: w = J(None, [RIF(7, 9)], {2: (4, 2), 3: (1/4, 1), 5: (5, 0)})
@@ -598,7 +598,7 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
 
             sage: K.<a> = NumberField(x^2+5)
             sage: Ak = Adeles(K)
-            sage: Jk = IdeleGroup(K)
+            sage: Jk = Ideles(K)
             sage: u = Jk(None, [I], {})
             sage: Ak(u)
             (1*I, 0 mod (1))
@@ -609,7 +609,7 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
 
         This defines a coercion::
 
-            sage: J = IdeleGroup(QQ)
+            sage: J = Ideles(QQ)
             sage: A = Adeles(QQ)
             sage: Qhat = ProfiniteNumbers(QQ)
             sage: a = A([2.5], Qhat(3, 10, 2))
@@ -736,14 +736,14 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
             Maybe via Khat? So two coercions: K_p --> Khat --> A_K
         """
         from profinite_number import ProfiniteNumbers
-        from idele import IdeleGroup
+        from idele import Ideles
         K = self.base()
         if K.has_coerce_map_from(S):
             return True
         Khat = ProfiniteNumbers(K)
         if Khat.has_coerce_map_from(S):
             return True
-        J = IdeleGroup(K)
+        J = Ideles(K)
         if J.has_coerce_map_from(S):
             return True
         return False

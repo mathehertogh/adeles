@@ -10,7 +10,7 @@ from sage.all_cmdline import *
 from profinite_number import ProfiniteNumbers
 from completion import completions
 from adele import Adeles
-from idele import IdeleGroup
+from idele import Ideles
 from ray_class_group import Modulus, ray_class_group
 from matrix import *
 

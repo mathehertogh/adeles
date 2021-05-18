@@ -43,7 +43,6 @@ where `S` is a finite set of places of `K` and each `U_p` is of the form
     Check all idele-code for edge cases:
         - finite empty
         - exact vs non-exact
-        - infinite: None vs value
     Also check idele-code in other files (i.e. Adeles._from_idele())
 """
 import sys # TODO erase these two lines
@@ -69,7 +68,7 @@ oo = Infinity
 
 class Idele(MultiplicativeGroupElement):
     r"""
-    An idele: an element of an :class:`IdeleGroup` of a number field
+    An idele: an element of an :class:`Ideles` of a number field
 
     .. automethod:: __init__
     """
@@ -82,7 +81,7 @@ class Idele(MultiplicativeGroupElement):
 
         INPUT:
 
-        - ``parent`` -- the :class:`IdeleGroup` to which this idele belongs
+        - ``parent`` -- the :class:`Ideles` to which this idele belongs
         - ``exact`` -- an element of ``K`` or ``None``; determines the exact
           value of this idele at all placed unspecified in ``infinite`` and
           ``finite``.
@@ -109,7 +108,7 @@ class Idele(MultiplicativeGroupElement):
 
         We begin with the easiest case: `K = \QQ`::
 
-            sage: J = IdeleGroup(QQ)
+            sage: J = Ideles(QQ)
             sage: Idele(J, None, [3.14], {2: (5/3, 2), 5: (1, 9)})
             (3.1400000000000002?, 5/3*(1+M_2^2), Z_3*, 1*(1+M_5^9), ...)
             sage: Idele(J, None, None, {7: (1/10, 100)})
@@ -120,7 +119,7 @@ class Idele(MultiplicativeGroupElement):
         Now let's take a non-trivial number field::
 
         sage: K.<a> = NumberField(x^4-17)
-        sage: Jk = IdeleGroup(K)
+        sage: Jk = Ideles(K)
         sage: Idele(Jk, None, None, {K.prime_above(3): (a^3+a+1, 10)})
         Idele over Number Field in a with defining polynomial x^4 - 17 with values
         (3, 1/2*a^2 - a - 1/2): a^3 + a + 1 * U_q^10
@@ -148,7 +147,7 @@ class Idele(MultiplicativeGroupElement):
         EXAMPLES::
 
             sage: K.<a> = NumberField(x^3-2)
-            sage: J = IdeleGroup(K)
+            sage: J = Ideles(K)
             sage: u = J(1)
             sage: u._exact = None
             sage: u._validate_exact()
@@ -192,7 +191,7 @@ class Idele(MultiplicativeGroupElement):
         one::
 
             sage: K.<a> = NumberField(x^3 + x + 1)
-            sage: Jk = IdeleGroup(K)
+            sage: Jk = Ideles(K)
             sage: u = Jk(1)
             sage: u._infinite = [1.2, I]
             sage: u._validate_infinite()
@@ -262,7 +261,7 @@ class Idele(MultiplicativeGroupElement):
         A few examples of the small adjustments we can do::
 
             sage: K.<a> = NumberField(x^4+x+1)
-            sage: J = IdeleGroup(K)
+            sage: J = Ideles(K)
             sage: u = J(1)
             sage: u._finite = None
             sage: u._validate_finite()
@@ -348,7 +347,7 @@ class Idele(MultiplicativeGroupElement):
 
         EXAMPLES::
 
-            sage: J = IdeleGroup(QQ)
+            sage: J = Ideles(QQ)
             sage: u = J(1/2, None, {10000079: (7/9, 20)})
             sage: u
             Idele over Rational Field with values
@@ -387,7 +386,7 @@ class Idele(MultiplicativeGroupElement):
         EXAMPLES::
 
             sage: K.<a> = NumberField(x^2+5)
-            sage: J = IdeleGroup(K)
+            sage: J = Ideles(K)
             sage: J(a, [2*I], {K.prime_above(3): (a/2+1, 8)})
             (2*I, a, (1/2*a + 1)*(1+M_p3^8), a, a, a, a, ...)
             where:
@@ -493,7 +492,7 @@ class Idele(MultiplicativeGroupElement):
         EXAMPLES::
 
             sage: K.<a> = NumberField(x^6+x+1)
-            sage: J = IdeleGroup(K)
+            sage: J = Ideles(K)
             sage: u = J(1)
             sage: u._prime_name(2, 0)
             'p2'
@@ -535,7 +534,7 @@ class Idele(MultiplicativeGroupElement):
 
         EXAMPLES::
 
-            sage: J = IdeleGroup(QQ)
+            sage: J = Ideles(QQ)
             sage: u = J(None, None, {2: (3, 7), 3: (1/2, 6)})
             sage: v = J(4, [-1.23], {3: (5, 10)})
             sage: w = J(None, None, {2: (3, 7), 3: (1/2, 6), 5: (1, 0)})
@@ -630,7 +629,7 @@ class Idele(MultiplicativeGroupElement):
         EXAMPLES::
 
             sage: K.<a> = NumberField(x^5-x+2)
-            sage: J = IdeleGroup(K)
+            sage: J = Ideles(K)
             sage: u = J(a^4+1, None, {K.prime_above(11): (a^3-a, 20)})
             sage: v = J(None, None, {K.prime_above(97): (a, 20)})
             sage: v == u
@@ -655,7 +654,7 @@ class Idele(MultiplicativeGroupElement):
 
         EXAMPLES::
 
-            sage: J = IdeleGroup(QQ)
+            sage: J = Ideles(QQ)
             sage: u = J(None, [3.1415])
             sage: u._has_exact()
             False
@@ -739,7 +738,7 @@ class Idele(MultiplicativeGroupElement):
 
         First a few multiplications of rational ideles::
 
-            sage: J = IdeleGroup(QQ)
+            sage: J = Ideles(QQ)
             sage: u = J(None, None, {2: (1/2, 7), 3: (2/5, 8)})
             sage: v = J(None, [1.2345], None)
             sage: w = J(1/7, [-1.0], {3: (-1, 7)})
@@ -755,7 +754,7 @@ class Idele(MultiplicativeGroupElement):
         And now a few over a non-trivial number field::
 
             sage: K.<i> = NumberField(x^2+1)
-            sage: J = IdeleGroup(K)
+            sage: J = Ideles(K)
             sage: p2, p3 = K.prime_above(2), K.prime_above(3)
             sage: u = J(i+1)
             sage: v = J(None, [I+1], {p3: (i/2, 7)})
@@ -848,7 +847,7 @@ class Idele(MultiplicativeGroupElement):
 
             sage: K.<a> = NumberField(x^2+x+1)
             sage: p2, p3 = K.prime_above(2), K.prime_above(3)
-            sage: J = IdeleGroup(K)
+            sage: J = Ideles(K)
             sage: u = J(None, [I], {p2: (a, 10), p3: (1/2, 7)})
             sage: u.inverse()
             (-1*I, (-a - 1)*(1+M_p2^10), 2*(1+M_p3^7), ...)
@@ -884,7 +883,7 @@ class Idele(MultiplicativeGroupElement):
 
             sage: K.<a> = NumberField(x^2+8)
             sage: p2, q3 = K.prime_above(2), K.primes_above(3)[1]
-            sage: J = IdeleGroup(K)
+            sage: J = Ideles(K)
             sage: u = J(None, [I+1], {p2: (a-1, 7), q3: (a/2, 9)})
             sage: v = J(a, None, {q3: (2, 10)})
             sage: u/v
@@ -910,7 +909,7 @@ class Idele(MultiplicativeGroupElement):
             
             Fix the following bug::
 
-                sage: J = IdeleGroup(QQ)
+                sage: J = Ideles(QQ)
                 sage: u = J(None, None, {2: (2, 3)})
                 sage: u/J(2)
                 (RR*, 1*(1+M_2^3), ...)
@@ -929,7 +928,7 @@ class Idele(MultiplicativeGroupElement):
 
                 Traceback (most recent call last):
                 ...
-                AttributeError: 'IdeleGroup_with_category' object has no attribute 'gens'
+                AttributeError: 'Ideles_with_category' object has no attribute 'gens'
         """
         return self * other.inverse()
 
@@ -946,7 +945,7 @@ class Idele(MultiplicativeGroupElement):
 
         EXAMPLES::
 
-            sage: J = IdeleGroup(QQ)
+            sage: J = Ideles(QQ)
             sage: u = J(None, None, {2: (1/4, 1), 3: (3/5, 2)})
             sage: u.integral_split()
             ((RR*, 5*(1+M_2^1), 12*(1+M_3^2), 20*Z_5*, ...), 20)
@@ -956,7 +955,7 @@ class Idele(MultiplicativeGroupElement):
 
             sage: K.<a> = NumberField(x^2+10)
             sage: p3, p5 = K.prime_above(3), K.prime_above(5)
-            sage: Jk = IdeleGroup(K)
+            sage: Jk = Ideles(K)
             sage: u = Jk(None, [I], {p3: (1/a, 3), p5: (7/6, 8)})
             sage: u.integral_split()
             ((30*I, 30*Z_p2*, -3*a*(1+M_p3^3), 35*(1+M_p5^8), ...)
@@ -1027,7 +1026,7 @@ class Idele(MultiplicativeGroupElement):
 
         EXAMPLES:
             
-        sage: J = IdeleGroup(QQ)
+        sage: J = Ideles(QQ)
         sage: u = J(None, None, {2: (1/3, 3), 5: (7, 1)})
         sage: u_bar = u.to_modulo_element()
         sage: u_bar, u_bar.parent()
@@ -1068,7 +1067,7 @@ class Idele(MultiplicativeGroupElement):
         EXAMPLES::
 
             sage: Q = NumberField(x-1, "one")
-            sage: J = IdeleGroup(Q)
+            sage: J = Ideles(Q)
             sage: u = J(None, [-9], {2: (10, 1), 3: (3, 2), 7: (1/2, 4)})
             sage: m = Modulus(Q.ideal(18), [0])
             sage: u.to_ray_class(m).ideal()
@@ -1077,7 +1076,7 @@ class Idele(MultiplicativeGroupElement):
         ::
 
             sage: K.<a> = NumberField(x^3-x-1)
-            sage: Jk = IdeleGroup(K)
+            sage: Jk = Ideles(K)
             sage: p7, q7 = K.primes_above(7)
             sage: u = Jk(None, [2, I], {p7: (1/2, 1), q7: (7*a, 2)})
             sage: m = Modulus(K.ideal(7), [0])
@@ -1087,7 +1086,7 @@ class Idele(MultiplicativeGroupElement):
         TESTS:
 
             sage: K = NumberField(x^2 + 5*x - 3, 'a')
-            sage: J = IdeleGroup(K)
+            sage: J = Ideles(K)
             sage: G = ray_class_group(K, Modulus(K.ideal(14), [0])); G
             Ray class group of order 18 with structure C6 x C3 of Number Field in a with defining polynomial x^2 + 5*x - 3 of modulus (Fractional ideal (14)) * infinity_0
             sage: c0, c1 = G.gens()
@@ -1198,7 +1197,7 @@ class Idele(MultiplicativeGroupElement):
         EXAMPLES::
 
             sage: Q = NumberField(x-1, "one")
-            sage: J = IdeleGroup(Q)
+            sage: J = Ideles(Q)
             sage: u = J(None, None, {5: (6, 2)})
             sage: u.is_one_mod_star(Modulus(Q.ideal(3)))
             False
@@ -1254,7 +1253,7 @@ class Idele(MultiplicativeGroupElement):
         
         First some examples with `\QQ`::
 
-            sage: J = IdeleGroup(QQ)
+            sage: J = Ideles(QQ)
             sage: u = J(None, None, {2: (5, 3), 3: (1/3, 0)})
             sage: u._contains_at(5, 2)
             True
@@ -1274,7 +1273,7 @@ class Idele(MultiplicativeGroupElement):
         And some examples with a non-trivial number field::
 
             sage: K.<a> = NumberField(x^3+x+1)
-            sage: Jk = IdeleGroup(K)
+            sage: Jk = Ideles(K)
             sage: v = Jk(a, [None, I], {K.prime_above(7): (a+1, 8)})
             sage: v._contains_at(a, K.places()[0])
             True
@@ -1336,7 +1335,7 @@ class Idele(MultiplicativeGroupElement):
         EXAMPLES::
 
             sage: K.<a> = NumberField(x^7-4/7*x^3+1)
-            sage: J = IdeleGroup(K)
+            sage: J = Ideles(K)
             sage: u = J(a^5-a)
             sage: v = J(None, [completions(K, oo)[0][1](a^3), None, None, None], {K.prime_above(5): (a^3, 4)})
             sage: u._contains(a^5-a)
@@ -1374,7 +1373,7 @@ class Idele(MultiplicativeGroupElement):
         EXAMPLES::
 
             sage: K.<a> = NumberField(x^2+3)
-            sage: J = IdeleGroup(K)
+            sage: J = Ideles(K)
             sage: u = J(a, None, {K.prime_above(2): (-a+1, 10)})
             sage: v = J(None, None, {K.prime_above(2): (-a+1, 4), K.prime_above(5): (-a-1, 0)})
             sage: w = J(None, None, {K.prime_above(2): (-a+1, 4), K.prime_above(5): (1/5, 0)})
@@ -1480,7 +1479,7 @@ class Idele(MultiplicativeGroupElement):
         EXAMPLE::
 
             sage: K.<a> = NumberField(x^3-2)
-            sage: J = IdeleGroup(K)
+            sage: J = Ideles(K)
             sage: p2 = K.prime_above(2)
             sage: p5 = K.prime_above(5)
             sage: u = J(None, None, {p2: (a, 5), p5: (1/3, 1)})
@@ -1551,7 +1550,7 @@ class Idele(MultiplicativeGroupElement):
 
 
 
-class IdeleGroup(UniqueRepresentation, Group):
+class Ideles(UniqueRepresentation, Group):
     Element = Idele
 
     def __init__(self, K):
@@ -1573,7 +1572,7 @@ class IdeleGroup(UniqueRepresentation, Group):
         return r"\Bold{A}_{" + latex(self.number_field()) + "}^*"
 
     def _element_constructor_(self, exact, infinite=None, finite=None):
-        #print("DEBUG: IdeleGroup._element_constructor_({}, {}, {})".format(exact, infinite, finite))
+        #print("DEBUG: Ideles._element_constructor_({}, {}, {})".format(exact, infinite, finite))
         if infinite is None and finite is None:
             x = exact
             if x is None:
@@ -1604,7 +1603,7 @@ class IdeleGroup(UniqueRepresentation, Group):
             
             sage: from profinite_number import ProfiniteNumbers
             sage: from adele import Adeles
-            sage: J = IdeleGroup(QQ)
+            sage: J = Ideles(QQ)
             sage: A = Adeles(QQ)
             sage: Qhat = ProfiniteNumbers(QQ)
             sage: a = A([-1.5], Qhat(7, 24, 5))
@@ -1685,7 +1684,7 @@ class IdeleGroup(UniqueRepresentation, Group):
         EXAMPLES::
 
             sage: Q = NumberField(x-1, "one")
-            sage: J = IdeleGroup(Q)
+            sage: J = Ideles(Q)
             sage: G = ray_class_group(Q, Modulus(Q.ideal(10), [0]))
             sage: r = G(Q.ideal(9))
             sage: factor(r.ideal())
@@ -1714,7 +1713,7 @@ class IdeleGroup(UniqueRepresentation, Group):
             sage: r = G([3, 0, 1])
             sage: factor(r.ideal())
             (Fractional ideal (25*a + 19)) * (Fractional ideal (28*a - 25)) * (Fractional ideal (-67*a + 109)) * (Fractional ideal (-1507*a - 5011))
-            sage: Jk = IdeleGroup(K)
+            sage: Jk = Ideles(K)
             sage: Jk(r)
             Idele over Number Field in a with defining polynomial x^2 - 6 with values
                     infinity_1: [0.0000000000000000 .. +infinity]
