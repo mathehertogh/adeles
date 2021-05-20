@@ -81,18 +81,14 @@ class Idele(MultiplicativeGroupElement):
 
         INPUT:
 
-        - ``parent`` -- the :class:`Ideles` to which this idele belongs
+        - ``parent`` -- instance of :class:`Ideles`; parent idele group
         - ``exact`` -- an element of ``K`` or ``None``; determines the exact
-          value of this idele at all placed unspecified in ``infinite`` and
-          ``finite``.
-        - ``infinite`` -- a ``list`` or ``None``; the list should have as many
-          entries as ``K`` has infinite places. The ``i``th entry specifies the
-          value of this idele at the infinite place corresponding to
-          ``K.places()[i]``. The entry should lie in ``RIF`` or ``CIF``
-          (depending on the place being real/complex), or be ``None`` for
-          "unspecified".
-          Setting ``list`` to None is the same as passing an all-``None``'s
-          list.
+          value of this idele at all unstored finite primes
+        - ``infinite`` -- ``None`` or a list of elements of ``RIF`` and ``CIF``;
+          the list should have as many entries as ``K`` has infinite places. The
+          ``i``th entry specifies the  value of this idele at the infinite place
+          corresponding to ``K.places()[i]``. The entry should lie in ``RIF``
+          or ``CIF``, depending on the place being real or complex.
         - ``finite`` -- a ``dict`` or ``None``; ``None`` is the same as passing
           an empty ``dict``. The ``dict`` should contain (``key``, ``value``)
           pairs such that:
@@ -110,21 +106,32 @@ class Idele(MultiplicativeGroupElement):
 
             sage: J = Ideles(QQ)
             sage: Idele(J, None, [3.14], {2: (5/3, 2), 5: (1, 9)})
-            (3.1400000000000002?, 5/3*(1+M_2^2), Z_3*, 1*(1+M_5^9), ...)
-            sage: Idele(J, None, None, {7: (1/10, 100)})
-            (RR*, Z_2*, Z_3*, Z_5*, 1/10*(1+M_7^100), ...)
-            sage: Idele(J, 1/3, None, {7: (1/10, 100)})
-            (0.3333333333333334?, 1/3, 1/3, 1/3, 1/10*(1+M_7^100), 1/3, 1/3, 1/3, ...)
+            Idele with values:
+              infinity_0:   3.1400000000000002?
+              2:            5/3 * U(2)
+              5:            1 * U(9)
+            sage: Idele(J, None, [-1], {7: (1/10, 100)})
+            Idele with values:
+              infinity_0:   -1
+              7:            1/10 * U(100)
+            sage: Idele(J, 1/3, [1], {7: (1/10, 100)})
+            Idele with values:
+              infinity_0:   1
+              7:            1/10 * U(100)
+              elsewhere:    1/3
 
         Now let's take a non-trivial number field::
 
-        sage: K.<a> = NumberField(x^4-17)
-        sage: Jk = Ideles(K)
-        sage: Idele(Jk, None, None, {K.prime_above(3): (a^3+a+1, 10)})
-        Idele over Number Field in a with defining polynomial x^4 - 17 with values
-        (3, 1/2*a^2 - a - 1/2): a^3 + a + 1 * U_q^10
+            sage: K.<a> = NumberField(x^4-17)
+            sage: Jk = Ideles(K)
+            sage: Idele(Jk, a/2, [3.14, -1, 1+I], {K.prime_above(3): (a^3+a+1, 10)})
+            Idele with values:
+              infinity_0:   3.1400000000000002?
+              infinity_1:   -1
+              infinity_2:   1 + 1*I
+              (3, 1/2*a^2 - a - 1/2):       (a^3 + a + 1) * U(10)
+              elsewhere:    1/2*a
         """
-        #print("DEBUG Idele.__init__({}, {}, {}, {})".format(parent, exact, infinite, finite))
         self._exact = exact
         self._infinite = infinite
         self._finite = finite
@@ -174,10 +181,9 @@ class Idele(MultiplicativeGroupElement):
         """
         Check that the ``infinite`` attribute is valid and adjust if faesable
 
-        Valid means: ``infinite`` is ``None``, or a list of length
-        ``len(K.places())`` with the `i`-th entry an element of
-        ``RIF`` or ``CIF`` (depending on the place being real/complex) or
-        ``None``.
+        Valid means: ``infinite`` is a list of length ``len(K.places())`` with
+        the `i`-th entry an element of ``RIF`` or ``CIF``, depending on the
+        place being real or complex, or ``infinite`` is ``None``.
 
         If the `i`-th entry's parent is not equal to ``RIF``/``CIF``, but does
         lie in it, than we cast the element to an actual element of such an
@@ -203,12 +209,13 @@ class Idele(MultiplicativeGroupElement):
             sage: u._infinite[0].parent()
             Real Interval Field with 53 bits of precision
 
-        And here we cast ``None`` to a list of ``None``s::
+        And here we cast ``None`` to a list of unknown intervals::
 
             sage: u._infinite = None
             sage: u._validate_infinite()
             sage: u._infinite
-            [None, None]
+            [[-infinity .. +infinity],
+             [-infinity .. +infinity] + [-infinity .. +infinity]*I]
 
         The exceptions that we may throw:
 
@@ -216,7 +223,7 @@ class Idele(MultiplicativeGroupElement):
             sage: u._validate_infinite()
             Traceback (most recent call last):
             ...
-            TypeError: infinite should have length 2
+            ValueError: infinite should have length 2
             sage: u._infinite = {CIF: I+1}
             sage: u._validate_infinite()
             Traceback (most recent call last):
@@ -232,20 +239,22 @@ class Idele(MultiplicativeGroupElement):
         K_oo = infinite_completions(K)
         t = len(K_oo)
         if self.infinite() is None:
-            self._infinite = [None for i in range(t)]
+            r1, r2 = K.signature()
+            RR = RIF(-oo, oo)
+            CC = CIF(RR, RR)
+            self._infinite = [RR for i in range(r1)] + [CC for i in range(r2)]
             return
         if not isinstance(self.infinite(), list):
             raise TypeError("infinite should be a list")
         if len(self.infinite()) != t:
-            raise TypeError("infinite should have length {}".format(t))
+            raise ValueError("infinite should have length {}".format(t))
         for i in range(t):
             val = self.infinite(i)
-            if val is not None:
-                if val not in K_oo[i][0]:
-                    raise TypeError("{}th infinite value ({}) should lie in {}".format(i, val, K_oo[i][0]))
-                if val.is_zero():
-                    raise ValueError("{}th infinite value ({}) should be a unit (i.e. non-zero)".format(i, val))
-                self._infinite[i] = K_oo[i][0](val)
+            if val not in K_oo[i][0]:
+                raise TypeError("{}th infinite value ({}) should lie in {}".format(i, val, K_oo[i][0]))
+            if val == 0:
+                raise ValueError("{}th infinite value ({}) must be non-zero".format(i, val))
+            self._infinite[i] = K_oo[i][0](val)
 
     def _validate_finite(self):
         r"""
@@ -329,200 +338,51 @@ class Idele(MultiplicativeGroupElement):
         """
         Return a representation of this idele.
 
-        If ``self`` only stored values at primes that lie above rational primes
-        smaller than 50, we return a dense representation (see
-        :meth:`_repr_dense`).
-        Else, we return a sparse representation (see :meth:`_repr_sparse`).
-        """
-        K = self.parent().number_field()
-        for q in self.finite():
-            p = q if K is QQ else q.gens_two()[0] # the rational prime below q
-            if p >= 50:
-                return self._repr_sparse()
-        return self._repr_dense()
-
-    def _repr_sparse(self):
-        """
-        Return a sparse representation of this idele.
-
         EXAMPLES::
 
             sage: J = Ideles(QQ)
-            sage: u = J(1/2, None, {10000079: (7/9, 20)})
-            sage: u
-            Idele over Rational Field with values
-                    10000079: 7/9 * U_q^20
-            and which equals exactly 1/2 at all other primes
+            sage: u = J(1/2, None, {10000079: (7/9, 20)}); u
+            Idele with values:
+              infinity_0:  RR^*
+              10000079:     7/9 * U(20)
+              elsewhere:    1/2
             sage: J(None, [7.9], {10000079: (7/9, 20)})
-            Idele over Rational Field with values
-                    infinity_0: 7.9000000000000004?
-                    10000079: 7/9 * U_q^20
+            Idele with values:
+              infinity_0:   7.9000000000000004?
+              10000079:     7/9 * U(20)
         """
         K = self.parent().number_field()
-        rep = "Idele over {} with values\n".format(K)
+        r1, r2 = K.signature()
+        RR = RIF(-oo, oo)
+        CC = CIF(RR, RR)
+        rep = "Idele with values:"
         for i in range(len(K.places())):
-            x_oo_i = self.infinite(i)
-            if x_oo_i is not None:
-                rep += "\tinfinity_{}: {}\n".format(i, x_oo_i)
-        for q in self.finite():
-            x_q, i_q = self.finite(q)
-            q_name = q if K is QQ else q.gens_reduced()
-            rep += "\t{}: {} * U_q^{}\n".format(q_name, x_q, i_q)
-        if self._has_exact():
-            rep += "and which equals exactly {} at all other primes.".format(self.exact())
-        return rep[0:-1]
-
-    def _repr_dense(self):
-        """
-        Return a dense representation of this idele
-
-        We represent the idele "densely": first we print (the values at) all
-        infinite primes, then at the primes above 2, then at the primes above
-        3, then at the primes above 5, etc. Each time we use the order as
-        returned by :meth:`NumberField.primes_above`. We keep printing until
-        we printed all stored values. All not-stored values in between are
-        printed as "RR*", "CC*" or "Z_p*".
-        
-        EXAMPLES::
-
-            sage: K.<a> = NumberField(x^2+5)
-            sage: J = Ideles(K)
-            sage: J(a, [2*I], {K.prime_above(3): (a/2+1, 8)})
-            (2*I, a, (1/2*a + 1)*(1+M_p3^8), a, a, a, a, ...)
-            where:
-                    p3 = Fractional ideal (3, a + 1)
-            sage: J(None, None, {K.prime_above(5): (-a-7, 0)})
-            (CC*, Z_p2*, Z_p3*, Z_q3*, (-a - 7)*Z_p5*, ...)
-            where:
-                    p2 = Fractional ideal (2, a + 1)
-                    p3 = Fractional ideal (3, a + 1)
-                    q3 = Fractional ideal (3, a + 2)
-                    p5 = Fractional ideal (-a)
-        """
-        from sage.rings.fast_arith import prime_range
-        if self._has_exact() and not self.finite() and all([x is None for x in self.infinite()]):
-            return str(self.exact())
-        rep = "("
-        K = self.parent().number_field()
-        K_oo = infinite_completions(K)
-        for i in range(len(K_oo)):
-            val = self.infinite(i)
-            if val is None:
-                if self._has_exact():
-                    phi = K_oo[i][1] # phi: K --> RIF/CIF
-                    rep += "{}, ".format(phi(self.exact()))
-                elif K_oo[i][0] is CIF:
-                    rep += "CC*, "
-                else:
-                    rep += "RR*, "
+            x = self.infinite(i)
+            if x.endpoints() == RR.endpoints():
+                rep += "\n  infinity_{}:\tRR^*".format(i)
+            elif x.endpoints() == CC.endpoints():
+                rep += "\n  infinity_{}:\tCC^*".format(i)
             else:
-                rep += "{}, ".format(val)
-        start = ZZ(0) 
-        step = ZZ(100) 
-        to_do = set(self.finite())
+                rep += "\n  infinity_{}:\t{}".format(i, self.infinite(i))
+
+        finite = list(self.finite().items())
         if K is QQ:
-            while to_do:
-                for p in prime_range(start, start+step):
-                    if p in to_do:
-                        v, i = self.finite(p)
-                        if i > 0:
-                            rep += "{}*(1+M_{}^{}), ".format(v, p, i)
-                        else:
-                            rep += "{}*Z_{}*, ".format(v, p)
-                        to_do.remove(p)
-                        if not to_do:
-                            break
-                    elif self.exact() is None:
-                        rep += "Z_{}*, ".format(p)
-                    else:
-                        rep += "{}, ".format(self.exact())
-                start += step
+            # sort on the (rational) prime itself
+            finite.sort(key=lambda x: x[0])
         else:
-            legend = "\nwhere:"
-            while to_do:
-                for p in prime_range(start, start+step):
-                    qs = K.primes_above(p)
-                    for i in range(len(qs)):
-                        q_str = self._prime_name(p, i)
-                        if qs[i] in to_do:
-                            v, w = self.finite(qs[i])
-                            if sum([c != 0 for c in v.list()]) > 1:
-                                v = "(" + str(v) + ")"
-                            if w > 0:
-                                rep += "{}*(1+M_{}^{}), ".format(v, q_str, w)
-                            else:
-                                rep += "{}*Z_{}*, ".format(v, q_str)
-                            legend += "\n\t{} = {}".format(q_str, qs[i])
-                            to_do.remove(qs[i])
-                        elif self.exact() is None:
-                            rep += "Z_{}*, ".format(q_str)
-                            legend += "\n\t{} = {}".format(q_str, qs[i])
-                        else:
-                            rep += "{}, ".format(self.exact())
-                    if not to_do:
-                        break
-                start += step
+            # sort on rational prime lying below the stored prime:
+            finite.sort(key=lambda x: x[0].gens_two()[0])
+
+        for q, val in finite:
+            x_q, i_q = val
+            q_name = str(q) if K is QQ else str(q.gens_two())
+            tab = "\t\t" if len(q_name) < 5 else "\t"
+            if len([c for c in x_q.list() if not c.is_zero()]) > 1:
+                x_q = "(" + str(x_q) + ")"
+            rep += "\n  {}:{}{} * U({})".format(q_name, tab, x_q, i_q)
         if self._has_exact():
-            rep += "{}, {}, {}, ".format(self.exact(), self.exact(), self.exact())
-        rep += "...)"
-        if K is not QQ:
-            rep += legend
+            rep += "\n  elsewhere:\t{}".format(self.exact())
         return rep
-
-    def _prime_name(self, p, i):
-        r"""
-        Return our name for the ``i``-th prime above the rational prime ``p``
-
-        INPUT:
-
-        - `p` -- a prime number in `\ZZ`
-        - `i` -- a non-negative integer
-
-        OUTPUT:
-
-        A short name for the prime ``K.primes_above(p)[i]``.
-
-        For `X` a prime number, we call the 0th, 1th, 2th, etc. primes above `X`
-        as follows: "pX", "qX", "rX", "sX", "tX", "ppX", "pqX", "prX", etc.
-        
-        We do not validate the input. For example, we don't check if ``p`` is a
-        prime number and we do not check if ``self.parent().number_field()``
-        actually has at least ``i+1`` primes above ``p``.
-
-        EXAMPLES::
-
-            sage: K.<a> = NumberField(x^6+x+1)
-            sage: J = Ideles(K)
-            sage: u = J(1)
-            sage: u._prime_name(2, 0)
-            'p2'
-            sage: for i in range(12):
-            ....:     u._prime_name(5, i)
-            'p5'
-            'q5'
-            'r5'
-            's5'
-            't5'
-            'pp5'
-            'pq5'
-            'pr5'
-            'ps5'
-            'pt5'
-            'qp5'
-            'qq5'
-            sage: u._prime_name(101, 0)
-            'p101'
-        """
-        if i == 0:
-            return "p" + str(p)
-        i = ZZ(i)
-        result = ""
-        digits = i.digits(base=5)
-        if len(digits) > 1:
-            digits[-1] -= ZZ(1) 
-        for d in digits:
-            result = chr(d + ord("p")) + result
-        return result + str(p)
 
     def _equals(self, other):
         """
@@ -571,17 +431,13 @@ class Idele(MultiplicativeGroupElement):
 
         t = len(self.infinite())
         for i in range(t):
-            if self.infinite(i) is None:
-                if other.infinite(i) is not None:
+            try:
+                intersection = self.infinite(i).intersection(other.infinite(i))
+                if intersection.is_zero():
                     return False
-            else:
-                if other.infinite(i) is None:
-                    return False
-                try:
-                    self.infinite(i).intersection(other.infinite(i))
-                except ValueError:
-                    # This indicates the intersection is empty
-                    return False
+            except ValueError:
+                # This indicates the intersection is empty
+                return False
 
         for q, v in self.finite().items():
             if q in other.finite():
@@ -743,13 +599,27 @@ class Idele(MultiplicativeGroupElement):
             sage: v = J(None, [1.2345], None)
             sage: w = J(1/7, [-1.0], {3: (-1, 7)})
             sage: u*v
-            (RR*, 1/2*Z_2*, 2/5*Z_3*, ...)
+            Idele with values:
+              infinity_0:  RR^*
+              2:            1/2 * U(0)
+              3:            2/5 * U(0)
             sage: u*w
-            (RR*, 1/14*(1+M_2^7), -2/5*(1+M_3^7), Z_5*, 1/7*Z_7*, ...)
+            Idele with values:
+              infinity_0:  RR^*
+              2:            1/14 * U(7)
+              3:            -2/5 * U(7)
+              7:            1/7 * U(0)
             sage: w*u
-            (RR*, 1/14*(1+M_2^7), -2/5*(1+M_3^7), Z_5*, 1/7*Z_7*, ...)
+            Idele with values:
+              infinity_0:       RR^*
+              2:                1/14 * U(7)
+              3:                -2/5 * U(7)
+              7:                1/7 * U(0)
             sage: v*w
-            (-1.2345000000000000?, Z_2*, -1*Z_3*, Z_5*, 1/7*Z_7*, ...)
+            Idele with values:
+              infinity_0:   -1.2345000000000000?
+              3:            -1 * U(0)
+              7:            1/7 * U(0)
 
         And now a few over a non-trivial number field::
 
@@ -760,47 +630,31 @@ class Idele(MultiplicativeGroupElement):
             sage: v = J(None, [I+1], {p3: (i/2, 7)})
             sage: w = J(i-1, None, {p2: (2, 5), p3: (3*i, 20)})
             sage: u*v
-            (2*I, (i + 1)*Z_p2*, (1/2*i - 1/2)*(1+M_p3^7), ...)
-            where:
-                    p2 = Fractional ideal (i + 1)
-                    p3 = Fractional ideal (3)
+            Idele with values:
+              infinity_0:       2*I
+              (2, i + 1):       (i + 1) * U(0)
+              (3, 0):   (1/2*i - 1/2) * U(7)
             sage: u*w
-            (-2, (2*i + 2)*(1+M_p2^5), (3*i - 3)*(1+M_p3^20), -2, -2, -2, ...)
-            where:
-                    p2 = Fractional ideal (i + 1)
-                    p3 = Fractional ideal (3)
+            Idele with values:
+              infinity_0:  CC^*
+              (2, i + 1):   (2*i + 2) * U(5)
+              (3, 0):       (3*i - 3) * U(20)
+              elsewhere:    -2
             sage: v*w
-            (-2, 2*Z_p2*, -3/2*(1+M_p3^7), ...)
-            where:
-                    p2 = Fractional ideal (i + 1)
-                    p3 = Fractional ideal (3)
+            Idele with values:
+              infinity_0:  CC^*
+              (2, i + 1):   2 * U(0)
+              (3, 0):       -3/2 * U(7)
         """
+        K = self.parent().number_field()
+
         exact = None
         if self._has_exact() and other._has_exact():
             exact = self.exact() * other.exact()
 
         infinite = self.infinite().copy()
-        K = self.parent().number_field()
-        K_oo = infinite_completions(K)
-        for i in range(len(K_oo)):
-            if infinite[i] is None:
-                if other.infinite(i) is None:
-                    pass # keep None, depends on exact which is already set correctly
-                else: # other has infinite value
-                    if self._has_exact():
-                        phi = K_oo[i][1] # phi: K --> RIF/CIF
-                        infinite[i] = phi(self.exact()) * other.infinite(i)
-                    else:
-                        pass
-            else: # infinite[i] set
-                if other.infinite(i) is None:
-                    if other._has_exact():
-                        phi = K_oo[i][1] # phi: K --> RIF/CIF
-                        infinite[i] = infinite[i] * phi(other.exact())
-                    else: # other.infinite(i) unknown
-                        infinite[i] = None
-                else: # both values set
-                    infinite[i] *= other.infinite(i)
+        for i in range(len(infinite)):
+            infinite[i] *= other.infinite(i)
 
         finite = self.finite().copy()
         for q, val in finite.items():
@@ -850,15 +704,16 @@ class Idele(MultiplicativeGroupElement):
             sage: J = Ideles(K)
             sage: u = J(None, [I], {p2: (a, 10), p3: (1/2, 7)})
             sage: u.inverse()
-            (-1*I, (-a - 1)*(1+M_p2^10), 2*(1+M_p3^7), ...)
-            where:
-                    p2 = Fractional ideal (2)
-                    p3 = Fractional ideal (-2*a - 1)
-            sage: v = J(5, None, {p3: (a+1, 97)})
+            Idele with values:
+              infinity_0:   -1*I
+              (2, 0):       (-a - 1) * U(10)
+              (3, a + 2):   2 * U(7)
+            sage: v = J(5, [1/2-I], {p3: (a+1, 97)})
             sage: v.inverse()
-            (0.2000000000000000?, 1/5, -a*(1+M_p3^97), 1/5, 1/5, 1/5, ...)
-            where:
-                    p3 = Fractional ideal (-2*a - 1)
+            Idele with values:
+              infinity_0:   0.4000000000000000? + 0.80000000000000005?*I
+              (3, a + 2):   -a * U(97)
+              elsewhere:    1/5
         """
         exact = None
         if self._has_exact():
@@ -866,8 +721,7 @@ class Idele(MultiplicativeGroupElement):
 
         infinite = self.infinite().copy()
         for i in range(len(infinite)):
-            if infinite[i] is not None:
-                infinite[i] = ZZ(1) / infinite[i]
+            infinite[i] = ZZ(1) / infinite[i]
 
         finite = self.finite().copy()
         for q, val in finite.items():
@@ -885,50 +739,22 @@ class Idele(MultiplicativeGroupElement):
             sage: p2, q3 = K.prime_above(2), K.primes_above(3)[1]
             sage: J = Ideles(K)
             sage: u = J(None, [I+1], {p2: (a-1, 7), q3: (a/2, 9)})
-            sage: v = J(a, None, {q3: (2, 10)})
+            sage: v = J(a, [3], {q3: (2, 10)})
             sage: u/v
-            (0.35355339059327374? - 0.35355339059327374?*I, (1/8*a + 1)*(1+M_p2^7), Z_p3*, 1/4*a*(1+M_q3^9), ...)
-            where:
-                    p2 = Fractional ideal (-1/2*a)
-                    p3 = Fractional ideal (1/2*a + 1)
-                    q3 = Fractional ideal (-1/2*a + 1)
+            Idele with values:
+              infinity_0:   0.3333333333333334? + 0.3333333333333334?*I
+              (2, 1/2*a):   (1/8*a + 1) * U(7)
+              (3, 1/2*a + 2):       1/4*a * U(9)
             sage: v/u
-            (1.4142135623730950? + 1.4142135623730950?*I, (-1/9*a + 8/9)*(1+M_p2^7), Z_p3*, -1/2*a*(1+M_q3^9), ...)
-            where:
-                    p2 = Fractional ideal (-1/2*a)
-                    p3 = Fractional ideal (1/2*a + 1)
-                    q3 = Fractional ideal (-1/2*a + 1)
+            Idele with values:
+              infinity_0:   1.5000000000000000? - 1.5000000000000000?*I
+              (2, 1/2*a):   (-1/9*a + 8/9) * U(7)
+              (3, 1/2*a + 2):       -1/2*a * U(9)
             sage: u/u
-            (1, 1*(1+M_p2^7), Z_p3*, 1*(1+M_q3^9), ...)
-            where:
-                    p2 = Fractional ideal (-1/2*a)
-                    p3 = Fractional ideal (1/2*a + 1)
-                    q3 = Fractional ideal (-1/2*a + 1)
-
-        .. TODO::
-            
-            Fix the following bug::
-
-                sage: J = Ideles(QQ)
-                sage: u = J(None, None, {2: (2, 3)})
-                sage: u/J(2)
-                (RR*, 1*(1+M_2^3), ...)
-                sage: u/2
-                Traceback (most recent call last):
-                ...
-                KeyError: (Idele Group of Rational Field, Integer Ring, <built-in function truediv>)
-
-                During handling of the above exception, another exception occurred:
-
-                Traceback (most recent call last):
-                ...
-                KeyError: 'gens'
-
-                During handling of the above exception, another exception occurred:
-
-                Traceback (most recent call last):
-                ...
-                AttributeError: 'Ideles_with_category' object has no attribute 'gens'
+            Idele with values:
+              infinity_0:   1
+              (2, 1/2*a):   1 * U(7)
+              (3, 1/2*a + 2):       1 * U(9)
         """
         return self * other.inverse()
 
@@ -948,21 +774,30 @@ class Idele(MultiplicativeGroupElement):
             sage: J = Ideles(QQ)
             sage: u = J(None, None, {2: (1/4, 1), 3: (3/5, 2)})
             sage: u.integral_split()
-            ((RR*, 5*(1+M_2^1), 12*(1+M_3^2), 20*Z_5*, ...), 20)
+            (Idele with values:
+               infinity_0: RR^*
+               2:           5 * U(1)
+               3:           12 * U(2)
+               5:           20 * U(0),
+             20)
             sage: v = J(3/14, [1], {2: (3/4, 5), 3: (1, 3)})
             sage: v.integral_split()
-            ((28, 21*(1+M_2^5), 28*(1+M_3^3), 6, 6, 6, ...), 28)
-
+            (Idele with values:
+               infinity_0:  28
+               2:           21 * U(5)
+               3:           28 * U(3)
+               elsewhere:   6,
+             28)
             sage: K.<a> = NumberField(x^2+10)
             sage: p3, p5 = K.prime_above(3), K.prime_above(5)
             sage: Jk = Ideles(K)
             sage: u = Jk(None, [I], {p3: (1/a, 3), p5: (7/6, 8)})
             sage: u.integral_split()
-            ((30*I, 30*Z_p2*, -3*a*(1+M_p3^3), 35*(1+M_p5^8), ...)
-             where:
-                    p2 = Fractional ideal (2, a)
-                    p3 = Fractional ideal (3)
-                    p5 = Fractional ideal (5, a),
+            (Idele with values:
+               infinity_0:  30*I
+               (2, a):      30 * U(0)
+               (3, 0):      -3*a * U(3)
+               (5, a):      35 * U(8),
              30)
         """
         from sage.arith.functions import lcm
@@ -1001,13 +836,10 @@ class Idele(MultiplicativeGroupElement):
                     finite[q] = (d, ZZ(0))
         infinite = self.infinite().copy()
         for i in range(len(infinite)):
-            if infinite[i] is not None:
-                infinite[i] = d*infinite[i]
+            infinite[i] = d*infinite[i]
         u = self.__class__(self.parent(), exact, infinite, finite)
 
         return (u, d)
-
-
 
     def to_modulo_element(self):
         r"""
@@ -1081,7 +913,7 @@ class Idele(MultiplicativeGroupElement):
             sage: u = Jk(None, [2, I], {p7: (1/2, 1), q7: (7*a, 2)})
             sage: m = Modulus(K.ideal(7), [0])
             sage: u.to_ray_class(m).ideal()
-            Fractional ideal (8*a^2 - 76*a + 9)
+            Fractional ideal (-2*a^2 - 3*a + 3)
 
         TESTS:
 
@@ -1130,8 +962,7 @@ class Idele(MultiplicativeGroupElement):
         # First we check if the precision of this idele is high enough to have
         # a well-defined image in the ray class group ``G``.
         for i in modulus.infinite_part():
-            if (self.infinite(i) is None
-                    or not (self.infinite(i) <= 0 or self.infinite(i) >= 0)
+            if (not (self.infinite(i) <= 0 or self.infinite(i) >= 0)
                     or self.infinite(i).is_zero()):
                 raise ValueError("idele has no well-defined sign at infinite prime {}".format(i))
         for q, e in modulus.finite_factors():
@@ -1229,10 +1060,7 @@ class Idele(MultiplicativeGroupElement):
             if (x-1).valuation(q) < e:
                 return False
         for i in modulus.infinite_part():
-            x = self.infinite(i)
-            if x is None:
-                return False
-            if not (x >= 0):
+            if not (self.infinite(i) >= 0):
                 return False
         return True
 
@@ -1274,7 +1102,7 @@ class Idele(MultiplicativeGroupElement):
 
             sage: K.<a> = NumberField(x^3+x+1)
             sage: Jk = Ideles(K)
-            sage: v = Jk(a, [None, I], {K.prime_above(7): (a+1, 8)})
+            sage: v = Jk(a, [RIF(-0.68, -0.69), I], {K.prime_above(7): (a+1, 8)})
             sage: v._contains_at(a, K.places()[0])
             True
             sage: v._contains_at(a+1, K.places()[0])
@@ -1300,14 +1128,8 @@ class Idele(MultiplicativeGroupElement):
         K = self.parent().number_field()
         if q in K.places():
             i = K.places().index(q)
-            if self.infinite(i) is not None:
-                phi = completions(K, oo)[i][1] # phi: K --> RIF/CIF
-                return phi(x) in self.infinite(i)
-            elif self._has_exact():
-                return x == self.exact()
-            else:
-                # Not stored represents RR* or CC*, which ``x`` always lies in
-                return True
+            phi = completions(K, oo)[i][1] # phi: K --> RIF/CIF
+            return phi(x) in self.infinite(i)
 
         if (K is QQ and q in Primes()) or (K is not QQ and q in K.ideal_monoid() and q.is_prime()):
             if q in self.finite():
@@ -1337,7 +1159,9 @@ class Idele(MultiplicativeGroupElement):
             sage: K.<a> = NumberField(x^7-4/7*x^3+1)
             sage: J = Ideles(K)
             sage: u = J(a^5-a)
-            sage: v = J(None, [completions(K, oo)[0][1](a^3), None, None, None], {K.prime_above(5): (a^3, 4)})
+            sage: v_oo = completions(K, oo)[0][1](a^3)
+            sage: C = CIF(RIF(-oo, oo), RIF(-oo, oo))
+            sage: v = J(None, [v_oo, C, C, C], {K.prime_above(5): (a^3, 4)})
             sage: u._contains(a^5-a)
             True
             sage: u._contains(1)
@@ -1409,7 +1233,6 @@ class Idele(MultiplicativeGroupElement):
         u = U.gen().value()
         for e in range(U.order()):
             if self._contains(u**e * r):
-                #print("DEBUG: found an original: {}".format(u^e * r))
                 return True
         return False
         r"""
@@ -1489,19 +1312,23 @@ class Idele(MultiplicativeGroupElement):
 
             sage: u.increase_precision([p2, 5], 3)
             sage: u
-            Idele over Number Field in a with defining polynomial x^3 - 2 with values
-                    (a,): a * U_q^8
-                    (-a^2 - 1,): 1/3 * U_q^4
-                    (a^2 - 2*a - 1,): 1 * U_q^3
+            Idele with values:
+              infinity_0:  RR^*
+              infinity_1:  CC^*
+              (2, a):       a * U(8)
+              (5, a + 2):   1/3 * U(4)
+              (5, a^2 - 2*a - 1):   1 * U(3)
 
         We can also decrease precision::
 
             sage: u.increase_precision(p2, -1)
             sage: u
-            Idele over Number Field in a with defining polynomial x^3 - 2 with values
-                    (a,): a * U_q^7
-                    (-a^2 - 1,): 1/3 * U_q^4
-                    (a^2 - 2*a - 1,): 1 * U_q^3
+            Idele with values:
+              infinity_0:  RR^*
+              infinity_1:  CC^*
+              (2, a):       a * U(7)
+              (5, a + 2):   1/3 * U(4)
+              (5, a^2 - 2*a - 1):   1 * U(3)
 
         The precision of exact values is unchanged::
         
@@ -1509,11 +1336,13 @@ class Idele(MultiplicativeGroupElement):
             sage: p3 = K.prime_above(3)
             sage: u.increase_precision([p2, p3, p5])
             sage: u
-            Idele over Number Field in a with defining polynomial x^3 - 2 with values
-                    (a,): a * U_q^8
-                    (-a^2 - 1,): 1/3 * U_q^5
-                    (a^2 - 2*a - 1,): 1 * U_q^3
-            and which equals exactly a + 1 at all other primes
+            Idele with values:
+              infinity_0:  RR^*
+              infinity_1:  CC^*
+              (2, a):       a * U(8)
+              (5, a + 2):   1/3 * U(5)
+              (5, a^2 - 2*a - 1):   1 * U(3)
+              elsewhere:    a + 1
         """
         K = self.parent().number_field()
 
@@ -1572,14 +1401,14 @@ class Ideles(UniqueRepresentation, Group):
         return r"\Bold{A}_{" + latex(self.number_field()) + "}^*"
 
     def _element_constructor_(self, exact, infinite=None, finite=None):
-        #print("DEBUG: Ideles._element_constructor_({}, {}, {})".format(exact, infinite, finite))
         if infinite is None and finite is None:
             x = exact
             if x is None:
                 raise TypeError("No arguments supplied to Idele-constructor")
             K = self.number_field()
             if x in K:
-                return self.element_class(self, exact, infinite, finite)
+                infinite = [phi(x) for L, phi in infinite_completions(K)]
+                return self.element_class(self, x, infinite, {})
             from adele import Adeles
             Ak = Adeles(K)
             if Ak.has_coerce_map_from(x.parent()): # conversion A_K --> J_K
@@ -1608,17 +1437,24 @@ class Ideles(UniqueRepresentation, Group):
             sage: Qhat = ProfiniteNumbers(QQ)
             sage: a = A([-1.5], Qhat(7, 24, 5))
             sage: J._from_adele(a)
-            (-1.5000000000000000?, 7*(1+M_2^3), 7*(1+M_3^1), ...)
+            Idele with values:
+              infinity_0:   -1.5000000000000000?
+              2:            7 * U(3)
+              3:            7 * U(1)
             sage: b = A([RIF(-1, 1)], Qhat(5, 25, 2))
             sage: J._from_adele(b)
-            (0.?, Z_2*, Z_3*, 5*(1+M_5^1), ...)
+            Idele with values:
+              infinity_0:   0.?
+              5:            5 * U(1)
             sage: c = A([pi.n()], 20/3)
             sage: J._from_adele(c)
-            (3.1415926535897932?, 20/3, 20/3, 20/3, ...)
+            Idele with values:
+              infinity_0:   3.1415926535897932?
+              elsewhere:    20/3
 
-        If the given adele has value zero modulo on of its stored primes (i.e.
-        ``4 mod 12`` has value zero modulo 2^2), then there is no idele that
-        represents the adele. For example: the given adele then represents
+        If the given adele has value zero modulo at one of its stored primes
+        (i.e. ``4 mod 12`` has value zero modulo 2^2), then there is no idele
+        that represents the adele. For example: the given adele then represents
         multiple element which have different valuation at that prime. But an
         idele always has a unique valuation at every prime. In this case, we
         throw an exception::
@@ -1652,7 +1488,7 @@ class Ideles(UniqueRepresentation, Group):
                     raise ValueError("adele is zero at the prime {}".format(q))
                 finite[q] = (value, e-v)
 
-        return self.element_class(self, exact, adele.infinite(), finite)
+        return self.element_class(self, exact, adele.infinite().copy(), finite)
 
     def _from_ray_class(self, r):
         r"""
@@ -1690,21 +1526,21 @@ class Ideles(UniqueRepresentation, Group):
             sage: factor(r.ideal())
             (Fractional ideal (3)) * (Fractional ideal (163))
             sage: J._from_ray_class(r)
-            Idele over Number Field in one with defining polynomial x - 1 with values
-                    infinity_0: [0.0000000000000000 .. +infinity]
-                    (2,): 1 * U_q^1
-                    (5,): 1 * U_q^1
-                    (3,): 3 * U_q^0
-                    (163,): 163 * U_q^0
+            Idele with values:
+              infinity_0:   [0.0000000000000000 .. +infinity]
+              (2, 0):       1 * U(1)
+              (5, 0):       1 * U(1)
+              (3, 0):       3 * U(0)
+              (163, 0):     163 * U(0)
             sage: s = G(Q.ideal(7))
             sage: s.ideal()
             Fractional ideal (67)
             sage: J._from_ray_class(s)
-            Idele over Number Field in one with defining polynomial x - 1 with values
-                    infinity_0: [0.0000000000000000 .. +infinity]
-                    (2,): 1 * U_q^1
-                    (5,): 1 * U_q^1
-                    (67,): 67 * U_q^0
+            Idele with values:
+              infinity_0:   [0.0000000000000000 .. +infinity]
+              (2, 0):       1 * U(1)
+              (5, 0):       1 * U(1)
+              (67, 0):      67 * U(0)
            
         :: 
 
@@ -1715,21 +1551,25 @@ class Ideles(UniqueRepresentation, Group):
             (Fractional ideal (25*a + 19)) * (Fractional ideal (28*a - 25)) * (Fractional ideal (-67*a + 109)) * (Fractional ideal (-1507*a - 5011))
             sage: Jk = Ideles(K)
             sage: Jk(r)
-            Idele over Number Field in a with defining polynomial x^2 - 6 with values
-                    infinity_1: [0.0000000000000000 .. +infinity]
-                    (-a + 2,): 1 * U_q^3
-                    (a + 3,): 1 * U_q^1
-                    (-a - 1,): 1 * U_q^1
-                    (-a + 1,): 1 * U_q^1
-                    (25*a + 19,): a + 543 * U_q^0
-                    (28*a - 25,): a - 1312 * U_q^0
-                    (-67*a + 109,): a - 1799 * U_q^0
-                    (-1507*a - 5011,): a + 1242116 * U_q^0
+            Idele with values:
+              infinity_0:  RR^*
+              infinity_1:   [0.0000000000000000 .. +infinity]
+              (2, a):       1 * U(3)
+              (3, a):       1 * U(1)
+              (5, a + 1):   1 * U(1)
+              (5, a + 4):   1 * U(1)
+              (3389, a + 543):      (a + 543) * U(0)
+              (4079, a + 2767):     (a - 1312) * U(0)
+              (15053, a + 13254):   (a - 1799) * U(0)
+              (11483827, a + 1242116):      (a + 1242116) * U(0)
         """
         K = self.number_field()
         G = r.parent()  # ray class group of r
         exact = None
-        infinite = [None for phi in self.number_field().places()]
+        r1, r2 = K.signature()
+        RR = RIF(-oo, oo)
+        CC = CIF(RR, RR)
+        infinite = [RR for i in range(r1)] + [CC for i in range(r2)]
         for i in G.modulus().infinite_part():
             infinite[i] = RIF(0, oo)
 
@@ -1761,5 +1601,38 @@ class Ideles(UniqueRepresentation, Group):
         """
         return self._number_field
 
+    def _an_element_(self):
+        """
+        Return a typical element of this group
 
+        EXAMPLE::
+
+            sage: Ideles(QQ).an_element()
+            Idele with values:
+              infinity_0:   3.1415926535897901?
+              2:            3/2 * U(7)
+              3:            2 * U(9)
+              elsewhere:    -1
+            sage: K.<a> = NumberField(x^3-2)
+            sage: Ideles(K).an_element()
+            Idele with values:
+              infinity_0:   1
+              infinity_1:   1
+              (2, a):       (a + 1) * U(7)
+              (3, a + 1):   1/2*a^2 * U(9)
+              elsewhere:    -a
+        """
+        K = self.number_field()
+        if K is QQ:
+            infinite = [3.14159265358979]
+            p2, p3 = ZZ(2), ZZ(3)
+        else:
+            r1, r2 = K.signature()
+            infinite = [i for i in range(1,r1+1)] + [1-i*CIF.gen() for i in range(r2)]
+            p2, p3 = K.prime_above(2), K.prime_above(3)
+        finite = {
+            p2: (1+K.an_element(), 7),
+            p3: (1/K.an_element(), 9)
+        }
+        return self.element_class(self, -K.gens()[-1], infinite, finite)
 
