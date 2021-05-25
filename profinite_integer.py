@@ -568,6 +568,68 @@ class ProfiniteInteger(CommutativeAlgebraElement):
         """
         return self._modulus
 
+    def factorial_digits(self):
+        r"""
+        Return the factorial digits of this profinite integer
+
+        Only implemented for profinite integers over `\QQ` with non-zero
+        modulus.
+        
+        Let `k` be the largest integer such that `k!` divides our modulus (this
+        is called our "factorial precision"). Then our factorial digits are the
+        unique integers `d_1, d_2, ..., d_{k-1}` satisfying `0 \leq d_i \leq i`
+        such that
+
+        .. MATH::
+
+            self \equiv d_1 * 1! + d_2 * 2! + ... + d_{k-1} * (k-1)! \mod k!
+
+        EXAMPLES::
+
+            sage: digits = Zhat(11, 48).factorial_digits(); digits
+            [1, 2, 1]
+            sage: sum([digits[i] * factorial(i+1) for i in range(3)])
+            11
+        """
+        if self.parent().number_field() is not QQ:
+            raise NotImplementedError("only implemented for profinite QQ-integers")
+        if self.modulus() == ZZ(0):
+            raise NotImplementedError("not implemented for zero-moduli")
+
+        # Calculate our factorial precision prec, which is the largest k such
+        # that k! divides our modulus.
+        prec = ZZ(1)
+        prec_factorial = ZZ(1)
+        while self.modulus() % (prec_factorial*(prec+1)) == 0:
+            prec += 1
+            prec_factorial *= prec
+
+        # Calculate the projection of our value to ZZ/(prec!)ZZ.
+        value = self.value() % prec_factorial
+
+        # Calculate the factorial digits of value.
+        digits = []
+        k_factorial = prec_factorial // prec
+        for k in range(prec-1, ZZ(0), ZZ(-1)):
+            digit, value = divmod(value, k_factorial)
+            digits = [digit] + digits
+            k_factorial //= k
+
+        return digits
+
+    def visual(self):
+        """
+        Return an interval within the unitinterval `[0,1]` representing ``self``
+        """
+        digits = self.factorial_digits()
+        left = ZZ(0)
+        k_fac = ZZ(1)
+        for k in range(ZZ(1), len(digits)+1):
+            k_fac *= k + 1
+            left += digits[k-1] / k_fac
+        right = left + ZZ(1)/k_fac
+        return left, right
+
     def is_integral(self):
         """
         Return ``True``, indicating that ``self`` is integral
