@@ -596,75 +596,108 @@ class ProfiniteNumbers(UniqueRepresentation, CommutativeAlgebra):
         """
         return ZZ(0)
 
-    def _element_constructor_(self, value, modulus=None, denominator=None):
+    def _element_constructor_(self, x, y=None):
         """
         Construct the element "(``value`` mod ``modulus``)/``denominator``" of
         ``self``
 
+        Write `K` for our base number field.
+
+        INPUT:
+
+        One of the following options:
+
+        - ``x`` an element of `K`, ``y`` a fractional ideal of `K` (default:
+          zero); gives ``x mod y``
+        - ``x`` a profinite `K`-integer, ``y`` a non-zero integer (default:
+          ``1``); gives ``x/y``
+
         EXAMPLES::
 
-            sage: Qhat = ProfiniteNumbers(QQ)
-            sage: Qhat(7, 25, 8)
-            (7 mod 25)/8
-            sage: Qhat(3, 10, 1)
+            Zhat = ProfiniteIntegers(QQ)
+            Qhat = ProfiniteNumbers(QQ)
+            n = Zhat(3, 10)
+            Qhat(n)
             3 mod 10
-            sage: Qhat(3, 10)
-            3 mod 10
-            sage: Qhat(3/2, 7/2)
-            (3 mod 7)/2
+            sage: Qhat(n, 7)
+            3/7 mod 10/7
+            sage: Qhat(3/2)
+            3/2 mod 0
+            sage: Qhat(3/2, 11/10)
+            2/5 mod 11/10
 
         ::
 
             sage: K.<a> = NumberField(x^3+x+1)
-            sage: Khat = ProfiniteNumbers(K)
-            sage: Khat(a, 18, a^2+2)
-            (a mod (18))/(a^2 + 2)
-            sage: Khat(a^2+a, 9*a^2, a^3-1)
-            (a^2 + a mod (9*a^2))/(-a - 2)
-            sage: Khat(a^2+a, 9*a^2, a^3+1)
-            (a^2 + a mod (9*a^2))/(-a)
-            sage: Khat(3*a-2, 4*a^2+16, a)
-            (-24*a^2 - a + 2 mod (4*a^2 + 16))/a
-
-        The number field which is our base coerces in::
-
-            sage: Qhat(7/9)
-            7/9
-            sage: Khat(1/(-4*a^2 - 2*a - 6))
-            1/(-4*a^2 - 2*a - 6)
-            sage: Khat((a-1)/(2*a^2+10))
-            1/(-4*a^2 - 2*a - 6)
-
-        As well as the corresponding profinite integer rings::
-
-            sage: Zhat = ProfiniteIntegers(QQ)
             sage: Ohat = ProfiniteIntegers(K)
-            sage: Qhat(Zhat(6, 24))
-            6 mod 24
-            sage: Khat(Ohat(a^2, 3*a+5))
-            a^2 mod (3*a + 5)
-            sage: Khat(Ohat(a+1, a^2+18*a+20))
-            1436*a^2 mod (a^2 + 18*a + 20)
+            sage: Khat = ProfiniteNumbers(K)
+            sage: n = Khat(a^2, a^2+a+1)
+            sage: Khat(n)
+            a^2 mod Fractional ideal (a^2 + a + 1)
+            sage: Khat(n, 17)
+            1/17*a^2 mod Fractional ideal (1/17*a^2 + 1/17*a + 1/17)
+            sage: Khat(a/3)
+            1/3*a mod Ideal (0) of Number Field in a with defining polynomial x^3 + x + 1
+            sage: Khat(a/3, (a^2-2)/9)
+            8/9*a^2 mod Fractional ideal (1/9*a^2 - 2/9)
+
+        TESTS::
+
+            sage: Qhat('bla')
+            Traceback (most recent call last):
+            ...
+            TypeError: Can't construct profinite number from ('bla', None)
         """
         K = self.base()
-        O = K.maximal_order()
-        Ohat = ProfiniteIntegers(O)
-        if modulus is None and denominator is None:
-            if value in K:  # K --> Khat
-                d = K(value).denominator()
-                return self.element_class(self, Ohat(value*d), d)
-            if value in Ohat:  # Ohat --> Khat
-                return self.element_class(self, Ohat(value))
-        if denominator is None:
-            if value in K and modulus in K.ideal_monoid():
-                from sage.arith.functions import lcm
-                if K is QQ:
-                    den = QQ(modulus).denominator()
-                else:
-                    _, den = K.ideal(modulus).integral_split()
-                d = lcm(K(value).denominator(), den)
-                return self.element_class(self, Ohat(d*value, d*modulus), d)
-        return self.element_class(self, Ohat(value, modulus), denominator)
+        Ohat = ProfiniteIntegers(K)
+
+        if x in K:
+            value = K(x)
+
+            if y is None:
+                modulus = QQ(0) if K is QQ else K.ideal(0)
+            elif y in K.ideal_monoid():
+                modulus = QQ(y) if K is QQ else K.ideal(y)
+            else:
+                raise TypeError("second parameter should be a fractional ideal specifying the modulus")
+
+            from sage.arith.functions import lcm
+            modulus_den = modulus.denominator() if K is QQ else modulus.integral_split()[1]
+            den = lcm(value.denominator(), modulus_den)
+            return self.element_class(self, Ohat(den*value, den*modulus), den)
+
+        if x in Ohat:
+            num = Ohat(x)
+
+            if y is None:
+                den = ZZ(1)
+            elif y in ZZ and y != 0:
+                den = ZZ(y)
+            else:
+                raise TypeError("second parameter should be a non-zero integer specifying the denominator")
+
+            if den < 0:
+                num, den = -num, -den
+
+            return self.element_class(self, num, den)
+
+        raise TypeError("Can't construct profinite number from {}".format((x,y)))
+        # if modulus is None and denominator is None:
+        #     if value in K:  # K --> Khat
+        #         d = K(value).denominator()
+        #         return self.element_class(self, Ohat(value*d), d)
+        #     if value in Ohat:  # Ohat --> Khat
+        #         return self.element_class(self, Ohat(value))
+        # if denominator is None:
+        #     if value in K and modulus in K.ideal_monoid():
+        #         from sage.arith.functions import lcm
+        #         if K is QQ:
+        #             den = QQ(modulus).denominator()
+        #         else:
+        #             _, den = K.ideal(modulus).integral_split()
+        #         d = lcm(K(value).denominator(), den)
+        #         return self.element_class(self, Ohat(d*value, d*modulus), d)
+        # return self.element_class(self, Ohat(value, modulus), denominator)
 
     def _coerce_map_from_(self, S):
         """
