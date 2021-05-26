@@ -490,6 +490,10 @@ class ProfiniteNumber(CommutativeAlgebraElement):
         """
         Return the modulus of self as a fractional ideal of our number field
         """
+        # Division of the zero ideal is not allowed, so we handle that case
+        # separately.
+        if self.numerator().modulus() == 0:
+            return self.numerator().modulus()
         return self.numerator().modulus() / self.denominator()
 
     def value(self):
