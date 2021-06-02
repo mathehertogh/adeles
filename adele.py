@@ -273,6 +273,45 @@ class Adele(CommutativeAlgebraElement):
         finite = self.finite() * other.finite()
         return self.__class__(self.parent(), infinite, finite)
 
+    def _div_(self, other):
+        """
+        Divide ``self`` by ``other`` and return the result
+
+        Only implemented when the finite part of ``other`` has zero modulus and
+        non-zero value. Raise an exception when this is not the case.
+
+        EXAMPLES::
+
+            sage: from all import *
+            sage: A = Adeles(QQ)
+            sage: b = A([3.0], Qhat(6, 14))
+            sage: c = A([2.0], 3/2)
+            sage: b/c
+            (1.5000000000000000?, 4 mod 28/3)
+
+        ::
+
+            sage: K.<a> = NumberField(x^2+x+1)
+            sage:             sage: Ak = Adeles(K)
+            sage:             sage: Khat = ProfiniteNumbers(K)
+            sage: b = Ak([CIF(1.5+I)], Khat((a+1)/3, 8*a))
+            sage: c = Ak([I], 2/3)
+            sage: b/c
+            (1 - 1.5000000000000000?*I, 1/2*a + 1/2 mod (12*a))
+
+        TESTS::
+        
+            sage: c/b
+            Traceback (most recent call last):
+            ...
+            NotImplementedError: Division of profinite numbers only implemented for exact non-zero denominators
+        """
+        infinite = []
+        for i in range(len(self.infinite())):
+            infinite.append(self.infinite(i) / other.infinite(i))
+        finite = self.finite() / other.finite()
+        return self.__class__(self.parent(), infinite, finite)
+
     def to_modulo_element(self):
         """
         Convert this *integral* adele to an element of `O/I`, with `O` the

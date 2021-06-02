@@ -303,28 +303,21 @@ class ProfiniteNumber(CommutativeAlgebraElement):
 
         EXAMPLES::
         
-            sage: Qhat = ProfiniteNumbers(QQ)
-            sage: Qhat(3, 10, 2) / 2
-            (3 mod 10)/4
-            sage: Qhat(3, 10, 2) / (2/3)
-            (9 mod 30)/4
-            sage: Qhat(3, 10, 2) / Qhat(3, 0, 2)
-            (3 mod 10)/3
+            sage: Qhat(3/2, 5) / 2
+            3/4 mod 5/2
+            sage: Qhat(4, 8) / Qhat(2/3, 0)
+            6 mod 12
 
         ::
 
             sage: K.<a> = CyclotomicField(5)
             sage: Khat = ProfiniteNumbers(K)
-            sage: Khat(a+1, 7, 2) / a
-            (a + 1 mod (7))/(2*a)
-            sage: Khat(a+1, 7, 2) / (3*a/2)
-            (a + 1 mod (7))/(3*a)
+            sage: Khat((a+1)/2, 7/2) / (3/a)
+            1/6*a^2 + 1/6*a mod (7/6*a)
         """
-        if not other.numerator().modulus().is_zero():
-            raise NotImplementedError("Division of profinite numbers only implemented for exact denominators")
-        numerator = self.numerator() * other.denominator()
-        denominator = self.denominator() * other.numerator().value()
-        return self.__class__(self.parent(), numerator, denominator)
+        if not other.numerator().modulus().is_zero() or other.value() == 0:
+            raise NotImplementedError("Division of profinite numbers only implemented for exact non-zero denominators")
+        return self * (1/other.value())
 
     def __getitem__(self, p):
         r"""
