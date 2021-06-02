@@ -34,7 +34,7 @@ class ProfiniteNumber(CommutativeAlgebraElement):
     :automethod:`_repr_`
     """
 
-    def __init__(self, parent, numerator, denominator=None):
+    def __init__(self, parent, numerator, denominator):
         r"""
         Construct the profinite number ``numerator / denominator``
         
@@ -44,157 +44,109 @@ class ProfiniteNumber(CommutativeAlgebraElement):
         - ``numerator`` -- an element of ``ProfiniteIntegers(K)``
         - ``denominator`` -- an element of ``K.maximal_order()``
 
-        OUTPUT:
-
-        The profinite number ``numerator``/``denominator``.
-
         EXAMPLES::
 
             sage: Zhat = ProfiniteIntegers(ZZ)
             sage: Qhat = ProfiniteNumbers(QQ)
             sage: ProfiniteNumber(Qhat, Zhat(2, 15), 8)
-            (2 mod 15)/8
+            1/4 mod 15/8
             sage: ProfiniteNumber(Qhat, -97)
             -97
             sage: ProfiniteNumber(Qhat, Zhat(2, 16), 8)
-            (1 mod 8)/4
+            1/4 mod 2
 
         ::
 
             sage: K.<a> = NumberField(x^4+7)
             sage: Ohat = ProfiniteIntegers(K)
             sage: Khat = ProfiniteNumbers(K)
-            sage: ProfiniteNumber(Khat, Ohat(a^3+a, a^3), 2*a-1)
-            (a^3 + a mod (a^3))/(2*a - 1)
-            sage: ProfiniteNumber(Khat, Ohat(a+2, a^3), 2*a-1)
-            (-3/4*a^3 - 7/4*a^2 - 3/4*a + 1/4 mod (a^3))/(2*a - 1)
-
-        TODO:
-
-        The following SHOULD work but does not::
-
-            sage: ProfiniteNumber(Khat, a)
-            a
-
-        This is because the parent of a is K, not O. And there is not coercion
-        from K to Ohat. Hence a in Ohat returns False.
-        We should fix this by the following from sage manual:
-            "Note x∈P holds if and only if the test x==P(x) does not raise an
-             error and evaluates as true."
-        Currently a==Ohat(a) returns False, but I think if we make sure this
-        is evaluated inside Khat, we get True. Hence we shouuld make pushouts
-        work. See also:
-        https://doc.sagemath.org/html/en/thematic_tutorials/coercion_and_categories.html
+            sage: ProfiniteNumber(Khat, Ohat(-a^3, a^2+1), 5)
+            -1/5*a^3 mod (1/5*a^2 + 1/5)
 
         TESTS::
 
             sage: ProfiniteNumber(Qhat, a, 3)
             Traceback (most recent call last):
             ...
-            TypeError: numerator should be an element of Profinite Integers of Rational Field
+            TypeError: numerator should be a profinite integer
             sage: ProfiniteNumber(Qhat, 3, a)
             Traceback (most recent call last):
             ...
-            TypeError: denominator should be a non-zero element of Integer Ring
+            TypeError: denominator should be a non-zero integer
             sage: ProfiniteNumber(Khat, Ohat(a), 0)
             Traceback (most recent call last):
             ...
-            TypeError: denominator should be a non-zero element of Maximal Order in Number Field in a with defining polynomial x^4 + 7
+            TypeError: denominator should be a non-zero integer
         """
         CommutativeAlgebraElement.__init__(self, parent)
-        O = parent.base().maximal_order()
-        Ohat = ProfiniteIntegers(O)
-        if denominator is None:
-            denominator = O.one()
+        Ohat = ProfiniteIntegers(parent.base())
         if numerator not in Ohat:
-            raise TypeError("numerator should be an element of {}".format(Ohat))
-        if denominator not in O or denominator == 0:
-            raise TypeError("denominator should be a non-zero element of {}".format(O))
+            raise TypeError("numerator should be a profinite integer")
+        if denominator not in ZZ or denominator == 0:
+            raise TypeError("denominator should be a non-zero integer")
         self._numerator = Ohat(numerator)
-        self._denominator = O(denominator)
+        self._denominator = ZZ(denominator)
         self._reduce()
 
     def _reduce(self):
         """
-        Try to divide out the greatest common divisor of ``value``, ``modulus``
-        and ``denominator``, where ``self == (value mod modulus)/denominator``.
-
-        Note that this is not possible if the greatest common divisor is a
-        non-principal ideal. In this case we leave ``self`` unchanged.
+        Adjust the numerator and denominator of this profinite number without
+        changing its value or modulus, making the denominator the smallest
+        positive integer possible.
 
         EXAMPLES::
 
             sage: Qhat = ProfiniteNumbers()
-            sage: a = Qhat(1, 100, 60); a
-            (1 mod 100)/60
-            sage: a._numerator._value = 10; a
-            (10 mod 100)/60
-            sage: a._reduce(); a
-            (1 mod 10)/6
-            sage: a._numerator._value = 14; a
-            (14 mod 10)/6
-            sage: a._reduce(); a
-            (2 mod 5)/3
+            sage: a = Qhat(Zhat(1, 100), 60)
+            sage: a._numerator._value = 10
+            sage: a.numerator(), a.denominator()
+            (10 mod 100, 60)
+            sage: a._reduce()
+            sage: a.numerator(), a.denominator()
+            (1 mod 10, 6)
+            sage: a._numerator._value = 14
+            sage: a.numerator(), a.denominator()
+            (14 mod 10, 6)
+            sage: a._reduce()
+            sage: a.numerator(), a.denominator()
+            (2 mod 5, 3)
 
-        ::
+        An example with non-principal ideals.
+        This method is called when creating a profinite number::
 
             sage: K.<a> = NumberField(x^2+5)
+            sage: Ohat = ProfiniteIntegers(K)
             sage: Khat = ProfiniteNumbers(K)
-            sage: Khat(a, 5, a)
-            (-1 mod (a))/-1
-            sage: Khat(3*a, 25, 7*a)
-            (-3 mod (5*a))/-7
-            sage: Khat(3*a, 75, 21*a)
-            (-1 mod (5*a))/-7
-
-        And lastly some examples with non-principal ideals, in which case we
-        cannot always reduce::
-
-            sage: O = K.maximal_order()
-            sage: I = O.ideal(2, a+1)
-            sage: I.divides(2)
-            True
-            sage: I.divides(a+1)
-            True
-            sage: I.is_principal()
-            False
-            sage: Khat(a+1, 2*I, 2)
-            (a + 1 mod (4, 2*a + 2))/2
-
-        Above the greatest common divisor of the three entries is the ideal
-        ``I``. But since ``I`` is non-principal, we cannot divide it out of the
-        elements ``a+1`` and ``2`` of ``O``.
-
-        .. TODO::
-
-            There is still improvement possible in this case of non-principal
-            GCD. For example::
-
-                sage: Khat(2*(a+1), 5*I^3, 4)
-                (2*a + 2 mod (20, 10*a + 10))/4
-
-            Here the GCD is ``I^3``, which is not principal. But ``I^2 = (2)``
-            is. So we could divide out a factor 2.
-
-            But:
-                - how do we find these principal divisors?
-                - is there a unique maximal one or should we chooose one?
-                - what to base this choice on?
+            sage: Khat(Ohat(2*a, K.ideal(4, 2*a+2)), 2)
+            a mod (2, a + 1)
         """
-        O = self.parent().base().maximal_order()
-        if O is ZZ:
+        K = self.parent().base()
+        Ohat = ProfiniteIntegers(K)
+        num = self.numerator()
+        if K is QQ:
             from sage.arith.misc import gcd
-            common = gcd(self.numerator().value(), self.numerator().modulus())
-            common = gcd(common, self.denominator())
-            self._numerator /= common
-            self._denominator = ZZ(self.denominator() // common)
+            b = gcd([num.value(), num.modulus(), self.denominator()])
         else:
-            common = O.ideal(self.numerator().value()) + O.ideal(self.numerator().modulus())
-            common += O.ideal(self.denominator())
-            gens = common.gens_reduced()
-            if len(gens) == 1:
-                self._numerator /= O(gens[0])
-                self._denominator = O(self.denominator() // gens[0])
+            O = K.maximal_order()
+            # The greatest common divisor of ideals is their sum.
+            I = O.ideal(num.value()) + num.modulus() + O.ideal(self.denominator())
+            # The element ``(1/I).gens_two()[0].abs()`` is the positive
+            # generator of `1/I \cap \QQ`. Write this element as `a/b` with `a`
+            # and `b` coprime and both positive.
+            # We have `(a/b)I \subset O`, i.e. `aI \subset bO`, i.e. `bO`
+            # divides `aI`. As `a` and `b` are coprime this implies `bO` divides
+            # `I`. In turn this is equivalent to `(1/b)I \subset O` and so
+            # `1/b \in 1/I \cap \QQ`.
+            # As `a/b` was the generator of `1/I \cap \QQ` we must have
+            # `a/b = 1/b`, i.e. `a = 1` (note that `a/b` and `b` are positive).
+            # This means `1/b` is the largest integer satisfying `I/b \subset O`
+            # i.e. `I \subset bO`.
+            # We conclude: `b` is the largest integer dividing `I`.
+            b = ZZ(1/(1/I).gens_two()[0])
+        # Avoid division of the zero-ideal, which is not defined in SageMath.
+        modulus = num.modulus()/b if num.modulus() != 0 else num.modulus()
+        self._numerator = Ohat(num.value()//b, modulus)
+        self._denominator = self.denominator() // b
 
     def _repr_(self):
         """
@@ -202,24 +154,26 @@ class ProfiniteNumber(CommutativeAlgebraElement):
 
         EXAMPLES::
 
+            sage: Qhat(1/2, 97/5)
+            1/2 mod 97/5
+
+        ::
+
             sage: K.<a> = NumberField(x^2+5)
+            sage: Ohat = ProfiniteIntegers(K)
             sage: Khat = ProfiniteNumbers(K)
-            sage: Khat(a-1, K.ideal(4, 2*a+2), 2*a-5)
-            (-a + 1 mod (4, 2*a + 2))/(2*a - 5)
+            sage: n = Ohat(2*a, K.ideal(4, 2*a+2))
+            sage: Khat(n, 6)
+            1/3*a mod (2/3, 1/3*a + 1/3)
         """
-        # if self.denominator() == 1:
-        #     return repr(self.numerator())
-        # numerator = repr(self.numerator())
-        # if (not self.numerator().modulus().is_zero() or
-        #         sum([not c.is_zero() for c in self.numerator().value().list()]) > 1):
-        #     numerator = "(" + numerator + ")"
-        # denominator = repr(self.denominator())
-        # if not (self.denominator() in QQ or
-        #         (sum([not c.is_zero() for c in self.denominator().list()]) == 1
-        #             and sum([c for c in self.denominator().list()]) == 1)):
-        #     denominator = "(" + denominator + ")"
-        # return numerator + "/" + denominator
-        return str(self.value()) + " mod " + str(self.modulus())
+        K = self.parent().base()
+        if K is QQ:
+            modulus = self.modulus()
+        else:
+            modulus = self.modulus().gens()
+            if len(modulus) == 1:
+                modulus = "(" + str(modulus[0]) + ")"
+        return str(self.value()) + " mod " + str(modulus)
 
     def _richcmp_(self, other, op):
         r"""
@@ -266,20 +220,20 @@ class ProfiniteNumber(CommutativeAlgebraElement):
 
         EXAMPLES::
         
-            sage: Qhat = ProfiniteNumbers()
-            sage: Qhat(1, 10, 2) + Qhat(2, 15, 3)
-            (7 mod 30)/6
-            sage: Qhat(2, 5) + Qhat(3, 11, 3)
-            (0 mod 1)/3
+            sage: Qhat(Zhat(1, 10), 2) + Qhat(Zhat(2, 15), 3)
+            7/6 mod 5
+            sage: Qhat(2, 5) + Qhat(1, 10/3)
+            4/3 mod 5/3
 
         ::
 
             sage: K.<a> = NumberField(x^3-2)
+            sage: Ohat = ProfiniteIntegers(K)
             sage: Khat = ProfiniteNumbers(K)
-            sage: Khat(a, 10, 3) + Khat(a^2, 15, 3)
-            (a^2 + a mod (5))/3
-            sage: Khat(a+1, 20*a+3, 7) + 5
-            (-3749*a^2 mod (-20*a - 3))/7
+            sage: Khat(Ohat(a, 10), 3) + Khat(Ohat(a^2, 15), 3)
+            1/3*a^2 + 1/3*a mod (5/3)
+            sage: Khat(Ohat(a+1, 20*a+3), 7) + 5
+            -3749/7*a^2 mod (-20/7*a - 3/7)
         """
         numerator = self.numerator() * other.denominator() + other.numerator() * self.denominator()
         denominator = self.denominator() * other.denominator()
@@ -291,13 +245,12 @@ class ProfiniteNumber(CommutativeAlgebraElement):
 
         EXAMPLES::
         
-            sage: Qhat = ProfiniteNumbers(QQ)
-            sage: Qhat(4, 12, 3) - 2/3
-            (2 mod 12)/3
-            sage: 1 - Qhat(3, 6, 2)
-            (5 mod 6)/2
-            sage: Qhat(4, 12, 3) - Qhat(3, 6, 2)
-            (5 mod 6)/6
+            sage: Qhat(Zhat(4, 12), 3) - 2/3
+            2/3 mod 4
+            sage: 1 - Qhat(Zhat(3, 6), 2)
+            5/2 mod 3
+            sage: Qhat(Zhat(4, 12), 3) - Qhat(Zhat(3, 6), 2)
+            5/6 mod 1
 
         ::
 
@@ -631,15 +584,15 @@ class ProfiniteNumbers(UniqueRepresentation, CommutativeAlgebra):
             sage: K.<a> = NumberField(x^3+x+1)
             sage: Ohat = ProfiniteIntegers(K)
             sage: Khat = ProfiniteNumbers(K)
-            sage: n = Khat(a^2, a^2+a+1)
+            sage: n = Ohat (a^2, a^2+a+1)
             sage: Khat(n)
-            a^2 mod Fractional ideal (a^2 + a + 1)
+            a^2 mod (a^2 + a + 1)
             sage: Khat(n, 17)
-            1/17*a^2 mod Fractional ideal (1/17*a^2 + 1/17*a + 1/17)
+            1/17*a^2 mod (1/17*a^2 + 1/17*a + 1/17)
             sage: Khat(a/3)
-            1/3*a mod Ideal (0) of Number Field in a with defining polynomial x^3 + x + 1
+            1/3*a mod (0)
             sage: Khat(a/3, (a^2-2)/9)
-            8/9*a^2 mod Fractional ideal (1/9*a^2 - 2/9)
+            8/9*a^2 mod (1/9*a^2 - 2/9)
 
         TESTS::
 
