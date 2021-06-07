@@ -123,30 +123,25 @@ class ProfiniteNumber(CommutativeAlgebraElement):
         K = self.parent().base()
         Ohat = ProfiniteIntegers(K)
         num = self.numerator()
+
         if K is QQ:
             from sage.arith.misc import gcd
-            b = gcd([num.value(), num.modulus(), self.denominator()])
+            g = gcd([num.value(), num.modulus(), self.denominator()])
+            denominator = self.denominator() // g
         else:
-            O = K.maximal_order()
-            # The greatest common divisor of ideals is their sum.
-            I = O.ideal(num.value()) + num.modulus() + O.ideal(self.denominator())
-            # The element ``(1/I).gens_two()[0].abs()`` is the positive
-            # generator of `1/I \cap \QQ`. Write this element as `a/b` with `a`
-            # and `b` coprime and both positive.
-            # We have `(a/b)I \subset O`, i.e. `aI \subset bO`, i.e. `bO`
-            # divides `aI`. As `a` and `b` are coprime this implies `bO` divides
-            # `I`. In turn this is equivalent to `(1/b)I \subset O` and so
-            # `1/b \in 1/I \cap \QQ`.
-            # As `a/b` was the generator of `1/I \cap \QQ` we must have
-            # `a/b = 1/b`, i.e. `a = 1` (note that `a/b` and `b` are positive).
-            # This means `1/b` is the largest integer satisfying `I/b \subset O`
-            # i.e. `I \subset bO`.
-            # We conclude: `b` is the largest integer dividing `I`.
-            b = ZZ(1/(1/I).gens_two()[0])
+            g = K.ideal(num.value()) + num.modulus() + K.ideal(self.denominator())
+            # We take the smallest positive integer inside self.denominator()/g.
+            denominator = ZZ((self.denominator() / g).gens_two()[0])
+        
+        value = denominator * num.value() / self.denominator()
         # Avoid division of the zero-ideal, which is not defined in SageMath.
-        modulus = num.modulus()/b if num.modulus() != 0 else num.modulus()
-        self._numerator = Ohat(num.value()//b, modulus)
-        self._denominator = self.denominator() // b
+        if num.modulus() == 0:
+            modulus = num.modulus()
+        else:
+            modulus = denominator * num.modulus() / self.denominator()
+        
+        self._numerator = Ohat(value, modulus)
+        self._denominator = denominator
 
     def _repr_(self):
         """
