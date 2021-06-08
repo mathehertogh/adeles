@@ -20,14 +20,17 @@ def completions(K, p, prec=20):
     INPUT:
 
     - ``K`` -- a number field
-    - ``p`` -- a (rational) prime number or ``Infinity``
-    - ``prec`` -- precision of the ``p``-adic number field we use (default: 20)
+    - ``p`` -- a prime number or ``Infinity``
+    - ``prec`` -- integer (default: 20); precision of the ``p``-adic number
+      field we use
 
     OUTPUT:
 
     A list of tuples ``(q, L, phi)`` (one for each prime lying above ``p``)
-    where: ``q`` is a prime of ``K`` lying above ``p``, ``L`` is the completion
-    of ``K`` at ``q``, and ``phi`` is the embedding of ``K`` in ``L``.
+    where:
+    - ``q`` is a prime of ``K`` lying above ``p``;
+    - ``L`` is the completion of ``K`` at ``q``;
+    - ``phi`` is the embedding of ``K`` in ``L``.
     """
     if p is Infinity:
         return infinite_completions(K)
@@ -76,29 +79,47 @@ def completion(K, q, prec=20):
             return L, phi
     raise ValueError("something went wrong in complete...")
 
-def infinite_completions(K):
-    """
+def infinite_completions(K, fields_only=False, embeddings_only=False):
+    r"""
     Return the infinite completions of ``K``
 
     INPUT:
 
     - ``K`` -- a number field
+    - ``fields_only`` - boolean (default: ``False``); if ``True``, only the
+      fields are returned, not the embeddings.
+    - ``embeddings_only`` - boolean (default: ``False``); if ``True``, only the
+      embeddings are returned, not the fields.
 
     OUTPUT:
 
-    A list of tuples (K_oo, phi) with K_oo a completion of K and phi: K --> K_oo
-    "the" embedding (the same one as K.places() returns, except with codomain
-    an interval field).
+    A list of tuples `(L, \phi)` with `L` equal to ``RIF`` or ``CIF``
+    and `\phi` an embedding `K \to L`. The embeddings returend correspond to
+    the infinite primes of `K` and they are returned in the same order as
+    ``K.places``.
+
+    Depending on ``fields_only`` and ``embeddings_only``, only the fields `L` or
+    the embeddings `\phi` may be returned.
+    If they are both set to ``True``, an exception is raised.
     """
+    if fields_only and embeddings_only:
+        raise ValueError("both fields_only and embeddings_only set to True")
+
     completions = []
-    for phi in K.places():
-        if phi.codomain() is CC:
-            K_oo = CIF
+    for psi in K.places():
+        if psi.codomain() is CC:
+            L = CIF
         else:
-            K_oo = RIF
-        im_gen = K_oo(phi(K.gen()))
-        psi = Hom(K, K_oo)([im_gen], check=False)
-        completions.append((K_oo, psi))
+            L = RIF
+        image_gen = L(psi(K.gen()))
+        phi = Hom(K, L)([image_gen], check=False)
+        if fields_only:
+            completions.append(L)
+        elif embeddings_only:
+            completions.append(phi)
+        else:
+            completions.append((L, phi))
+    
     return completions
 
 
