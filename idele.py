@@ -51,6 +51,7 @@ sys.path.append('/home/mathe/adeles/src')
 from sage.structure.element import MultiplicativeGroupElement
 from sage.structure.unique_representation import UniqueRepresentation
 from sage.groups.group import Group
+from sage.categories.groups import Groups
 from sage.arith.misc import factor
 from sage.rings.integer_ring import ZZ
 from sage.rings.rational_field import QQ
@@ -1388,7 +1389,7 @@ class Ideles(UniqueRepresentation, Group):
         if not is_field(K) or not K.absolute_degree() in ZZ:
             raise TypeError("K should be a number field")
         self._number_field = K
-        Group.__init__(self)
+        Group.__init__(self, category=Groups().Commutative())
 
     def _repr_(self):
         """
