@@ -228,7 +228,7 @@ def GL2Zhat_GL2QQ_factor(A):
 def random_GL2Qhat_element():
     A = matrix(Qhat, [[0, 0], [0, 0]])
     while det(A).value().is_zero():
-        a = QQ.random_element()
+        a = QQ.random_element() 
         b = QQ.random_element()
         c = QQ.random_element()
         d = QQ.random_element()
