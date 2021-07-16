@@ -521,7 +521,7 @@ class ProfiniteGraph:
         self.title = "Interactive profinite graph - left-click to zoom in, right-click to zoom out"
         self.approx_colors = ["orange", "pink", "sienna3"] # sienna3 is light brown
         self.highlight_color = "yellow"
-        self.identity_line = True
+        self.identity_line = False
         self.identity_line_color = "green"
         self.min_draw_area = ZZ(1)
         self.min_axis_distance = ZZ(8)
