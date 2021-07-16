@@ -74,7 +74,7 @@ def print_action_on_gamma_2(STs):
     else:
         print("  gamma_2 ]--> zeta_3^2 * gamma_2")
 
-def print_action_on_f2(d, STs):
+def print_action_on_weber_f2(d, STs):
     r"""
     Print the action of iota(d)*STs on Weber's f_2 modular function
 
@@ -136,7 +136,7 @@ def print_action_on_f2(d, STs):
     print("  f2       ]--> {}".format(f2_image))
 
 
-def print_action_on_f(STs):
+def print_action_on_weber_f(STs):
     r"""
     Print the action of ``STs`` on Weber's `\mathfrak{f}` modular function
 
