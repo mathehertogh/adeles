@@ -1,5 +1,78 @@
-"""
+r"""
 Profinite Integers of Number Fields
+
+This file implements rings of profinite integers over number fields and their
+elements.
+
+Let `K` be a number field and `O` its ring of integers. For `O`-ideals `I` and
+`J` with `I` dividing `J` we have a canonical map `O/J \to O/I`.
+The familie `\{O/I\}_I` with `I` running over the non-zero `O`-ideals together
+with these canonical maps form a projective system of topological rings
+(where each `O/I` is given the discrete topology).
+Taking the projective limit results in the topological ring
+
+.. MATH::
+
+    \hat{O} = \varprojlim_I O/I
+
+of profinite `K`-integers. It is naturally an `O`-algebra as well.
+
+In Sage the ring of profinite `\QQ`-integers `\hat{\ZZ}` and its elements look
+as follows::
+
+    sage: Zhat
+    Profinite Integers of Rational Field
+    sage: Zhat is ProfiniteIntegers(QQ)
+    True
+    sage: Zhat.an_element()
+    2 mod 6
+
+This element ``2 mod 6`` is an approximation to the integer 2 in `\hat{\ZZ}`.
+It represents all profinite integers in the open subset `2 + 6\hat{\ZZ}` of
+`\hat{\ZZ}`. Hence ``2 mod 6`` also represents the integers 8 and -4, but not
+5::
+
+    sage: a = Zhat(2, 6); a
+    2 mod 6
+    sage: a == 8
+    True
+    sage: a == -4
+    True
+    sage: a == 5
+    False
+
+A sum of a profinite integer in `2+6\hat{\ZZ}` and a profinite integer in
+`5+15\hat{\ZZ}` will lie in `1+3\hat{\ZZ}`, while any product will lie in
+`10+30\hat{\ZZ}`::
+
+    sage: b = Zhat(5, 15); b
+    5 mod 15
+    sage: a + b
+    1 mod 3
+    sage: a * b
+    10 mod 30
+
+The ideals `I \hat{O}`, for `I` ranging over the non-zero ideals of `O`, form a
+basis of open neighborhoods of zero in `\hat{O}`.
+
+
+.. MATH::
+
+    \{ I \hat{O} \mid }
+
+
+
+Let `p` be a prime ideal of `O` and denote the completion of `K` at `p` by
+`K_p`: the field of `p`-adic numbers. Let `O_p` be the corresponding valuation
+ring, consisting of `p`-adic numbers with non-negative (`p`-adic) valuation.
+
+The Chinese Remainder Theorem induces a natural isomorphism of topolocial rings
+
+.. MATH::
+
+    \hat{O} \to \prod_p O_p
+
+with `p` running over all prime ideals of `O`.
 
 .. TODO::
 
@@ -7,6 +80,7 @@ Profinite Integers of Number Fields
 """
 
 from sage.categories.integral_domains import IntegralDomains
+from sage.categories.metric_spaces import MetricSpaces
 from sage.categories.rings import Rings
 from sage.structure.unique_representation import UniqueRepresentation
 from sage.rings.ring import CommutativeAlgebra
@@ -1083,6 +1157,9 @@ class ProfiniteIntegersFunctor(ConstructionFunctor):
         self.args = args or ()
         self.kwds = kwds or {}
         ConstructionFunctor.__init__(self, IntegralDomains(), Rings())
+        # TODO Change IntegralDomains() to Fields() maybe? Making
+        # ProfiniteIntegers(K) the standard case, instead of
+        # ProfiniteIntegers(K.maximal_order())
 
     def _apply_functor(self, R):
         return ProfiniteIntegers(R, *self.args, **self.kwds)
