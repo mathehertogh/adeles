@@ -21,6 +21,17 @@ CIF = ComplexIntervalField()
 oo = Infinity
 
 
+def is_finite_prime(p, K):
+    """
+    Return ``true`` if and only if ``p`` is a finite prime of the number field
+    ``K``
+    """
+    if K is QQ:
+        return p in Primes()
+    else:
+        return p in K.ideal_monoid() and K.ideal(p).is_prime()
+
+
 def _associated_multPAdic(center, precision, prime):
     r"""
     Return the associated multiplicative ``prime``-adic of the pair
@@ -419,99 +430,11 @@ class Idele(MultiplicativeGroupElement):
 
         return rep
 
-    def stored_primes(self):
-        r"""
-        Return the set of stored primes of this idele as an ordered list.
-
-        A stored prime is a finite prime of the base number field `K` for which
-        this idele has stored a value in its ``_finite`` attribute.
-
-        If this idele has exact finite part, then it has no stored primes.
-        
-        The order is determined by the implemented order on number field ideals,
-        or by the natural order on `\NN` if `K = \QQ` (in which case the primes
-        are prime numbers).
-
-        EXAMPLES::
-
-            sage: K.<a> = NumberField(x^2+17)
-            sage: J = Ideles(K)
-            sage: p2, p5 = K.prime_above(2), K.prime_above(5)
-            sage: p7, q7 = K.primes_above(7)
-            sage: u = J([I], {q7: (a, 1), p2: (8, 0), p7: (1,0), p5: (a, 3)})
-            sage: u.stored_primes()
-            [Fractional ideal (2, a + 1),
-             Fractional ideal (5),
-             Fractional ideal (7, a + 2),
-             Fractional ideal (7, a + 5)]
-
-        ::
-
-            sage: v = J([-1], a+1)
-            sage: v.stored_primes()
-            []
-        """
-        if self.has_exact_finite_part():
-            return []
-        return sorted(list(self.finite_part().keys()))
-
-    def has_exact_finite_part(self):
-        """
-        Return whether or not this idele has exact finite part
-
-        EXAMPLES::
-
-            sage: J = Ideles(QQ)
-            sage: u = J([-1], 7)
-            sage: u.has_exact_finite_part()
-            True
-            sage: v = J([-1], {2: (1, 1)})
-            sage: v.has_exact_finite_part()
-            False
-        """
-        K = self.parent().number_field()
-        return self._finite in K
-
-    def infinite_part(self, index=None):
-        """
-        Return the infinite part of this idele as a list
-
-        EXAMPLES::
-
-            sage: K.<a> = NumberField(x^5-3*x+1)
-            sage: J = Ideles(K)
-            sage: K.signature()
-            (3, 1)
-            sage: u = J([-1, 7.9, 1, 1+I], a^2)
-            sage: u.infinite_part()
-            [-1, 7.9000000000000004?, 1, 1 + 1*I]
-        """
-        return self._infinite
-
-    def finite_part(self, prime=None):
-        """
-        Return the finite part of this idèle
-
-        This could be either a number field element or a dictionary.
-
-        EXAMPLES::
-
-            sage: K.<a> = NumberField(x^5-3*x+1)
-            sage: J = Ideles(K)
-            sage: u = J([-1, 7.9, 1, 1+I], a^2)
-            sage: u.finite_part()
-            a^2
-            sage: p3, q3 = K.primes_above(3)
-            sage: v = J(None, {p3: (a,10), q3: (-1-a^2,7)})
-            sage: v.finite_part()
-            {Fractional ideal (-2*a^4 - a^3 - 2*a^2 - a + 4): (-920*a^4 - 31*a^3 - 90*a^2 - 961*a, 7),
-             Fractional ideal (-a^2 + 1): (-11107*a^4, 10)}
-        """
-        return self._finite
-
     def __getitem__(self, prime):
         """
         Get the value of this idèle at the prime ``prime``
+
+        TODO INPUT
 
         EXAMPLES::
 
@@ -565,11 +488,261 @@ class Idele(MultiplicativeGroupElement):
             pass
         raise KeyError("You can only index by a prime ideal or (Infinity, index)")
 
+    def infinite_part(self):
+        """
+        Return the infinite part of this idele as a list
+
+        EXAMPLES::
+
+            sage: K.<a> = NumberField(x^5-3*x+1)
+            sage: J = Ideles(K)
+            sage: K.signature()
+            (3, 1)
+            sage: u = J([-1, 7.9, 1, 1+I], a^2)
+            sage: u.infinite_part()
+            [-1, 7.9000000000000004?, 1, 1 + 1*I]
+        """
+        return self._infinite
+
+    def finite_part(self):
+        """
+        Return the finite part of this idèle
+
+        This could be either a number field element or a dictionary.
+
+        EXAMPLES::
+
+            sage: K.<a> = NumberField(x^5-3*x+1)
+            sage: J = Ideles(K)
+            sage: u = J([-1, 7.9, 1, 1+I], a^2)
+            sage: u.finite_part()
+            a^2
+            sage: p3, q3 = K.primes_above(3)
+            sage: v = J(None, {p3: (a,10), q3: (-1-a^2,7)})
+            sage: v.finite_part()
+            {Fractional ideal (-2*a^4 - a^3 - 2*a^2 - a + 4): (-920*a^4 - 31*a^3 - 90*a^2 - 961*a, 7),
+             Fractional ideal (-a^2 + 1): (-11107*a^4, 10)}
+        """
+        return self._finite
+
+    def has_exact_finite_part(self):
+        """
+        Return whether or not this idele has exact finite part
+
+        EXAMPLES::
+
+            sage: J = Ideles(QQ)
+            sage: u = J([-1], 7)
+            sage: u.has_exact_finite_part()
+            True
+            sage: v = J([-1], {2: (1, 1)})
+            sage: v.has_exact_finite_part()
+            False
+        """
+        K = self.parent().number_field()
+        return self._finite in K
+
+    def stored_primes(self):
+        r"""
+        Return the set of stored primes of this idele as an ordered list.
+
+        A stored prime is a finite prime of the base number field `K` for which
+        this idele has stored a value in its ``_finite`` attribute.
+
+        If this idele has exact finite part, then it has no stored primes.
+        
+        The order is determined by the implemented order on number field ideals,
+        or by the natural order on `\NN` if `K = \QQ` (in which case the primes
+        are prime numbers).
+
+        EXAMPLES::
+
+            sage: K.<a> = NumberField(x^2+17)
+            sage: J = Ideles(K)
+            sage: p2, p5 = K.prime_above(2), K.prime_above(5)
+            sage: p7, q7 = K.primes_above(7)
+            sage: u = J([I], {q7: (a, 1), p2: (8, 0), p7: (1,0), p5: (a, 3)})
+            sage: u.stored_primes()
+            [Fractional ideal (2, a + 1),
+             Fractional ideal (5),
+             Fractional ideal (7, a + 2),
+             Fractional ideal (7, a + 5)]
+
+        ::
+
+            sage: v = J([-1], a+1)
+            sage: v.stored_primes()
+            []
+        """
+        if self.has_exact_finite_part():
+            return []
+        return sorted(list(self.finite_part().keys()))
+
+    def valuation(self, prime):
+        r"""
+        Return the valuation of this idèle at the finite prime ``prime``
+
+        INPUT:
+
+        - ``prime`` -- a finite prime
+
+        EXAMPLES::
+
+            sage: J = Ideles(QQ)
+            sage: u = J([1], 1/25)
+            sage: u.valuation(2)
+            0
+            sage: u.valuation(5)
+            -2
+            sage: v = J([1], {2: (8, 10)})
+            sage: v.valuation(2)
+            3
+            sage: v.valuation(3)
+            0
+
+        ::
+
+            sage: K.<a> = NumberField(x^2+5)
+            sage: J = Ideles(K)
+            sage: p3, q3 = K.primes_above(3)
+            sage: u = J([I], {p3: (3, 0)})
+            sage: u.valuation(p3)
+            1
+            sage: u.valuation(q3)
+            0
+
+        TESTS::
+
+            sage: Q.<one> = NumberField(x-1)
+            sage: J = Ideles(Q)
+            sage: u = J([-1], {7: (7^20, 3)})
+            sage: u.valuation(Q.prime_above(7))
+            20
+        """
+        if self.has_exact_finite_part():
+            return self.finite_part().valuation(prime)
+        center, prec = self[prime]
+        return center.valuation(prime)
+
+    def increase_precision(self, primes, prec_increment=1):
+        """
+        Increase the precision of this idele at the primes given in ``primes``
+
+        INPUT:
+
+        - ``primes`` -- an iterable containing finite primes and/or (rational)
+          prime numbers, or a single prime
+        - ``prec_increment`` -- integer (default = 1); the amount by which we
+          increase the precision at each prime in ``primes``
+
+        Let `p` be a finite prime in ``primes``. Suppose ``self`` represents the
+        open subset `x * U_p^n` at `p`. Then after calling this method, ``self``
+        will represent `x * U_p^(n + prec_increment)` at `p`.
+
+        If `p` in ``primes`` is a rational prime number, then the above is done
+        for each prime `q` lying above `p` with ``prec_increment`` multiplied
+        by the ramification index of `q` over `p`.
+
+        .. NOTE::
+
+            If this idele has exact finite part, then this method does not do
+            anything. If one sees exactness as having infinite precision, this
+            just corresponds to ``oo + prec_increment == oo``.
+
+        .. NOTE::
+
+            Setting ``prec_increment`` to a negative value will decrease the
+            precision, but not below zero.
+
+        EXAMPLE::
+
+            sage: K.<a> = NumberField(x^3-2)
+            sage: J = Ideles(K)
+            sage: p2, p5 = K.prime_above(2), K.prime_above(5)
+            sage: u = J(None, {p2: (a, 5), p5: (1/3, 1)})
+
+        Let's increase the precision of ``p2`` and *both* prime ideals above 5
+        by 3::
+
+            sage: u.increase_precision([p2, 5], 3); u
+            Idele with values:
+              infinity_0:   RR^*
+              infinity_1:   CC^*
+              (2, a):       a * U(8)
+              (5, a^2 - 2*a - 1):   (36*a^2 + 33*a) * U(3)
+              (5, a + 2):   1/3 * U(4)
+              other primes: 1 * U(0)
+
+        We can also decrease precision::
+
+            sage: u.increase_precision(p2, -1); u
+            Idele with values:
+              infinity_0:   RR^*
+              infinity_1:   CC^*
+              (2, a):       a * U(7)
+              (5, a^2 - 2*a - 1):   (36*a^2 + 33*a) * U(3)
+              (5, a + 2):   1/3 * U(4)
+              other primes: 1 * U(0)
+
+        As ``p2`` has ramification index 3, the following will increase the
+        precision of ``u`` at ``p2`` by 3::
+
+            sage: u.increase_precision(2); u
+            Idele with values:
+              infinity_0:   RR^*
+              infinity_1:   CC^*
+              (2, a):       a * U(10)
+              (5, a^2 - 2*a - 1):   (36*a^2 + 33*a) * U(3)
+              (5, a + 2):   1/3 * U(4)
+              other primes: 1 * U(0)
+
+        Nothing changes for ideles with exact finite part::
+        
+            sage: v = J(None, a^2)
+            sage: v.increase_precision([p2, p5]); v
+            Idele with values:
+              infinity_0:   RR^*
+              infinity_1:   CC^*
+              other primes: a^2
+
+        TESTS::
+
+            sage: u.increase_precision([QQ])
+            Traceback (most recent call last):
+            ...
+            ValueError: primes should be a (list of) prime(s)
+        """
+        if self.has_exact_finite_part():
+            return
+
+        K = self.parent().number_field()
+
+        if is_finite_prime(primes, K):
+            P = primes # primes is a single finite prime
+            center, prec = self[P]
+            new_prec = max(ZZ(0), prec + prec_increment)
+            self._finite[P] = _associated_multPAdic(center, new_prec, P)
+            return
+
+        if primes in Primes():
+            p = primes # primes is a single rational prime number
+            for P in K.primes_above(p):
+                self.increase_precision(P, prec_increment*P.ramification_index())
+            return
+
+        for prime in primes:
+            if not (is_finite_prime(prime, K) or prime in Primes()):
+                raise ValueError("primes should be a (list of) prime(s)")
+            self.increase_precision(prime, prec_increment)
+
+
 
 class Ideles(UniqueRepresentation, Group):
     Element = Idele
 
     def __init__(self, K):
+        # TODO: docstring
+        # TODO: check is_NumberField mooier maken
         # TODO: implement default K=QQ, via __classcall__()
         from sage.misc.functional import is_field
         if not is_field(K) or not K.absolute_degree() in ZZ:
@@ -602,22 +775,6 @@ class Ideles(UniqueRepresentation, Group):
         from sage.misc.latex import latex
         return "J_{" + latex(self.number_field()) + "}"
 
-    def _element_constructor_(self, x, y=None):
-        if y is None:
-            K = self.number_field()
-            if x in K:
-                infinite = [phi(x) for L, phi in infinite_completions(K)]
-                return self.element_class(self, infinite, x)
-            from adele import Adeles
-            Ak = Adeles(K)
-            if x in Ak:
-                return self._from_adele(Ak(x))
-            if hasattr(x, "parent") and hasattr(x.parent(), "_bnr"):
-                # TODO make the check above less hacky and more robust
-                # for some reason checking isinstance(x, RayClassGroupElement) fails
-                return self._from_ray_class(x)
-        return self.element_class(self, x, y)
-
     def number_field(self):
         """
         Return the base number field of ``self``
@@ -630,3 +787,115 @@ class Ideles(UniqueRepresentation, Group):
             Number Field in a with defining polynomial x^7 - 1000*x + 1
         """
         return self._number_field
+
+    def _element_constructor_(self, x, y=None):
+        # TODO: docstring
+        if y is None:
+            K = self.number_field()
+            if x in K:
+                infinite = [phi(x) for L, phi in infinite_completions(K)]
+                return self.element_class(self, infinite, x)
+            if hasattr(x, "parent") and hasattr(x.parent(), "_bnr"):
+                # TODO make the check above less hacky and more robust
+                # for some reason checking isinstance(x, RayClassGroupElement) fails
+                return self._from_ray_class(x)
+        return self.element_class(self, x, y)
+
+    def _from_ray_class(self, r):
+        r"""
+        Convert the ray class group element ``r`` to an idele
+
+        INPUT:
+
+        - ``r`` -- a ray class group element
+
+        OUPUT:
+        
+        Denote the ray class group to which ``r`` belongs by `G` and denote the
+        modulus of `G` by `m`. So `G = I(m)/R(m)`.
+        Consider the homomorphism `\phi: ` ``self`` `\to` `G` that sends a prime
+        element at a finite prime `q` (not dividing `m`) to `q \mod R(m)`.
+        The kernel of `\phi` is `K^* W_m` where `W_m = \prod_p U_p^{\ord_p(m)}`.
+
+        Given ``r``, let `H` be the inverse image of ``r`` under `\phi`. We can
+        try to find an idele that represents the subset `H` of ``self``. This is
+        however not precisely possible. We can exactly represent `W_m`, but 
+        we can not represent `K^*`. Hence what we do is the following: we find
+        some `x \in H` en return an idele that represents `x \cdot W_m`.
+
+        Although we do always return the same idele for equal inputs, the user
+        should be aware that from a mathematical perspective, the output is only
+        defined up to multiplication by a principal idele.
+        
+
+        EXAMPLES::
+
+            sage: Q = NumberField(x-1, "one")
+            sage: J = Ideles(Q)
+            sage: G = ray_class_group(Q, Modulus(Q.ideal(10), [0]))
+            sage: r = G(Q.ideal(9))
+            sage: factor(r.ideal())
+            (Fractional ideal (3)) * (Fractional ideal (163))
+            sage: J._from_ray_class(r)
+            Idele with values:
+              infinity_0:   [0.0000000000000000 .. +infinity]
+              (2, 0):       1 * U(1)
+              (3, 0):       3 * U(0)
+              (5, 0):       1 * U(1)
+              (163, 0):     163 * U(0)
+              other primes: 1 * U(0)
+            sage: s = G(Q.ideal(7))
+            sage: s.ideal()
+            Fractional ideal (67)
+            sage: J._from_ray_class(s)
+            Idele with values:
+              infinity_0:   [0.0000000000000000 .. +infinity]
+              (2, 0):       1 * U(1)
+              (5, 0):       1 * U(1)
+              (67, 0):      67 * U(0)
+              other primes: 1 * U(0)
+
+        :: 
+
+            sage: K.<a> = NumberField(x^2-6)
+            sage: G = ray_class_group(K, Modulus(K.ideal(10*a), [1]))
+            sage: r = G([3, 0, 1])
+            sage: factor(r.ideal())
+            (Fractional ideal (25*a + 19)) * (Fractional ideal (28*a - 25)) * (Fractional ideal (-67*a + 109)) * (Fractional ideal (-1507*a - 5011))
+            sage: Jk = Ideles(K)
+            sage: Jk(r)
+            Idele with values:
+              infinity_0:   RR^*
+              infinity_1:   [0.0000000000000000 .. +infinity]
+              (2, a):       1 * U(3)
+              (3, a):       1 * U(1)
+              (5, a + 1):   -a * U(1)
+              (5, a + 4):   a * U(1)
+              (3389, a + 543):      2846760*a * U(0)
+              (4079, a + 2767):     -2916485*a * U(0)
+              (15053, a + 13254):   -94683370*a * U(0)
+              (11483827, a + 1242116):      -22108284774109*a * U(0)
+              other primes: 1 * U(0)
+        """
+        K = self.number_field()
+        G = r.parent()  # ray class group of r
+        r1, r2 = K.signature()
+        RR = RIF(-oo, oo)
+        CC = CIF(RR, RR)
+        infinite = [RR for i in range(r1)] + [CC for i in range(r2)]
+        for i in G.modulus().infinite_part():
+            infinite[i] = RIF(0, oo)
+
+        finite = {}
+        for q, e in G.modulus().finite_factors():
+            finite[q] = (K(1), e)
+
+        if not r.is_one():
+            for q, e in factor(r.ideal()):
+                if self.number_field() is QQ:
+                    finite[q] = (q**e, ZZ(0))
+                else:
+                    pi = K.uniformizer(q)
+                    finite[q] = (pi**e, ZZ(0))
+        
+        return self.element_class(self, infinite, finite)
