@@ -1,9 +1,8 @@
 
 from sage.rings.complex_mpfr import ComplexField
-from sage.functions.log import exp
-from sage.symbolic.constants import pi, I
 from sage.misc.functional import eta
 from sage.functions.other import sqrt
+from matrix import ST_factor
 
 def weber_f(x, prec=53):
     r"""
@@ -11,8 +10,7 @@ def weber_f(x, prec=53):
     """
     CC = ComplexField(prec)
     x = CC(x)
-    zeta48 = CC(exp(2*CC(pi)*CC(I)/48))
-    return eta((x+CC(1))/CC(2)) / (zeta48 * eta(x))
+    return eta((x+CC(1))/CC(2)) / (CC.zeta(48) * eta(x))
 
 def weber_f1(x, prec=53):
     r"""
@@ -36,8 +34,25 @@ def gamma_2(x, prec=53):
     Evaluate Weber's `\gamma_2` function in ``x`` with ``prec`` bits of precision
     """
     CC = ComplexField(prec)
+    x = CC(x)
     fx = weber_f(x, prec)
     return (fx**CC(24) - CC(16)) / fx**CC(8)
+
+def apply_fractional_linear_transformation(M, tau):
+    r"""
+    Apply the fractional linear transformation given by ``M`` to ``tau``
+
+    INPUT:
+
+    - ``M`` -- a matrix in `GL_2(\QQ)` with positive determinant
+    - ``tau`` -- a non-zero field element
+
+    OUTPUT:
+    
+    If ``M = (a, b; c, d)``, then return the element ``(a*tau+b)/(c*tau+d)``.
+    """
+    a, b, c, d = M.list()
+    return (a*tau + b) / (c*tau + d)
 
 def print_action_on_gamma_2(STs):
     r"""
@@ -74,26 +89,28 @@ def print_action_on_gamma_2(STs):
     else:
         print("  gamma_2 ]--> zeta_3^2 * gamma_2")
 
-def print_action_on_weber_f2(d, STs):
+def print_action_on_weber_f2(B):
     r"""
     Print the action of iota(d)*STs on Weber's f_2 modular function
 
     INPUT:
 
-    - ``d`` -- element of `(\ZZ/48\ZZ)^*`
-    - ``STs`` -- an element of the free group on {S, T}; usually obtained from
-      an `SL_2(\ZZ/48\ZZ)`-matrix passed into :func:`ST_factor`
+    - ``B`` -- a `GL_2(\ZZ/48\ZZ)`-matrix
 
     OUTPUT:
 
     Does not return anything.
-    Prints a string describing the action of iota(d)*STs on Weber's f_2
-    function. Here `\iota(d) = (1, 0; 0, d) \in GL_2(\ZZ/48\ZZ)` and `S, T \in
-    SL_2(\ZZ)` are given by `S = (0, -1; 1, 0)` and `T = (1, 1; 0, 1)`.
+    Prints a string describing the action of ``B`` on Weber's `f_2` function.
 
     ALGORITHM:
 
-    We use the fact that `S` and `T` act as follows on
+    We factor ``B`` as ``B = iota(d) * U`` where ``iota(d) = (1, 0; 0, d)`` with
+    ``d = det(B)`` and `U \in SL_2(\ZZ)`.
+    Next we write `U` on the standard generators `S = (0, -1; 1, 0)` and
+    `T = (1, 1; 0, 1)` of `SL_2(\ZZ)`.
+    Then we use the following (hard-coded) knowledge.
+
+    The generators `S` and `T` act as follows on
     `\QQ(\zeta_48, f, f_1, f_2)`, with `\zeta_48 = exp(2i\pi/48)`:
 
     - `S: (f, f_1, f_2) \mapsto (f, f_2, f_1)`;
@@ -109,6 +126,12 @@ def print_action_on_weber_f2(d, STs):
     from sage.groups.free_group import FreeGroup
     from sage.categories.homset import Hom
     from sage.rings.integer_ring import ZZ
+    from sage.matrix.special import diagonal_matrix
+    from sage.misc.functional import det
+
+    d = det(B)
+    U = diagonal_matrix([1, 1/d]) * B
+    STs = ST_factor(U)
 
     G = STs.parent()
     F = FreeGroup(['zeta48', 'f', 'f1', 'f2'])
@@ -133,7 +156,7 @@ def print_action_on_weber_f2(d, STs):
         else: # R == T^-1
             f2_image = phi_T_inv(f2_image)
 
-    print("  f2       ]--> {}".format(f2_image))
+    print("  f2    ]--> {}".format(f2_image))
 
 
 def print_action_on_weber_f(STs):
@@ -183,3 +206,4 @@ def print_action_on_weber_f(STs):
             f_image = phi_T_inv(f_image)
 
     print("  f       ]--> {}".format(f_image))
+
