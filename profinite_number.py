@@ -371,6 +371,7 @@ class ProfiniteNumber(CommutativeAlgebraElement):
         from sage.arith.functions import lcm
         K = self.parent().base()
         n = K.absolute_degree()
+        Zhat = ProfiniteIntegers(QQ)
         Qhat = ProfiniteNumbers(QQ)
 
         if self.numerator().modulus().is_zero():
@@ -410,7 +411,7 @@ class ProfiniteNumber(CommutativeAlgebraElement):
             denominator = lcm(values[i].denominator(), moduli[i].denominator())
             value = values[i] * denominator
             modulus = moduli[i] * denominator
-            profinite_rationals.append(Qhat(value, modulus, denominator))
+            profinite_rationals.append(Qhat(Zhat(value, modulus), denominator))
 
         return vector(profinite_rationals)
 
@@ -725,5 +726,34 @@ class ProfiniteNumbers(UniqueRepresentation, CommutativeAlgebra):
         modulus *= multiplier
             
         return self(value, modulus)
+
+    def construction(self):
+        return ProfiniteNumbersFunctor(), self.number_field()
+
+
+from sage.categories.pushout import ConstructionFunctor
+from sage.categories.fields import Fields
+class ProfiniteNumbersFunctor(ConstructionFunctor):
+    rank = 5
+
+    def __init__(self, args=None, kwds=None):
+        """
+        Create a ProfiniteNumbersFunctor
+
+        EXAMPLES::
+
+            sage: ProfiniteNumbersFunctor()
+            ProfiniteNumbersFunctor
+        """
+        self.args = args or ()
+        self.kwds = kwds or {}
+        ConstructionFunctor.__init__(self, Fields(), Rings())
+
+    def _apply_functor(self, K):
+        return ProfiniteNumbers(K, *self.args, **self.kwds)
+
+    # def merge(self, other):
+    #     if isinstance(other, (type(self), sage.categories.pushout.FractionField)):
+    #         return self
 
 Qhat = ProfiniteNumbers(QQ)
