@@ -12,6 +12,7 @@ from sage.rings.complex_interval_field import ComplexIntervalField
 from sage.rings.infinity import Infinity
 
 from completion import completions, infinite_completions
+from profinite_integer import ProfiniteIntegers
 from profinite_number import ProfiniteNumbers
 
 CIF = ComplexIntervalField()
@@ -72,19 +73,28 @@ class Adele(CommutativeAlgebraElement):
             TypeError: finite should lie in Profinite Numbers of Rational Field
         """
         CommutativeAlgebraElement.__init__(self, parent)
+
         K = parent.base()
-        K_oo = infinite_completions(K)
+        K_oo = infinite_completions(K, fields_only=True)
         t = len(K_oo)
-        if not isinstance(infinite, list):
-            raise TypeError("infinite should be a list")
-        if len(infinite) != t:
-            raise TypeError("infinite should have length {}".format(t))
-        self._infinite = infinite
+
+        try:
+            if t == 1 and infinite in K_oo[0]:
+                self._infinite = [infinite]
+            else:
+                self._infinite = list(infinite)
+        except TypeError:
+            raise TypeError("infinite must be iterable")
+
+        if len(self._infinite) != t:
+            raise ValueError("infinite must have length {}".format(t))
+
         for i in range(t):
-            val = infinite[i]
-            if val not in K_oo[i][0]:
-                raise TypeError("{}th infinite value ({}) should lie in {}".format(i, val, K_oo[i][0]))
-            self._infinite[i] = K_oo[i][0](val)
+            val = self._infinite[i]
+            if val not in K_oo[i]:
+                raise TypeError("{}th infinite value ({}) should lie in {}".format(i, val, K_oo[i]))
+            self._infinite[i] = K_oo[i](val)
+
         Khat = ProfiniteNumbers(K)
         if finite not in Khat:
             raise TypeError("finite should lie in {}".format(Khat))
@@ -668,45 +678,41 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
         from sage.arith.misc import CRT
         from sage.misc.misc_c import prod
         K = self.base()
+        Ohat = ProfiniteIntegers(K)
         Khat = ProfiniteNumbers(K)
 
-        if idele._has_exact() and not idele._contains(idele.exact()):
-            raise NotImplementedError("non-matching exact and finite part not implemented yet...")
+        if idele.has_exact_finite_part():
+            raise NotImplementedError("Idele-->Adele conversion for exact finite parts not implemented yet... TODO")
 
         K_oo = completions(K, oo)
-        infinite = idele.infinite().copy()
-        for i in range(len(infinite)):
-            if infinite[i] is None:
-                if idele._has_exact():
-                    phi = K_oo[i][0]  # phi: K --> RIF/CIF
-                    infinite[i] = phi(idele.exact())
-                elif K_oo[i][0] is RIF:
-                    infinite[i] = RIF(-oo, oo)
-                else:
-                    infinite[i] = CIF(RIF(-oo, oo), RIF(-oo, oo))
+        infinite = idele.infinite_part().copy()
+        if K is QQ:
+            norm_2_primes = [2]
+        else:
+            norm_2_primes = [P for P in K.primes_above(2) if P.norm() == 2]
 
         integral, denominator = idele.integral_split()
         values = []
         moduli = []
-        for q, val in integral.finite().items():
-            x, i = val
-            if i == 0:
-                values.append(ZZ(0))
+        for P in set(integral.stored_primes() + norm_2_primes):
+            if (K is QQ and P == 2) or (K is not QQ and P.norm() == 2):
+                n_P = max(1, integral[P].prec())
             else:
-                values.append(x)
-            if K is not QQ:
-                x = K.ideal(x)
-            e = x.valuation(q)
-            moduli.append(q**(i+e))
+                n_P = integral[P].prec()
+            e_P = n_P + integral[P].valuation()
+            if e_P >= 1:
+                values.append(integral[P].center())
+                moduli.append(P**e_P)
         if K is QQ:
             value = CRT(values, moduli)
         else:
             value = K.solve_CRT(values, moduli)
         modulus = prod(moduli)
-        finite = Khat(value, modulus, denominator)
+        finite = Khat(Ohat(value, modulus), denominator)
 
-        if len(moduli) == 0 and idele._has_exact():
-            finite = idele.exact()
+        # if len(moduli) == 0 and idele.has_exact_finite_part():
+        #     finite = idele.finite_part()
+        # TODO
 
         return self.element_class(self, infinite, finite)
 
