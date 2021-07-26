@@ -79,7 +79,6 @@ with `p` running over all prime ideals of `O`.
     Write documentation for this module
 """
 
-from sage.categories.integral_domains import IntegralDomains
 from sage.categories.metric_spaces import MetricSpaces
 from sage.categories.rings import Rings
 from sage.structure.unique_representation import UniqueRepresentation
@@ -506,6 +505,19 @@ class ProfiniteInteger(CommutativeAlgebraElement):
                 raise NotImplementedError("modulus is not divisible by {}".format(other))
         return self.__class__(self.parent(), value, modulus)
 
+    def str(self, style="value-modulus"):
+        """
+        TODO
+        """
+        if style == "value-modulus":
+            return self._repr_()
+        if style == "factorial":
+            d = self.factorial_digits()
+            s = "".join(["{}*{}! + ".format(d[i], i+1) for i in range(len(d)) if d[i] != 0])
+            s += "O({}!)".format(len(d)+1)
+            return s
+        raise ValueError("Unkown style ``{}''".format(style))
+
     def prime_repr(self):
         """
         TODO fix projection() first, then write this
@@ -585,6 +597,7 @@ class ProfiniteInteger(CommutativeAlgebraElement):
             Only implemented over `\QQ`, since we only have `p`-adics for
             rational `p` in Sage.
         """
+        from sage.rings.padics.factory import Zp
         if self.parent().number_field() is not QQ:
             raise NotImplementedError("Projection to `p`-adics only implemented over rationals")
         if p not in Primes():
@@ -678,18 +691,28 @@ class ProfiniteInteger(CommutativeAlgebraElement):
             prec += 1
             prec_factorial *= prec
 
-        # Calculate the projection of our value to ZZ/(prec!)ZZ.
-        value = self.value() % prec_factorial
-
-        # Calculate the factorial digits of value.
+        value = self.value()
+        digit = 0
         digits = []
-        k_factorial = prec_factorial // prec
-        for k in range(prec-1, ZZ(0), ZZ(-1)):
-            digit, value = divmod(value, k_factorial)
-            digits = [digit] + digits
-            k_factorial //= k
+        for k in range(1, prec):
+            value = (value - digit) // k
+            digit = value % (k+1)
+            digits.append(digit)
 
         return digits
+
+        # # Calculate the projection of our value to ZZ/(prec!)ZZ.
+        # value = self.value() % prec_factorial
+
+        # # Calculate the factorial digits of value.
+        # digits = []
+        # k_factorial = prec_factorial // prec
+        # for k in range(prec-1, ZZ(0), ZZ(-1)):
+        #     digit, value = divmod(value, k_factorial)
+        #     digits = [digit] + digits
+        #     k_factorial //= k
+
+        # return digits
 
     def visual(self):
         """
@@ -941,6 +964,13 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
         """
         from sage.rings.quotient_ring import is_QuotientRing
         if modulus is None:
+            if self.number_field() is QQ:
+                try:
+                    digits = value
+                    if all([digits[i] in ZZ and 0 <= digits[i] <= i+1 for i in range(len(digits))]):
+                        return self._from_factorial_digits(digits)
+                except TypeError:
+                    pass
             if hasattr(value, "parent"):
                 P = value.parent()
                 if is_QuotientRing(P):
@@ -1036,6 +1066,18 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
         if not (number.value().is_integral() and number.modulus().is_integral()):
             raise ValueError("Can't convert non-integral profinite number to profinite integer")
         return self.element_class(self, number.value(), number.modulus())
+
+    def _from_factorial_digits(self, digits):
+        """
+        TODO
+
+        EMPTY LIST CASE?
+        """
+        from sage.functions.other import factorial
+        value = sum([digits[i] * factorial(i+1) for i in range(len(digits))])
+        modulus = factorial(len(digits)+1)
+        return self.element_class(self, value, modulus)
+
 
     def _coerce_map_from_(self, S):
         """
@@ -1138,10 +1180,11 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
         return self.element_class(self, value, modulus)
 
     def construction(self):
-        return ProfiniteIntegersFunctor(self._reduction[1][1:], self._reduction[2]), self.base()
+        return ProfiniteIntegersFunctor(), self.number_field()
 
 
 from sage.categories.pushout import ConstructionFunctor
+from sage.categories.fields import Fields
 class ProfiniteIntegersFunctor(ConstructionFunctor):
     rank = 5
 
@@ -1156,13 +1199,13 @@ class ProfiniteIntegersFunctor(ConstructionFunctor):
         """
         self.args = args or ()
         self.kwds = kwds or {}
-        ConstructionFunctor.__init__(self, IntegralDomains(), Rings())
+        ConstructionFunctor.__init__(self, Fields(), Rings())
         # TODO Change IntegralDomains() to Fields() maybe? Making
         # ProfiniteIntegers(K) the standard case, instead of
         # ProfiniteIntegers(K.maximal_order())
 
-    def _apply_functor(self, R):
-        return ProfiniteIntegers(R, *self.args, **self.kwds)
+    def _apply_functor(self, K):
+        return ProfiniteIntegers(K, *self.args, **self.kwds)
 
     # def merge(self, other):
     #     if isinstance(other, (type(self), sage.categories.pushout.FractionField)):
