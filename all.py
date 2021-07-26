@@ -1,5 +1,6 @@
 from adele import Adele, Adeles
 from completion import completions
+from multiplicative_padic import MultiplicativePAdic, MultiplicativePAdics
 from idele import Idele, Ideles
 from matrix import *
 from profinite_integer import ProfiniteInteger, ProfiniteIntegers, ProfiniteIntegersFunctor, Zhat
