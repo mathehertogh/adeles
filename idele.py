@@ -15,56 +15,15 @@ from sage.sets.primes import Primes
 from sage.arith.functions import lcm
 
 from completion import completions, infinite_completions
+from multiplicative_padic import is_finite_prime, multPAdic
 from ray_class_group import Modulus, ray_class_group
 
 CIF = ComplexIntervalField()
 oo = Infinity
 
 
-def is_finite_prime(p, K):
-    """
-    Return ``true`` if and only if ``p`` is a finite prime of the number field
-    ``K``
-    """
-    if K is QQ:
-        return p in Primes()
-    else:
-        return p in K.ideal_monoid() and K.ideal(p).is_prime()
 
 
-def _associated_multPAdic(center, precision, prime):
-    r"""
-    Return the associated multiplicative ``prime``-adic of the pair
-    (``center``, ``precision``) in `K \times \ZZ_{\geq 0}`
-
-    EXAMPLES::
-
-        sage: _associated_multPAdic(-3, 3, 2)
-        (5, 3)
-        sage: _associated_multPAdic(-3/5, 4, 5)
-        (622/5, 4)
-        sage: -3/5 - 622/5
-        -125
-
-    ::
-
-        sage: K.<a> = NumberField(x^2+5)
-        sage: p3 = K.prime_above(3)
-        sage: _associated_multPAdic(-1+2*a, 4, p3)
-        (-75*a, 4)
-        sage: (-1+2*a - (-75*a)).valuation(p3)
-        5
-    """
-    e = max(1, precision) + center.valuation(prime)
-    I = prime**e
-    if I in ZZ:
-        den = lcm(center.denominator(), I.denominator())
-        num_new_center = (den*center) % (den*I)
-    else:
-        den = lcm(center.denominator(), I.integral_split()[1])
-        num_new_center = (den*I).reduce(den*center)
-    new_center = num_new_center / den
-    return (new_center, precision)
 
 
 
@@ -169,7 +128,6 @@ class Idele(MultiplicativeGroupElement):
             Implement parameter ``check=True``
         """
         MultiplicativeGroupElement.__init__(self, parent)
-        K = parent.number_field()
 
         self._infinite = infinite
         if check:
@@ -260,8 +218,13 @@ class Idele(MultiplicativeGroupElement):
         K_oo = infinite_completions(K, fields_only=True)
         t = len(K_oo)
 
-        if not isinstance(self._infinite, list):
-            raise TypeError("infinite must be a list")
+        try:
+            if t == 1 and self._infinite in K_oo[0]:
+                self._infinite = [self._infinite]
+            else:
+                self._infinite = list(self._infinite)
+        except TypeError:
+            raise TypeError("infinite must be iterable")
 
         if len(self._infinite) != t:
             raise ValueError("infinite must have length {}".format(t))
@@ -356,29 +319,17 @@ class Idele(MultiplicativeGroupElement):
         elif self._finite in K:
             if self._finite == 0:
                 raise ValueError("exact finite value must be non-zero")
-            self._exact = K(self._finite)
+            self._finite = K(self._finite)
         elif isinstance(self._finite, dict):
             # We will replace self._finite will our own dictionary ``finite`` in
             # which we ensure all keys and values have the correct parents.
             finite = {}
-            for P, val in self._finite.items():
-                if K is QQ:
-                    if P not in Primes():
-                        raise TypeError("keys of finite must be prime numbers")
-                    P = ZZ(P)
-                else:
-                    if P not in K.ideal_monoid() or not K.ideal(P).is_prime():
-                        raise TypeError("keys of finite must be prime ideals of the number field")
-                    P = K.ideal(P)
-                
-                try:
-                    center, prec = val
-                except TypeError:
-                    raise TypeError("values at finite primes must be pairs in K^* x NN")
-                if center not in K or center == 0 or prec not in ZZ or prec < 0:
-                    raise TypeError("values at finite primes must be pairs in K^* x NN")
+            for P, data in self._finite.items():
+                if not is_finite_prime(P, K):
+                    raise TypeError("keys of finite must be finite primes")
+                P = ZZ(P) if K is QQ else K.ideal(P)
 
-                finite[P] = _associated_multPAdic(K(center), ZZ(prec), P)
+                finite[P] = multPAdic(P, data)
 
             self._finite = finite
         else:
@@ -416,12 +367,9 @@ class Idele(MultiplicativeGroupElement):
                 rep += "\n  infinity_{}:\t{}".format(i, x_i)
 
         for P in self.stored_primes():
-            center, prec = self[P]
-            p_name = str(P) if K is QQ else str(P.gens_two())
-            tab = "\t\t" if len(p_name) < 5 else "\t"
-            if len([c for c in center.list() if not c.is_zero()]) > 1:
-                center = "(" + str(center) + ")"
-            rep += "\n  {}:{}{} * U({})".format(p_name, tab, center, prec)
+            P_name = self[P].parent().prime_name()
+            tab = "\t\t" if len(P_name) < 5 else "\t"
+            rep += "\n  {}:{}{}".format(P_name, tab, self[P])
 
         if self.has_exact_finite_part():
             rep += "\n  other primes:\t{}".format(self.finite_part())
@@ -470,14 +418,13 @@ class Idele(MultiplicativeGroupElement):
             KeyError: 'You can only index by a prime ideal or (Infinity, index)'
         """
         K = self.parent().number_field()
-        if ((K is QQ and prime in Primes()) or
-                (prime in K.ideal_monoid() and K.ideal(prime).is_prime())):
+        if is_finite_prime(prime, K):
             if self.has_exact_finite_part():
                 return self.finite_part()
             try:
                 return self.finite_part()[prime]
             except KeyError:
-                return (K(1), ZZ(0))
+                return multPAdic(prime, (K(1), ZZ(0)))
         if prime is Infinity and len(self.infinite_part()) == 1:
             return self.infinite_part()[0]
         try:
@@ -621,8 +568,7 @@ class Idele(MultiplicativeGroupElement):
         """
         if self.has_exact_finite_part():
             return self.finite_part().valuation(prime)
-        center, prec = self[prime]
-        return center.valuation(prime)
+        return self[prime].valuation()
 
     def increase_precision(self, primes, prec_increment=1):
         """
@@ -719,9 +665,8 @@ class Idele(MultiplicativeGroupElement):
 
         if is_finite_prime(primes, K):
             P = primes # primes is a single finite prime
-            center, prec = self[P]
-            new_prec = max(ZZ(0), prec + prec_increment)
-            self._finite[P] = _associated_multPAdic(center, new_prec, P)
+            new_prec = max(ZZ(0), self[P].prec() + prec_increment)
+            self._finite[P] = multPAdic(P, (self[P].center(), new_prec))
             return
 
         if primes in Primes():
@@ -735,6 +680,118 @@ class Idele(MultiplicativeGroupElement):
                 raise ValueError("primes should be a (list of) prime(s)")
             self.increase_precision(prime, prec_increment)
 
+    def integral_split(self):
+        """
+        TODO
+        """
+        from sage.arith.functions import lcm
+        K = self.parent().number_field()
+
+        if self.has_exact_finite_part():
+            d = self.finite_part().denominator()
+        else:
+            d = lcm([self[P].center().denominator() for P in self.stored_primes()])
+
+        return (self.parent()(d)*self, d)
+
+    def _mul_(self, other):
+        """
+        Multiply this idele with ``other``
+
+        EXAMPLES::
+
+            sage: J = Ideles(QQ)
+            sage: u = J(-1, {2: (1/2, 7), 3: (2/5, 8)}); u
+            Idele with values:
+              infinity_0:   -1
+              2:            1/2 * U(7)
+              3:            2/5 * U(8)
+              other primes: 1 * U(0)
+            sage: v = J(2.5, {3: (-1, 4)}); v
+            Idele with values:
+              infinity_0:   2.5000000000000000?
+              3:            80 * U(4)
+              other primes: 1 * U(0)
+            sage: u*v
+            Idele with values:
+              infinity_0:   -2.5000000000000000?
+              2:            1/2 * U(0)
+              3:            32 * U(4)
+              other primes: 1 * U(0)
+        """
+        from sage.modules.free_module_element import vector
+
+        # At the infinite primes we perform component-wise multiplication.
+        infinite = vector(self.infinite_part()) * vector(other.infinite_part())
+
+        if self.has_exact_finite_part() and other.has_exact_finite_part():
+            finite = self.finite_part() * other.finite_part()
+        elif not self.has_exact_finite_part() and not other.has_exact_finite_part():
+            stored_primes = set(self.stored_primes() + other.stored_primes())
+            finite = dict([(P, self[P]*other[P]) for P in stored_primes])
+        else:
+            if not self.has_exact_finite_part():
+                self, other = other, self
+            # Now self has exact finite part while other does not.
+            stored_primes = set(self.finite_part().support() + other.stored_primes())
+            finite = dict([(P, self[P]*other[P]) for P in stored_primes])
+
+        return self.__class__(self.parent(), infinite, finite)
+
+    def inverse(self):
+        """
+        Return the inverse of this idèle
+        """
+        infinite = self.infinite_part().copy()
+        for i in range(len(infinite)):
+            infinite[i] = 1 / infinite[i]
+
+        if self.has_exact_finite_part():
+            finite = 1 / self.finite_part()
+        else:
+            finite = dict([(P, self[P].inverse()) for P in self.stored_primes()])
+
+        return self.__class__(self.parent(), infinite, finite)
+
+    def _div_(self, other):
+        """"
+        TODO
+        """
+        return self * other.inverse()
+
+    def _equals(self, other):
+        """
+        TODO
+        """
+        raise NotImplementedError("_equals() not implemtend yet TODO")
+
+    def _richcmp_(self, other, op):
+        """
+        Return the result of operator ``op`` applied to ``self`` and ``other``
+
+        Only equality and inequality are implented.
+
+        EXAMPLES::
+
+            sage: K.<a> = NumberField(x^5-x+2)
+            sage: J = Ideles(K)
+            sage: u = J(a^4+1, None, {K.prime_above(11): (a^3-a, 20)})
+            sage: v = J(None, None, {K.prime_above(97): (a, 20)})
+            sage: v == u
+            False
+            sage: v != u
+            True
+            sage: u == u
+            True
+            sage: u != u
+            False
+        """
+        from sage.structure.richcmp import op_EQ, op_NE
+        if op == op_EQ:
+            return self._equals(other)
+        if op == op_NE:
+            return not self._equals(other)
+        raise NotImplementedError()
 
 
 class Ideles(UniqueRepresentation, Group):
@@ -800,6 +857,16 @@ class Ideles(UniqueRepresentation, Group):
                 # for some reason checking isinstance(x, RayClassGroupElement) fails
                 return self._from_ray_class(x)
         return self.element_class(self, x, y)
+
+    def _from_modulo_element(self, x):
+        """
+        Create an idele from ``x`` in `(O/I)^*`
+        """
+        I = x.parent().defining_ideal()
+        finite_part = {}
+        for P, e in I.factor():
+            finite_part[P] = (x.lift(), e)
+        return self.element_class(self, None, finite_part)
 
     def _from_ray_class(self, r):
         r"""
