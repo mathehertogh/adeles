@@ -18,7 +18,6 @@ we never use it to denote exclamation.
 AUTHORS:
 
 - Mathé Hertogh (2021-01-15): initial version
-
 """
 
 # ****************************************************************************
