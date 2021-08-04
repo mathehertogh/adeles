@@ -36,4 +36,5 @@ files = [
 
 repository = "https://raw.githubusercontent.com/mathehertogh/adeles/main/"
 
-load([repository + file for file in files])
+for file in files:
+	load(repository + file)
