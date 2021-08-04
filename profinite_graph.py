@@ -1,19 +1,94 @@
 r"""
 Profinite Graph
 
-Implements a graph for continuous functions from and to the profinite integers
+Let `F: \hat{\ZZ} \to \hat{\ZZ}` be a function and let `P` be a
+:class:`profinite_function.ProfiniteFunction` implementing `F`. This file
+implements interactive profinite graphs in the class :class:`ProfiniteGraph`:
+a user can view arbitrarily high precision approximations of the graph
+`\{(x, F(x)) \mid x \in \hat{\ZZ}\}` of `F` by zooming in and out.
 
-The graph is implemented in the class ProfiniteGraph.
+We use the class :class:`profinite_integer.ProfiniteIntegers` as our
+implementation of `\hat{\ZZ}` and by a profinite integer we shall mean an
+instance of ``Zhat``, i.e. ``ProfiniteIntegers(QQ)``. Also by ``3 mod 6`` we
+shall mean the profinite integer ``Zhat(3, 6)``.
 
-We use the class
-:class:`ProfiniteIntegers <sage.rings.adeles.profinite_integers.ProfiniteIntegers>`
-as our implementation of `\hat{\ZZ}`.
+In this file we use the character '!' to mean factorial (e.g. `4!` is `24`).
 
-By "``3 mod 6``" we mean the profinite integer ``Zhat(3, 6)``, representing the
-open subset `3 + 6 \cdot \hat{\ZZ}` of `\hat{\ZZ}`.
+Factorial digits
+--------------------------------
 
-In this file we solely use the character "!" to mean factorial (e.g. 4! is 24);
-we never use it to denote exclamation.
+Every `\alpha \in \hat{\ZZ}` is uniquely determined by its *factorial digits*,
+which are the unique integers `d_1, d_2, d_3, d_4, ... \in \ZZ` satisfying
+`0 \leq d_k \leq k` and `\alpha \equiv \sum_{i=1}^k d_i \cdot i! \mod
+(k+1)!\hat{\ZZ}` for every `k \in \ZZ_{\geq 1}`. Knowing the first `k` factorial
+digits of `\alpha` corresponds to knowing `\alpha` modulo `(k+1)!`. These
+factorial digits are implemented in ``Zhat``::
+
+    sage: a = Zhat([1, 2, 1, 1]); a
+    35 mod 120
+    sage: print(a.str(style='factorial'))
+    1*1! + 2*2! + 1*3! + 1*4! + O(5!)
+    sage: a.factorial_digits()
+    [1, 2, 1, 1]
+
+::
+
+    sage: b = Zhat([1, 2, 1, 1, 0, 0]); b
+    35 mod 5040
+    sage: print(b.str(style='factorial'))
+    1*1! + 2*2! + 1*3! + 1*4! + O(7!)
+    sage: b.factorial_digits()
+    [1, 2, 1, 1, 0, 0]
+
+The visualization function
+----------------------------------------------------
+
+We define the *visualization function* to be the map `\phi: \hat{\ZZ} \to
+[0, 1]` (where `[0, 1] \subset \RR` denotes the unit interval) defined by
+`\phi(\alpha) = \sum_{i=1}^\infty d_i / (i+1)!` for `d_i` the factorial digits
+of `\alpha`.
+
+It is illustrative to verify the equalities `\phi(1+2\hat{\ZZ}) = [1/2, 1]` and
+`\phi(2+3\hat{\ZZ}) = [1/6, 1/3] \cup [5/6, 1]`. Can you determine
+`\phi(8+24\hat{\ZZ})`?
+
+The visualization function enables us to visualize the ring `\hat{\ZZ}` as the
+unit interval and `\hat{\ZZ} \times \hat{\ZZ}` as the unit square. It is
+implemented in ``Zhat``::
+
+    sage: Zhat(1, 2).visual()
+    (1/2, 1)
+    sage: Zhat(2, 3).visual()
+    (1/6, 1)
+    sage: a.visual()
+    (53/60, 107/120)
+    sage: b.visual()
+    (53/60, 4453/5040)
+
+Graphing a profinite function
+----------------------------------------------------------
+
+Let `k` be a positive integer which we call our *precision*. Then we can draw
+the graph of a function `F: \hat{\ZZ} \to \hat{\ZZ}` at precision `k` as
+follows. For each profinite integer `x` of modulus `k!`, we compute the image of
+the represented subset of `x` under `F` and we take all profinite integers `y`
+of modulus `k!` whose represented subset intersects this image. Each of
+these profinite integers `x` and `y` are mapped by the visualization function to
+a closed interval. Hence we can draw the points `(x, y)` as squares in the unit
+interval. This is precisely what the class :class:`ProfiniteGraph` does. See
+the documentation of that class for examples.
+
+REFERENCES:
+
+[Her2021] Mathé Hertogh, Computing with adèles and idèles, master's thesis,
+Leiden University, 2021.
+
+[Len2005] Hendrik Lenstra, Profinite Fibonacci numbers, Niew Archief voor
+Wiskunde, 5/6(4):297-300, december 2005.
+http://www.nieuwarchief.nl/serie5/pdf/naw5-2005-06-4-297.pdf
+
+This implementation is based on and part of [Her2021]. For details, see Chapter
+7 of [Her2021]. The idea of these kinds of graphs is taken from [Len2005].
 
 AUTHORS:
 
@@ -30,134 +105,104 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
-from tkinter import Tk, Canvas, TclError
-from tkinter.font import Font
+try:
+    from tkinter import Tk, Canvas, TclError
+    from tkinter.font import Font
+except ModuleNotFoundError:
+    tkinter_available = False
+else:
+    tkinter_available = True
+from sage.functions.other import factorial
+from sage.misc.misc_c import prod
 
 from sage.rings.integer_ring import ZZ
 from profinite_integer import Zhat
 
 
-def factorial(n):
-    """
-    Return ``n`` factorial
-
-    EXAMPLES::
-
-        sage: factorial(0)
-        1
-        sage: factorial(3)
-        6
-        sage: factorial(5)
-        120
-
-    .. TODO::
-
-        ``from sage.other.functions import factorial`` gives a compilation error...
-        Why? We want to use the already existing factorial-function of Sage
-    """
-    if n <= 1:
-        return ZZ(1)
-    return ZZ(n) * factorial(n-1)
-
-def prod(factors):
-    """
-    Return the product of all elements in ``factors``
-    
-    EXAMPLES::
-
-        sage: prod([2, 3, 5])
-        30
-        sage: prod({3, 4})
-        12
-
-    .. TODO::
-
-        Replace with the standard ``prod`` function.
-    """
-    result = ZZ(1)
-    for factor in factors:
-        result *= factor
-    return result
-
-
-
 
 class ProfiniteGraph:
     r"""
-    Interactive graph of a continuous function from and to profinite integers
-
-    The function to be graphed is passed to the constructor as a
-    :class:`ProfiniteFunction <sage.rings.adeles.profinite_functions.ProfiniteFunction>`.
+    Interactive graph of a function from and to profinite integers
+    
+    Every :class:`profinite_function.ProfiniteFunction` can be graphed, as well
+    as callables that behave like such profinite functions (see below for
+    examples).
 
     The graph allows the user to zoom in (and back out) to arbitrary high
     precisions. Left-click on an area in the graph to zoom into that area.
     Right-click anywhere on the graph to zoom out.
 
     The profinite integers are drawn based on the
-    :meth:`visual() <sage.rings.adeles.profinite_integers.ProfiniteInteger.visual>`
-    method of profinite integers.
-    So `\hat{\ZZ} \times \hat{\ZZ}` is identified with the unit square
-    `[0,1] \times [0,1]` and a pair of profinite integers
-    (``x mod m``, ``y mod n``) is identified with a retangle
-    `[a,b] \times [c,d]` in the unit square.
+    :meth:`profinite_integer.ProfiniteInteger.visual` method of profinite
+    integers. So `\hat{\ZZ} \times \hat{\ZZ}` is identified with the unit square
+    `[0,1] \times [0,1]` and a pair of profinite integers (``x mod m``, ``y mod
+    n``) is identified with a rectangle `[a,b] \times [c,d]` in the unit square.
 
     The idea of this kind of graph is taken from the paper "Profinite Fibonacci
-    numbers" by Hendrik Lenstra, cf. [Len2005]_. Some default settings such as
+    numbers" by Hendrik Lenstra, cf. [Len2005]. Some default settings such as
     the colors to draw in are taken such that the resulting graph looks like the
     picture in that paper.
+
+    .. WARNING::
+
+        This class uses the standard Python interface package `tkinter
+        <https://docs.python.org/3/library/tkinter.html>`_ for its graphical
+        interface. Make sure that tkinter is installed (which should already be
+        the case on Windows and most Unix systems) and that the command ``import
+        tkinter`` works.
 
     EXAMPLES:
 
     We plot the graph of the profinite Fibonacci function::
 
         sage: g = ProfiniteGraph(ProfiniteFibonacci())
-        sage: g.set_window_sizes(960, 960)
+        sage: g.set_window_sizes(720, 720)
         sage: g.set_title("Graph of the profinite Fibonacci function")
         sage: g.plot() # optional - tkinter
 
     This produces the following image:
 
-    .. image:: fibonacci_graph_0mod1x0mod1.png
+    .. image:: Fibonacci_graph_0mod1x0mod1.png
 
     What do we see here? Lets first look only at the big orange blocks. Above
     ``3 mod 6`` on the `x`-axis, there are two orange blocks, which on the
-    `y`-axis represent ``2 mod 6`` and ``4 mod 6``. This means that the iamge of
+    `y`-axis represent ``2 mod 6`` and ``4 mod 6``. This means that the image of
     `3 + 6 \cdot \hat{\ZZ}` under the Fibonacci function lies in
     `(2 + 6 \cdot \hat{\ZZ}) \cup (4 + 6 \cdot \hat{\ZZ})`. It also means that
     both ``2 mod 6`` and ``4 mod 6`` are "hit" by ``3 mod 6``:
     `F(3 + 6 \cdot \hat{\ZZ}) \cap (2 + 6 \cdot \hat{\ZZ}) \neq \emptyset` and
     `F(3 + 6 \cdot \hat{\ZZ}) \cap (4 + 6 \cdot \hat{\ZZ}) \neq \emptyset`.
 
-    The orange blocks represent the approximation of *precision* 3: it computes
-    the images of the elements of `\hat{\ZZ}/3!\hat{\ZZ}`. In pink, the
-    approximation of precision 4 is drawn. So it calculates images of subsets
-    of the form `a + 4! \cdot \hat{\ZZ}`, i.e. `a + 24 \cdot \hat{\ZZ}`. By left
-    clicking we zoom into the area ``(3 mod 6) x (2 mod 6)``:
+    The orange blocks represent the approximation of the graph of the profinite
+    Fibonacci function of *precision* 3: it computes the images of the profinite
+    integers of modulus `3!`. In pink, the approximation of precision 4 is
+    drawn. Hence the pink rectangles all represents subsets of `\hat{\ZZ} \times
+    \hat{\ZZ}` of the form `(x+4!\hat{\ZZ}) \times (y+4!\hat{\ZZ})`.
+
+    By left clicking we zoom in to the area `(3+6\hat{\ZZ}) \times
+    (2+6\hat{\ZZ})`, i.e. ``(3 mod 6) x (2 mod 6)``:
 
     .. image:: fibonacci_graph_3mod6x2mod6.png
 
-    Now we see that within ``3 mod 6``, the open subsets ``3 mod 24`` and
-    ``21 mod 24`` are actually mapped to ``2 mod 24``. Apparently, the rest of
-    ``3 mod 6`` (i.e. ``9 mod 24`` and ``15 mod 24``) is mapped into
-    ``4 mod 6``. One could see this by right-clicking anywhere on the graph to
-    zoom out and than zooming in to the area ``(3 mod 6) x (4 mod 6)``.
+    Now we see that within `3+6\hat{\ZZ}`, the open subsets `3+24\hat{\ZZ}` and
+    `21+24\hat{\ZZ}` are actually mapped to `2+24\hat{\ZZ}`. Apparently, the
+    rest of `3+6\hat{\ZZ}` (i.e. `9+24\hat{\ZZ}` and `15+24\hat{\ZZ}`) is mapped
+    into `4+6\hat{\ZZ}`. One could see this by right-clicking anywhere on the
+    graph to zoom out and than zooming in to the area ``(3 mod 6) x (4 mod 6)``.
 
-    Now within the pink squares, we see brown squares. This is the precision-5
+    Now within the pink squares, we see brown squares. This is the precision 5
     approximation. From this picture one can already see that ``3 mod 120`` is
     mapped to ``2 mod 120`` and that ``27 mod 120`` is mapped to ``98 mod 120``.
     But a user can also zoom in again to see this more clearly of course.
 
-    Other functions can be plotted as well. Here is an example of how to produce
-    a graph of the square function::
+    Any profinite function (cf. :class:`profinite_function.ProfiniteFunction`)
+    can be graphed. We can even graph any callable that behaves like a
+    profinite function. Here is an example of how to produce a graph of the
+    square function `\hat{\ZZ} \to \hat{\ZZ}, x \mapsto x^2`::
 
         sage: graph = ProfiniteGraph(lambda x, des_mod: x*x)
-        sage: graph.set_title("square function")
+        sage: graph.set_title("Square function")
         sage: graph.plot()  # optional - tkinter
-
-    For details on what to pass into the constructor of ``ProfiniteGraph``, see
-    :meth:`__init__`.
-
-    .. automethod:: __init__
     """
 
 
@@ -175,7 +220,7 @@ class ProfiniteGraph:
             r"""
             Construct a fully zoomed out view
 
-            Initial view is (0 mod 1!)x(0 mod 1!), i.e. the whole
+            Initial view is ``(0 mod 1!) x (0 mod 1!)``, i.e. the whole
             `\hat{\ZZ} \times \hat{\ZZ}`.
 
             TESTS::
@@ -209,45 +254,44 @@ class ProfiniteGraph:
 
         INPUT:
 
-        - ``function`` -- a ProfiniteFunction that is "continuous" in the
-          following practical sense:
+        - ``function`` -- a profinite function (cf.
+          :class:`profinite_function.ProfiniteFunction`), or a callable that
+          behaves like a profinite function.
 
-            for any desired output modulus ``des_mod``, increasing the
-            modulus of the input-value ``x`` to ``function`` will ultimately
-            give an output modulus of ``des_mod``.
-
-          A continuous function `F: \hat{\ZZ} \to \hat{\ZZ}` that is
-          correctly implemented as a ProfiniteFunction satisfies this
-          criterion.
-
-          We do *not* enforce that ``function`` is an actual instance of
-          :class:`ProfiniteFunction <sage.rings.adeles.profinite_functions.ProfiniteFunction>`.
-          Instead, we only do a very simple test to see if ``function`` is
-          callable, excepts a profinite integer and an integer as arguments and
-          returns a profinite integer. This is to allow uses like these::
-
-            sage: cube_graph = ProfiniteGraph(lambda x, des_mod: x*x*x)
 
         EXAMPLES::
 
             sage: fibonacci = ProfiniteFibonacci()
             sage: graph = ProfiniteGraph(fibonacci)
 
+        An example where we pass in a callable behaving like a profinite
+        function, which is not an instance of
+        :class:`profinite_function.ProfiniteFunction`. ::
+
+            sage: cube_graph = ProfiniteGraph(lambda x, des_mod: x*x*x)
+
+        This creates the graph of the cube map `\hat{\ZZ} \to \hat{\ZZ}, x
+        \mapsto x^3`.
+
         .. NOTE::
 
             This *creates* the graph, but does not *display* is yet. Call
             :meth:`plot` to actually view the graph.
 
-        TESTS:
+        TESTS::
 
-            TODO: also fix the result of the line below to reflect the ValueError
-            that is raised when the ``in`` test is implemented below::
-
-            sage: #ProfiniteGraph(97)
+            sage: ProfiniteGraph(97)
+            Traceback (most recent call last):
+            ...
+            ValueError: function is not a profinite function (and does not behave like one)
         """
-        # TODO fix Zhat.__contains__() such that ``in`` works below...
-        #if function(Zhat(5, 24), 6) not in Zhat:
-        #    raise ValueError("function should return a profinite integer")
+        if not tkinter_available:
+            raise ModuleNotFoundError("tkinter is not available")
+        try:
+            if function(Zhat(5, 24), 6) not in Zhat:
+               raise ValueError("function is not a profinite function (and does not behave like one)")
+        except:
+            raise ValueError("function is not a profinite function (and does not behave like one)")
         self.function = function
         self.view = ProfiniteGraph.View()
         self.canvas = None # the canvas on which we draw everything
@@ -267,7 +311,6 @@ class ProfiniteGraph:
 
             Control flow of the program is handed over to the drawing library
             used (``Tkinter``) until the user closes the graph-window.
-
         """
         self._create_window()
         self._draw()
@@ -307,14 +350,13 @@ class ProfiniteGraph:
         - ``approx`` -- non-empty list of strings (optional, default is keep the
           current setting); colors of the different approximations
         - ``highlight`` -- string (optional, default is keep the current
-                        setting); color of the transparent box that follows
-                        the mouse
+          setting); color of the transparent box that follows the mouse
         - ``identity_line`` -- string (optional, default is keep the current
-                               setting); color of the identity line, see also
-                               :meth:`set_identity_line`
+          setting); color of the identity line, see also
+          :meth:`set_identity_line`
         - ``axis`` -- string (optional, default is keep the current setting);
-                      color of the axis and the corresponding coordinate labels
-                      (e.g. "1/6", "2/3")
+          color of the axis and the corresponding coordinate labels (e.g. "1/6",
+          "2/3")
         
         Strings to denote a color should be formatted in one of the following
         ways:
@@ -363,7 +405,7 @@ class ProfiniteGraph:
         By the identity line we mean de graph of the identity function on
         `\hat{\ZZ}`, i.e. "`x = y`". We draw this as an actual line (with zero
         surface area). This can be useful to find fixed points of the function
-        you are graphing. This is for example done in the paper [Len2005]_ for
+        you are graphing. This is for example done in the paper [Len2005] for
         the graph of the Fibonacci function.
 
         INPUT:
@@ -467,10 +509,6 @@ class ProfiniteGraph:
             |            |footer    currenty viewing: ...             |
             |            v                                            |
             -----------------------------------------------------------
-
-        .. TODO::
-
-            get rid of the ASCII art and use a picture/plot
 
         Note that width and height are *not* the width and height of the full
         window.
