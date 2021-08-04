@@ -37,7 +37,7 @@ We start with loading our code and initilizing our quadratic imaginary number
 field together with its idèle group. We embed `K` in `\CC` such that `\theta`
 lies in the upper half plane. ::
 
-    sage: from all import *
+    sage: from adeles import *
     sage: R = ZZ['X']; X = R.gen()
     sage: K.<theta> = NumberField(X**2+X+18, embedding=-0.5+4.2*I)
     sage: K.discriminant() # Check that we have the correct field QQ(sqrt(-71))

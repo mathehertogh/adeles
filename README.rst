@@ -80,9 +80,17 @@ How to use this package
 
 We assume you have a working SageMath installation.
 
-To use the
+Download this repository to your drive, for example to ``path/to/adeles``.
 
+Go the the directory ``path/to`` and start up SageMath::
 
+	$ sage
+
+Then within SageMath, import the package::
+
+	$ sage: from adeles import *
+	$ sage: Adeles(QQ)
+	Adèle Ring of Rational Field
 
 
 Copyright

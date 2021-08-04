@@ -38,7 +38,7 @@ AUTHORS:
 
 from sage.groups.free_group import FreeGroup
 from sage.categories.homset import Hom
-from sage.rings.complex_mpfr import ComplexField
+from sage.all import ComplexField
 from sage.misc.functional import eta
 from sage.functions.other import sqrt
 from sage.modular.arithgroup.congroup_sl2z import SL2Z

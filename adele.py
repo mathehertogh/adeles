@@ -211,7 +211,7 @@ from sage.structure.element import CommutativeAlgebraElement
 from sage.rings.ring import CommutativeAlgebra
 from sage.categories.homset import Hom
 from sage.sets.primes import Primes
-from sage.rings.complex_mpfr import ComplexField
+from sage.all import ComplexField
 from sage.rings.complex_interval_field import ComplexIntervalField
 from sage.rings.real_mpfi import RIF
 from sage.rings.integer_ring import ZZ
