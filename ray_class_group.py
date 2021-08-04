@@ -653,7 +653,7 @@ class RayClassGroup(AbelianGroup_class):
             L = -1
         if L == self.ngens():
             return self.element_class(self, args[0])
-        from idele import Idele
+        from .idele import Idele
         if isinstance(args[0], RayClassGroupElement):
             c = args[0]
             if c.parent() is self:

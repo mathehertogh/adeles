@@ -217,7 +217,7 @@ from sage.sets.primes import Primes
 from sage.arith.functions import lcm
 from sage.modules.free_module_element import vector
 
-from profinite_integer import ProfiniteIntegers, ProfiniteCompletionFunctor
+from .profinite_integer import ProfiniteIntegers, ProfiniteCompletionFunctor
 
 
 class ProfiniteNumber(CommutativeAlgebraElement):

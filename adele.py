@@ -218,10 +218,10 @@ from sage.rings.integer_ring import ZZ
 from sage.rings.rational_field import QQ
 from sage.rings.infinity import Infinity
 
-from profinite_integer import ProfiniteIntegers
-from profinite_number import ProfiniteNumbers, ProfiniteNumber
-from completion import infinite_completions
-from idele import Idele
+from .profinite_integer import ProfiniteIntegers
+from .profinite_number import ProfiniteNumbers, ProfiniteNumber
+from .completion import infinite_completions
+from .idele import Idele
 
 CC = ComplexField()
 CIF = ComplexIntervalField()
@@ -1097,7 +1097,7 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
             sage: A._coerce_map_from_(ZZ)
             True
         """
-        from idele import Ideles
+        from .idele import Ideles
         K = self.base()
         if K.has_coerce_map_from(domain):
             return True

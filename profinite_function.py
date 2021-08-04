@@ -36,8 +36,9 @@ from sage.rings.finite_rings.integer_mod_ring import IntegerModRing
 from sage.matrix.constructor import matrix
 from sage.arith.misc import gcd
 from sage.rings.integer_ring import ZZ
-from profinite_integer import Zhat
 from sage.misc.abstract_method import abstract_method
+
+from .profinite_integer import Zhat
 
 
 class ProfiniteFunction:

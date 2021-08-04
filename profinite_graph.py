@@ -114,9 +114,9 @@ else:
     tkinter_available = True
 from sage.functions.other import factorial
 from sage.misc.misc_c import prod
-
 from sage.rings.integer_ring import ZZ
-from profinite_integer import Zhat
+
+from .profinite_integer import Zhat
 
 
 

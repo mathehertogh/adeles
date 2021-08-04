@@ -44,10 +44,11 @@ from sage.rings.rational_field import QQ
 from sage.arith.functions import lcm
 from sage.misc.misc_c import prod
 from sage.matrix.constructor import matrix
-from profinite_number import Qhat
-from adele import Adeles
-from idele import Ideles
-from matrix import modulus, denominator, factor_GLQhat#, value_matrix, denominator_matrix, 
+
+from .profinite_number import Qhat
+from .adele import Adeles
+from .idele import Ideles
+from .matrix import modulus, denominator, factor_GLQhat
 
 
 def shimura_connecting_homomorphism(u, output_prec=None):

@@ -40,7 +40,9 @@ from sage.matrix.constructor import matrix
 from sage.matrix.special import identity_matrix, block_matrix, diagonal_matrix
 from sage.matrix.symplectic_basis import symplectic_basis_over_ZZ
 from sage.misc.functional import det
-from profinite_number import Qhat
+
+from .profinite_number import Qhat
+
 
 def value_matrix(M):
     r"""

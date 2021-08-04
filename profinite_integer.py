@@ -1185,7 +1185,7 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
             sage: Zhat([Zp(2)(20, 5), Zp(3)(7, 2)])
             52 mod 288
         """
-        import profinite_number
+        from .profinite_number import ProfiniteNumbers
         from sage.rings.quotient_ring import is_QuotientRing
         from sage.rings.padics.generic_nodes import is_pAdicRing, is_pAdicField
         is_pAdic = lambda P: is_pAdicRing(P) or is_pAdicField(P)
@@ -1198,7 +1198,7 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
                 return self.element_class(self, x.value(), x.modulus())
 
             # Check if x is a profinite K-number for some subfield K of our base field:
-            if isinstance(P, profinite_number.ProfiniteNumbers) and self.number_field().has_coerce_map_from(P.number_field()):
+            if isinstance(P, ProfiniteNumbers) and self.number_field().has_coerce_map_from(P.number_field()):
                 return self._from_profinite_number(x)
             
             # Check if x is an element of a quotient of our base maximal order:
@@ -1792,8 +1792,8 @@ class ProfiniteCompletionFunctor(ConstructionFunctor):
             Ring of Profinite Numbers of Number Field in a with defining polynomial x^4 + 2
         """
         if R.is_field():
-            import profinite_number
-            return profinite_number.ProfiniteNumbers(R, *self.args, **self.kwds)
+            from .profinite_number import ProfiniteNumbers
+            return ProfiniteNumbers(R, *self.args, **self.kwds)
         return ProfiniteIntegers(R, *self.args, **self.kwds)
 
 

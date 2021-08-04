@@ -242,9 +242,9 @@ from sage.rings.infinity import Infinity
 from sage.sets.primes import Primes
 from sage.arith.functions import lcm
 
-from completion import infinite_completions
-from multiplicative_padic import is_finite_prime, MulPAdic, MultiplicativePAdics
-from ray_class_group import Modulus, ray_class_group, RayClassGroupElement
+from .completion import infinite_completions
+from .multiplicative_padic import is_finite_prime, MulPAdic, MultiplicativePAdics
+from .ray_class_group import Modulus, ray_class_group, RayClassGroupElement
 
 CIF = ComplexIntervalField()
 oo = Infinity
