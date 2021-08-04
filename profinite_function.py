@@ -1,9 +1,24 @@
 r"""
-Profinite Function
+Profinite Functions
+
+This file describes an interface for implementations of profinite functions
+`\hat{\ZZ} \to \hat{\ZZ}` in the form of the abstract class
+:class:`ProfiniteFunction`.
+
+It also implements a good example of such a profinite function, namely the
+Profinite Fibonacci function, in :class:`ProfiniteFibonacci`.
+
+REFERENCES:
+
+[Her2021] Mathé Hertogh, Computing with adèles and idèles, master's thesis,
+Leiden University, 2021.
+
+These profinite functions, aspecially the profinite Fibonacci function, is
+introduced in Chapter 7 of [Her2021].
 
 AUTHORS:
 
-- Mathé Hertogh (2021-01-15): initial version
+- Mathé Hertogh (2021-7): initial version based on [Her2021]
 
 """
 
@@ -26,11 +41,30 @@ from sage.misc.abstract_method import abstract_method
 
 
 class ProfiniteFunction:
-    """
+    r"""
     Abstract class representing a function from and to the profinite integers
 
+    An instance `P` of this class represents a function `F: \hat{\ZZ} \to
+    \hat{\ZZ}` and should implement the abstract method :meth:`__call__` to
+    evaluate this function in a point. For a profinite `\QQ`-integer `x` the
+    call `P(x)` should return a profinite `\QQ`-inter and this evaluation must
+    satisfy the following conditions:
 
-    This class has one abstract method, the __call__() method.
+    1. for every profinite `\QQ`-integer `x` and for every `\alpha \in
+       \hat{\ZZ}` that `x` represents, `F(\alpha)` is represented by `P(x)`;
+    2. for every `k \in \ZZ_{>0}` there exists `m \in \ZZ_{\geq k}` such
+       that for all `n \in \ZZ_{\geq m}` and for all profintie `\QQ`-integers
+       `x` of modulus divisible by `n!`, the modulus of `P(x)` is divisible by
+       `k!`.
+
+    Condition 1 ensures that the evaluation is "correct" and Condition 2 states
+    that the profinite function can be evulated with "arbitrarily high
+    precision".
+        
+    .. SEEALSO::
+        
+        See the class :class:`profinite_graph.ProfiniteGraph` for visualizations
+        of the graphs of profinite functions.
 
     .. automethod:: __call__
     """
@@ -40,64 +74,40 @@ class ProfiniteFunction:
         r"""
         Evaluate this function in ``x``
 
-        This is an abstract method.
+        This is an abstract method that should be implemented by subclasses.
 
-        Denote the function that we implement by `F: \hat{\ZZ} \to \hat{\ZZ}`.
+        The evulation should always satisfy Condition 1 stated in the docstring
+        of the class :class:`ProfiniteFunction`.
+        For ``des_mod == 0`` it should also satisfy Condition 2.
 
         INPUT:
 
-        - ``x`` -- profinite integer; point to evaluate `F` in
+        - ``x`` -- profinite `\QQ`-integer; point to evaluate this profinite
+          function in
         - ``des_mod`` -- integer (default: `0`); the desired modulus of
           the output. Set to 0 for "as high as possible".
 
         OUTPUT:
+        
+        The profinite integer ``self(x)``. If ``des_mod`` is set to a non-zero
+        value, then this function returns the profinite integer
+        ``self(x) + Zhat(0, m)`` for some multiple `m` of ``des_mod``.
 
-        `F(x)` in the following sense: we return a profinite integer ``y``
-        satisfying:
+        .. NOTE::
 
-        1. any profinite integer that ``x`` represents is mapped by `F` to a
-           profinite integer that is represented by ``y``.
-        2. Let `m` be the maximal divisor of ``des_mod`` for which ``y`` can
-           have modulus `m` under condition 1, if it exists. Then the modulus
-           of ``y`` is a multiple of `m`.
-
-           If ``des_mod`` is zero, such `m` might not exist. In this case, the
-           modulus of ``y`` should be zero if this is possible under condition
-           1. Else, no guarantees are made about the modulus of ``y``. An
-           implementer of such a function should clearly specify its own
-           precision guarantees in its documentation.
-
-        Condition 1 above says that the output should be "correct". If we give
-        ``a mod m`` as input and we receive ``b mod n`` as output, than the
-        following must hold:
-
-        .. MATH::
-
-            F(a + m \cdot \hat{\ZZ}) \subset b + n \cdot \hat{\ZZ}.
-
-        Condition 2 says that the output should have a "high" precision. One
-        could always output ``0 mod 1`` to satisfy condition 1, since this
-        represents the whole ring `\hat{\ZZ}`. But a user wants more precision
-        of course. When a user specifies a non-zero ``des_mod``, the precision
-        should be as high as possible modulo ``des_mod``. This is the main
-        content of condition 2. We allow a modulus that is *a multiple of* `m`,
-        not just `m`: returning a multiple of `m` gives strictly more
-        information. Note that this always includes zero. So an exact answer may
-        always be returned as well.
-
-        For non-zero ``des_mod``, a maximal `m` as mentioned always exists,
-        since ``des_mod`` has finitely many divisors and 1 is a candidate
-        divisor that always satisfies condition 1.
-
-        Note that if ``des_mod`` is zero, there may still be a maximal `m`: the
-        input is a bounded subset of `\hat{\ZZ}`, so in many cases the output
-        will also be some bounded subset. In such a case, a maximal `m` could
-        exist.
+            The ``des_mod`` option can be used by implementers of profinite
+            functions to speed up the evaluation: the user can specify a 
+            precision up to which he/she is interested in the result. If this
+            desired output precision is much lower than the maximal precision
+            (returend for ``des_mod == 0``), the evaluation of the profinite
+            function may be much faster. For a good example of such a situation,
+            see :class:`ProfiniteFibonacci`.
 
         EXAMPLES:
 
-        This constant-zero map only returns the result modulo the desired
-        modulus, although we know the result exactly::
+        We create a profinite function implementing the constant zero map
+        `\hat{\ZZ} \to \hat{\ZZ}, x \mapsto 0`. We only return zero modulo the
+        desired modulus, although we know the result is exactly zero::
 
             sage: class ConstantZero(ProfiniteFunction):
             ....:     def __call__(self, x, des_mod=0):
@@ -107,12 +117,10 @@ class ProfiniteFunction:
             0 mod 0
             sage: zero(Zhat(5,20), 30)
             0 mod 30
-
-        The constant zero function above is also an example of a
-        ProfiniteFunction that returns an exact answer (output modulus 0) when
-        ``des_mod`` is zero.
-
-        We may also always return an answer with the maximal modulus::
+        
+        Next we create a profinite function implementing the squaring map
+        `\hat{\ZZ} \to \hat{\ZZ}, x \mapsto x^2`. This time we simply ignore
+        the desired input modulus given by the user. ::
 
             sage: class Square(ProfiniteFunction):
             ....:     def __call__(self, x, des_mod=0):
@@ -125,57 +133,37 @@ class ProfiniteFunction:
 
         In the last example, ``4 mod 5`` would also have been an acceptable
         answer, since ``gcd(40, 15)=5``. But instead, we choose to return an
-        answer with strictly more precision: a multiple of 5.
+        answer with strictly more precision: the multiple 40 of 5.
 
         For a good "real world" example, take a look at the
-        :class:`profinite Fibonacci function <sage.rings.adeles.profinite_functions.ProfiniteFibonacci>`.
-
-        For a (theoretical) example of a function for which we cannot give
-        precision guarantees, consider the prime decomposition
-        `\hat{\ZZ} = \prod_p \ZZ_p` and the function
-        `G: \hat{\ZZ} \to \hat{\ZZ}` which is given on the `p`-th coordinate as
-        follows. For `p \neq 2`, `G` is the `p`-adic identity function on
-        `\ZZ_p`, while on the `2`-adics `G` is the constant 1 map.
-        Suppose the user asks for `G(2 \mod 6)` with desired modulus 0. Then for
-        any positive integer `n`, we know the answer modulo `2^n` (namely 1).
-        Hence the output moduli satisfying condition 1 are unbounded. But we do
-        *not* know the answer exactly: we don't know the answer modulo 5.
-
-        .. NOTE::
-
-            The purpose of ``des_mod`` is to allow implementations of
-            ProfiniteFunctions to speed up their computation, knowing that the
-            user is only interested in the result modulo ``des_mod``.
-
-            Hence if function evaluation is very slow, the user is adviced to
-            set ``des_mod`` to a non-zero value.
+        :class:`profinite Fibonacci function <ProfiniteFibonacci>`.
         """
-        pass
-
+        raise NotImplementedError("no general function evaluation implemented")
 
 
 class ProfiniteFibonacci(ProfiniteFunction):
     r"""
-    The Fibonacci function from and to the profinite integers
+    The profinite Fibonacci function
 
     The Fibonacci function `F` is defined on the integers by `F(0)=0`, `F(1)=1`
     and `F(n) = F(n-1) + F(n-2)` for all integers  `n \in \ZZ`.
     There exists a unique continuous extension `F: \hat{\ZZ} \to \hat{\ZZ}` of
-    the Fibonacci function to the profinite integers.
-    This is an implementation of that function.
+    the Fibonacci function, called the *profinite Fibonacci function*. This is
+    an implementation of it.
 
     .. automethod:: __call__
     """
     def __call__(self, x, des_mod=0):
         r"""
-        Return the ``x``-th profinite Fibonacci number
+        Return the ``x``-th profinite Fibonacci number, for ``x`` a profinite
+        integer
 
         We refer to :meth:`ProfiniteFunction.__call__
         <sage.rings.adeles.profinite_functions.ProfiniteFunction.__call__>`
         for a description of the input and output.
 
-        The modulus of the output will always be a divisor of ``des_mod``.
-        So we never compute up to a higher precision than the user asks for.
+        The modulus of the output will always be a divisor of ``des_mod``, so we
+        never compute up to a higher precision than the user asks for.
 
         EXAMPLES::
 
@@ -196,43 +184,36 @@ class ProfiniteFibonacci(ProfiniteFunction):
         seconds. See the warning below.
 
         ALGORITHM:
-
-        Let `m` and `n` be the modulus of the input (``x``) and the output 
-        respectively. Then clearly we have the upper bound
         
-        .. MATH::
+        Write `F` for the Fibonacci function `\ZZ \to \ZZ`. Let `m` be the
+        modulus of ``x``. Then the modulus of the output is computed as
+        `\gcd(F(m), F(m+1)-1)`. The value of the output is computed as `F(v)`
+        where `v` denotes the value of ``x``.
 
-            n \leq gcd(F(m)-F(0), F(m+1)-F(1)).
-
-        Using the Fibonacci-recurrence relation and the fact that the Fibonacci
-        function is continous (as a function `F: \hat{\ZZ} \to \hat{\ZZ}`) one
-        can show that this is an equality. This enables us to directly compute
-        the output modulus.
-
-        Hence for ``x = v mod m``, it suffices to compute F(m), F(m+1) and F(v).
-        This is done using the formula
+        These Fibonacci numbers in `\ZZ` are computed using the formula
 
         .. MATH::
 
-            \left(\begin{matrix} 1&1\\1&0 \end{matrix}\right)^n
+            \begin{pmatrix} 1 & 1 \\ 1 & 0 \end{pmatrix}^n
             =
-            \left(\begin{matrix} F(n+1)&F(n) \\F(n)&F(n-1) \end{matrix}\right)
+            \begin{pmatrix} F(n+1) & F(n) \\ F(n) & F(n-1) \end{pmatrix}
 
-        The matrix exponentiation is done using a square-and-multiply method in
-        the ring of matrices over `\ZZ/\texttt{des_mod}\ZZ`.
+        The matrix exponentiation is done using a square-and-multiply method.
+        For `F(m)` and `F(m+1)` we do this exponentiation in the ring of
+        matrices over `\ZZ/\texttt{des_mod}\ZZ`; for `F(v)` over `\ZZ/N\ZZ`,
+        where `N` denotes the output modulus.
 
         .. WARNING::
 
             Not specifying ``des_mod``, or setting it to 0, requires the exact
-            computation of F(x.modulus), which may be huge
-            (`F(n) \approx 1.6^n`). Hence the computation with bounded desired
-            modulus is significantly faster than for unbounded.
+            computation of ``F(x.modulus())``, which may be huge (`F(m) \approx
+            1.6^m`). Hence the computation with bounded desired modulus is
+            significantly faster than for unbounded.
         
         .. SEEALSO::
             
-            The class
-            :class:`ProfiniteGraph <sage.rings.adeles.profinite_graph.ProfiniteGraph>`
-            for a visualization of the graph of this function.
+            See the class :class:`profinite_graph.ProfiniteGraph` for a
+            visualization of the graph of this function.
         """
         if des_mod is None:
             des_mod = x.modulus()
