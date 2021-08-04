@@ -15,7 +15,7 @@ Taking the projective limit results in the topological ring
 
     \hat{O} = \varprojlim_I O/I
 
-of profinite `K`-integers. It is naturally an `O`-algebra as well.
+of *profinite `K`-integers*. It is naturally a commutative `O`-algebra as well.
 
 Profinite Integers over `\QQ`
 -----------------------------
@@ -24,7 +24,7 @@ In SageMath the ring of profinite `\QQ`-integers `\hat{\ZZ}` and its elements
 look like this::
 
     sage: Zhat
-    Profinite Integers of Rational Field
+    Ring of Profinite Integers of Rational Field
     sage: Zhat is ProfiniteIntegers(QQ)
     True
     sage: Zhat.an_element()
@@ -37,12 +37,14 @@ It represents all profinite integers in the open subset `2 + 6\hat{\ZZ}` of
 
     sage: a = Zhat(2, 6); a
     2 mod 6
-    sage: a == 8
+    sage: a.represents(8)
     True
-    sage: a == -4
+    sage: a.represents(-4)
     True
-    sage: a == 5
+    sage: a.represents(5)
     False
+    sage: [n for n in range(-20, 30) if a.represents(n)]
+    [-16, -10, -4, 2, 8, 14, 20, 26]
 
 A sum of a profinite integer in `2+6\hat{\ZZ}` and a profinite integer in
 `5+15\hat{\ZZ}` will lie in `1+3\hat{\ZZ}`, while any product will lie in
@@ -97,7 +99,7 @@ of the subset `[1.2, 1,3]` of `\RR`. ::
 
     sage: K.<a> = NumberField(x^2+5)
     sage: Ohat = ProfiniteIntegers(K); Ohat
-    Profinite Integers of Number Field in a with defining polynomial x^2 + 5
+    Ring of Profinite Integers of Number Field in a with defining polynomial x^2 + 5
     sage: b = Ohat(a+1, K.ideal(4, 2*a+2)); b
     a + 1 mod (4, 2*a + 2)
     sage: b.value()
@@ -124,14 +126,8 @@ for the other arithmetic operations. ::
 
 See the arithmetic methods such as :meth:`_add_` for details.
 
-REFERENCES:
-
-[Her2021] Mathé Hertogh, Computing with adèles and idèles, masther's thesis,
-Leiden University, 2021.
-
-This implementation of profinite integers is based on the Master's thesis
-[Her2021] of Mathé Hertogh. An extensive exposition of properties, design
-choices and two applications can be found there.
+In the rest of this file, we shall write "profinite integer" to mean an instance
+of ``ProfiniteInteger``, as opposed to element of `\hat{O}`.
 
 .. SEEALSO::
 
@@ -139,6 +135,10 @@ choices and two applications can be found there.
     :class:`profinite_graph.ProfiniteGraph`. There a graph of the profinite
     Fibonacci function `\hat{\ZZ} \to \hat{\ZZ}` is created using these
     profinite integers.
+
+.. SEEALSO::
+
+    :mod:`profinite_number`
 
 .. NOTE::
 
@@ -164,6 +164,15 @@ choices and two applications can be found there.
     ``Ohat(a, 15)`` and ``a``, which is not ``Ohat``, but the ring of profinite
     *numbers* over ``K``.
 
+REFERENCES:
+
+[Her2021] Mathé Hertogh, Computing with adèles and idèles, master's thesis,
+Leiden University, 2021.
+
+This implementation of profinite integers is based on [Her2021]. An extensive
+exposition of properties, design choices and two applications can be found
+there.
+
 AUTHORS:
 
 - Mathé Hertogh (2021-07): initial version based on [Her2021]
@@ -179,12 +188,10 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
-import sys # TODO erase these two lines
-sys.path.append('/home/mathe/adeles/src')
-
-from sage.categories.metric_spaces import MetricSpaces
 from sage.categories.rings import Rings
+from sage.categories.integral_domains import IntegralDomains
 from sage.structure.unique_representation import UniqueRepresentation
+from sage.categories.pushout import ConstructionFunctor
 from sage.rings.ring import CommutativeAlgebra
 from sage.structure.element import CommutativeAlgebraElement
 from sage.rings.integer_ring import ZZ
@@ -199,6 +206,8 @@ class ProfiniteInteger(CommutativeAlgebraElement):
 
     .. automethod:: __init__
 
+    .. automethod:: __getitem__
+
     .. automethod:: _add_
 
     .. automethod:: _sub_
@@ -209,7 +218,7 @@ class ProfiniteInteger(CommutativeAlgebraElement):
 
     .. automethod:: _floordiv_
 
-    .. automethod:: __getitem__
+    .. automethod:: _richcmp_
     """
 
     def __init__(self, parent, value, modulus):
@@ -287,6 +296,69 @@ class ProfiniteInteger(CommutativeAlgebraElement):
             self._modulus = O.ideal(modulus.gens_reduced())
         self._reduce()
 
+    def __getitem__(self, p):
+        r"""
+        Return the projection of this profinite integer to the ring of
+        ``p``-adic integers
+
+        Only implemented for profinite integers over `\QQ`, as no general
+        implementation of completions at finite places of a number field
+        exists in SageMath at the time of writing.
+        
+        The Chinese Remainder Theorem induces a canonical isomorphism
+        `\hat{\ZZ} \cong \prod_p \ZZ_p`, where `p` runs over all prime numbers.
+        This method computes the image of ``self`` under this isomorphism and
+        returns the projection to the ``p``-th coordinate. 
+
+        INPUT:
+
+        - ``p`` -- a prime number
+
+        EXAMPLES::
+
+            sage: a = Zhat(4, 27)
+            sage: a[3]
+            1 + 3 + O(3^3)
+            sage: b = Zhat(5, 2^6 * 5^12)
+            sage: b[2]
+            1 + 2^2 + O(2^6)
+            sage: b[3]
+            O(3^0)
+            sage: b[5]
+            5 + O(5^12)
+            sage: c = Zhat(-1, 7^5)
+            sage: c[7]
+            6 + 6*7 + 6*7^2 + 6*7^3 + 6*7^4 + O(7^5)
+            sage: c[7].parent()
+            7-adic Ring with capped relative precision 20
+
+        TESTS::
+
+            sage: d[2]
+            Traceback (most recent call last):
+            ...
+            NotImplementedError: projection to `p`-adics only implemented over rationals
+            sage: d[K.prime_above(5)]
+            Traceback (most recent call last):
+            ...
+            NotImplementedError: projection to `p`-adics only implemented over rationals
+            sage: c[-1]
+            Traceback (most recent call last):
+            ...
+            ValueError: p must be a prime number
+            sage: c[6]
+            Traceback (most recent call last):
+            ...
+            ValueError: p must be a prime number
+        """
+        from sage.rings.padics.factory import Zp
+        if self.parent().number_field() is not QQ:
+            raise NotImplementedError("projection to `p`-adics only implemented over rationals")
+        if p not in Primes():
+            raise ValueError("p must be a prime number")
+        e = self.modulus().valuation(p)
+        return Zp(p)(self.value(), e)
+
     def _repr_(self):
         """
         Return a string representation of this profinite integer
@@ -308,12 +380,237 @@ class ProfiniteInteger(CommutativeAlgebraElement):
         """
         if self.modulus() == 0:
             return repr(self.value())
-        modulus = self.modulus()
+
         if self.parent().base() is ZZ:
             modulus = self.modulus()
         else:
-            modulus = "(" + ", ".join([str(g) for g in modulus.gens()]) + ")"
+            modulus = "(" + ", ".join([str(g) for g in self.modulus().gens()]) + ")"
+
         return "{} mod {}".format(self.value(), modulus)
+
+    def _add_(self, other):
+        r"""
+        Return the sum of this profinite integer and ``other``
+
+        The sum of two profinite integers `a` and `b` is defined to be the
+        profinite integer `c` with smallest represented subset (with respect to
+        inclusion) containing the sum of the represented subsets of `a` and `b`,
+        i.e. containig `\alpha + \beta` for all `\alpha` represented by `a` and
+        `\beta` represented by `b`.
+
+        EXAMPLES::
+        
+            sage: Zhat = ProfiniteIntegers(ZZ)
+            sage: a = Zhat(3, 20)
+            sage: b = Zhat(-1, 30)
+            sage: a + b
+            2 mod 10
+            sage: a + 3
+            6 mod 20
+
+        ::
+
+            sage: K.<a> = NumberField(x^2-7)
+            sage: O = K.maximal_order()
+            sage: Ohat = ProfiniteIntegers(O)
+            sage: b = Ohat(3*a+1, a*13)
+            sage: c = Ohat(2*a+1, 7)
+            sage: b+c
+            2 mod (a)
+            sage: O(-a)+c
+            a + 1 mod (7)
+        """
+        modulus = self._common_modulus(other)
+        value = self.value() + other.value()
+        return self.__class__(self.parent(), value, modulus)
+
+    def _sub_(self, other):
+        r"""
+        Return the difference of this profinite integer and ``other``
+
+        The difference of two profinite integers `a` and `b` is defined to be
+        the profinite integer with smallest represented subset (with respect to
+        inclusion) containing the sum of the represented subsets of `a` and `b`,
+        i.e. containig `\alpha + \beta` for all `\alpha` represented by `a` and
+        `\beta` represented by `b`.
+
+        EXAMPLES::
+
+            sage: Zhat = ProfiniteIntegers(ZZ)
+            sage: a = Zhat(3, 20)
+            sage: b = Zhat(-1, 30)
+            sage: a-b
+            4 mod 10
+            sage: b-0
+            29 mod 30
+
+        ::
+
+            sage: K.<a> = NumberField(x^2-7)
+            sage: Ohat = ProfiniteIntegers(K)
+            sage: b = Ohat(3*a+1, a*13)
+            sage: c = Ohat(2*a+1, 7)
+            sage: b-c
+            0 mod (a)
+            sage: c-1
+            2*a mod (7)
+        """
+        modulus = self._common_modulus(other)
+        value = self.value() - other.value()
+        return self.__class__(self.parent(), value, modulus)
+
+    def _mul_(self, other):
+        r"""
+        Return the product of this profinite integer and ``other``
+
+        The product of two profinite integers `a` and `b` is defined to be
+        the profinite integer with smallest represented subset (with respect to
+        inclusion) containing the sum of the represented subsets of `a` and `b`,
+        i.e. containig `\alpha + \beta` for all `\alpha` represented by `a` and
+        `\beta` represented by `b`.
+
+        EXAMPLES::
+
+            sage: Zhat = ProfiniteIntegers(ZZ)
+            sage: a = Zhat(3, 20)
+            sage: b = Zhat(-1, 30)
+            sage: a*b
+            7 mod 10
+            sage: 0*a
+            0
+
+        ::
+
+            sage: K.<a> = NumberField(x^2-7)
+            sage: Ohat = ProfiniteIntegers(K)
+            sage: b = Ohat(3*a+1, a*13)
+            sage: c = Ohat(2*a+1, 7)
+            sage: b*c
+            1 mod (a)
+            sage: 1*c
+            2*a + 1 mod (7)
+
+        .. TODO::
+
+            Currently this multiplication method implicitly defines powering of
+            profinite numbers::
+
+                sage: a = Zhat(1, 2)
+                sage: a^2
+                1 mod 2
+
+            This is however not optimal: for any `\alpha \in 1 + 2\hat{\ZZ}` we
+            have `\alpha^2 \in 1 + 4\hat{\ZZ}`. Hence by implementing powering
+            explicitly we could obtain the better behaviour::
+
+                sage: a * a
+                1 mod 2
+                sage: a^2 # not tested
+                1 mod 4
+        """
+        # We seperate the zero-modulus case because multiplying a non-principal
+        # ideal with the zero-ideal is not implemented in Sage.
+        if self.modulus().is_zero():
+            modulus = self.value() * other.modulus()
+        elif other.modulus().is_zero():
+            modulus = other.value() * self.modulus()
+        else:
+            I = self.value() * other.modulus()
+            J = self.modulus() * other.value()
+            K = self.modulus() * other.modulus()
+            if self.parent().base() is ZZ:
+                modulus = gcd(I, gcd(J, K))
+            else:
+                modulus = I + J + K
+        value = self.value() * other.value()
+        return self.__class__(self.parent(), value, modulus)
+
+    def _div_(self, other):
+        """
+        Divide this profinite integer by ``other`` in the ring of profinite
+        *numbers* and return the result
+
+        Only implemented for ``other`` having zero-modulus and non-zero value.
+
+        EXAMPLES::
+
+            sage: b = Zhat(4, 10) / 7; b
+            4/7 mod 10/7
+            sage: b.parent()
+            Profinite Numbers of Rational Field
+
+        ::
+
+            sage: K.<a> = NumberField(x^2+x-7)
+            sage: Ohat = ProfiniteIntegers(K)
+            sage: Ohat(a^2, 20) / a
+            a mod (20/7*a + 20/7)
+
+        TESTS::
+
+            sage: Zhat(4, 10) / Zhat(2, 10)
+            Traceback (most recent call last):
+            ...
+            NotImplementedError: Cannot divide by profinite integers of non-zero modulus
+        """
+        if other.modulus() != 0:
+            raise ValueError("division by profinite integer with non-zero modulus")
+        if other.value() == 0:
+            raise ZeroDivisionError("profinite integer division by zero")
+        Khat = ProfiniteNumbers(self.parent().number_field())
+        return Khat(self, other.value())
+
+    def _floordiv_(self, other):
+        """
+        Return the quotient of this profinite integer by ``other``
+
+        Only implemented when ``other`` has zero modulus and ``self.value()``
+        and ``self.modulus()`` are both divisible by ``other.value()``.
+
+        EXAMPLES::
+
+            sage: Zhat(5, 100) // 5
+            1 mod 20
+
+        ::
+
+            sage: K.<a> = NumberField(x^2+5)
+            sage: Ohat = ProfiniteIntegers(K)
+            sage: Ohat(9*a, 75) // O(3*a)
+            3 mod (-5*a)
+
+        TESTS::
+
+            sage: b // Zhat(5, 10)
+            Traceback (most recent call last):
+            ...
+            TypeError: can only divide by elements of the base
+            sage: b/0
+            Traceback (most recent call last):
+            ...
+            ZeroDivisionError: division by zero
+            sage: b/3
+            Traceback (most recent call last):
+            ...
+            NotImplementedError: value is not divisible by 3
+            sage: c/9
+            Traceback (most recent call last):
+            ...
+            NotImplementedError: modulus is not divisible by 9
+        """
+        if other.modulus() != 0:
+            raise ValueError("division by profinite integer with non-zero modulus")
+        if other.value() == 0:
+            raise ZeroDivisionError("profinite integer division by zero")
+        if not other.value().divides(self.value()):
+            raise ValueError("value is not divisible by {}".format(other))
+        if not other.value().divides(self.modulus()):
+            raise ValueError("modulus is not divisible by {}".format(other))
+
+        value = self.value() // other.value()
+        modulus = 0 if self.modulus() == 0 else self.modulus() / other.value()
+
+        return self.__class__(self.parent(), value, modulus)
 
     def _richcmp_(self, other, op):
         r"""
@@ -440,217 +737,6 @@ class ProfiniteInteger(CommutativeAlgebraElement):
             return gcd(self.modulus(), other.modulus())
         return self.modulus() + other.modulus()
 
-    def _add_(self, other):
-        r"""
-        Return the sum of this profinite integer and ``other``
-
-        The sum of two profinite integers `a` and `b` is defined to be the
-        profinite integer `c` with smallest represented subset (with respect to
-        inclusion) containing the sum of the represented subsets of `a` and `b`,
-        i.e. containig `\alpha + \beta` for all `\alpha` represented by `a` and
-        `\beta` represented by `b`.
-
-        EXAMPLES::
-        
-            sage: Zhat = ProfiniteIntegers(ZZ)
-            sage: a = Zhat(3, 20)
-            sage: b = Zhat(-1, 30)
-            sage: a + b
-            2 mod 10
-            sage: a + 3
-            6 mod 20
-
-        ::
-
-            sage: K.<a> = NumberField(x^2-7)
-            sage: O = K.maximal_order()
-            sage: Ohat = ProfiniteIntegers(O)
-            sage: b = Ohat(3*a+1, a*13)
-            sage: c = Ohat(2*a+1, 7)
-            sage: b+c
-            2 mod (a)
-            sage: O(-a)+c
-            a + 1 mod (7)
-        """
-        modulus = self._common_modulus(other)
-        value = self.value() + other.value()
-        return self.__class__(self.parent(), value, modulus)
-
-    def _sub_(self, other):
-        r"""
-        Return the difference of this profinite integer and ``other``
-
-        The difference of two profinite integers `a` and `b` is defined to be
-        the profinite integer with smallest represented subset (with respect to
-        inclusion) containing the sum of the represented subsets of `a` and `b`,
-        i.e. containig `\alpha + \beta` for all `\alpha` represented by `a` and
-        `\beta` represented by `b`.
-
-        EXAMPLES::
-
-            sage: Zhat = ProfiniteIntegers(ZZ)
-            sage: a = Zhat(3, 20)
-            sage: b = Zhat(-1, 30)
-            sage: a-b
-            4 mod 10
-            sage: b-0
-            29 mod 30
-
-        ::
-
-            sage: K.<a> = NumberField(x^2-7)
-            sage: Ohat = ProfiniteIntegers(K)
-            sage: b = Ohat(3*a+1, a*13)
-            sage: c = Ohat(2*a+1, 7)
-            sage: b-c
-            0 mod (a)
-            sage: c-1
-            2*a mod (7)
-        """
-        modulus = self._common_modulus(other)
-        value = self.value() - other.value()
-        return self.__class__(self.parent(), value, modulus)
-
-    def _mul_(self, other):
-        r"""
-        Return the product of this profinite integer and ``other``
-
-        The product of two profinite integers `a` and `b` is defined to be
-        the profinite integer with smallest represented subset (with respect to
-        inclusion) containing the sum of the represented subsets of `a` and `b`,
-        i.e. containig `\alpha + \beta` for all `\alpha` represented by `a` and
-        `\beta` represented by `b`.
-
-        EXAMPLES::
-
-            sage: Zhat = ProfiniteIntegers(ZZ)
-            sage: a = Zhat(3, 20)
-            sage: b = Zhat(-1, 30)
-            sage: a*b
-            7 mod 10
-            sage: 0*a
-            0
-
-        ::
-
-            sage: K.<a> = NumberField(x^2-7)
-            sage: Ohat = ProfiniteIntegers(K)
-            sage: b = Ohat(3*a+1, a*13)
-            sage: c = Ohat(2*a+1, 7)
-            sage: b*c
-            1 mod (a)
-            sage: 1*c
-            2*a + 1 mod (7)
-        """
-        # We seperate the zero-modulus case because multiplying a non-principal
-        # ideal with the zero-ideal is not implemented in Sage.
-        if self.modulus().is_zero():
-            modulus = self.value() * other.modulus()
-        elif other.modulus().is_zero():
-            modulus = other.value() * self.modulus()
-        else:
-            I = self.value() * other.modulus()
-            J = self.modulus() * other.value()
-            K = self.modulus() * other.modulus()
-            if self.parent().base() is ZZ:
-                modulus = gcd(I, gcd(J, K))
-            else:
-                modulus = I + J + K
-        value = self.value() * other.value()
-        return self.__class__(self.parent(), value, modulus)
-
-    def _div_(self, other):
-        """
-        Divide this profinite integer by ``other`` in the ring of profinite
-        *numbers* and return the result
-
-        Only implemented for ``other`` having zero-modulus and non-zero value.
-
-        EXAMPLES::
-
-            sage: #from profinite_number import *
-            sage: import __main__
-            sage: __main__.ProfiniteNumbers = ProfiniteNumbers
-            sage: __main__.ProfiniteIntegers = ProfiniteIntegers
-            sage: __main__.Zhat = Zhat
-            sage: b = Zhat(4, 10) / 7; b
-            4/7 mod 10/7
-            sage: b.parent()
-            Profinite Numbers of Rational Field
-
-        ::
-
-            sage: K.<a> = NumberField(x^2+x-7)
-            sage: Ohat = ProfiniteIntegers(K)
-            sage: Ohat(a^2, 20) / a
-            a mod (20/7*a + 20/7)
-
-        TESTS::
-
-            sage: Zhat(4, 10) / Zhat(2, 10)
-            Traceback (most recent call last):
-            ...
-            NotImplementedError: Cannot divide by profinite integers of non-zero modulus
-        """
-        if other.modulus() != 0:
-            raise ValueError("division by profinite integer with non-zero modulus")
-        if other.value() == 0:
-            raise ZeroDivisionError("profinite integer division by zero")
-        Khat = ProfiniteNumbers(self.parent().number_field())
-        return Khat(self, other.value())
-
-    def _floordiv_(self, other):
-        """
-        Return the quotient of this profinite integer by ``other``
-
-        Only implemented when ``other`` has zero modulus and ``self.value()``
-        and ``self.modulus()`` are both divisible by ``other.value()``.
-
-        EXAMPLES::
-
-            sage: Zhat(5, 100) // 5
-            1 mod 20
-
-        ::
-
-            sage: K.<a> = NumberField(x^2+5)
-            sage: Ohat = ProfiniteIntegers(K)
-            sage: Ohat(9*a, 75) // O(3*a)
-            3 mod (-5*a)
-
-        TESTS::
-
-            sage: b // Zhat(5, 10)
-            Traceback (most recent call last):
-            ...
-            TypeError: can only divide by elements of the base
-            sage: b/0
-            Traceback (most recent call last):
-            ...
-            ZeroDivisionError: division by zero
-            sage: b/3
-            Traceback (most recent call last):
-            ...
-            NotImplementedError: value is not divisible by 3
-            sage: c/9
-            Traceback (most recent call last):
-            ...
-            NotImplementedError: modulus is not divisible by 9
-        """
-        if other.modulus() != 0:
-            raise ValueError("division by profinite integer with non-zero modulus")
-        if other.value() == 0:
-            raise ZeroDivisionError("profinite integer division by zero")
-        if not other.value().divides(self.value()):
-            raise ValueError("value is not divisible by {}".format(other))
-        if not other.value().divides(self.modulus()):
-            raise ValueError("modulus is not divisible by {}".format(other))
-
-        value = self.value() // other.value()
-        modulus = 0 if self.modulus() == 0 else self.modulus() / other.value()
-
-        return self.__class__(self.parent(), value, modulus)
-
     def str(self, style="value-modulus"):
         """
         Return a string representation of this profinite integer
@@ -692,68 +778,71 @@ class ProfiniteInteger(CommutativeAlgebraElement):
             return "Profinite integer with values:\n  " + "\n  ".join(padics)
         raise ValueError("unkown style ``{}''".format(style))
 
-    def __getitem__(self, p):
-        r"""
-        Return the projection of this profinite integer to the ring of
-        ``p``-adic integers
-
-        Only implemented for profinite integers over `\QQ`, as no general
-        implementation of completions at finite places of a number field
-        exists in SageMath at the time of writing.
-        
-        The Chinese Remainder Theorem induces a canonical isomorphism
-        `\hat{\ZZ} \cong \prod_p \ZZ_p`, where `p` runs over all prime numbers.
-        This method computes the image of ``self`` under this isomorphism and
-        returns the projection to the ``p``-th coordinate. 
-
-        INPUT:
-
-        - ``p`` -- a prime number
+    def value(self):
+        """
+        Return the value of this profinite integer
 
         EXAMPLES::
 
-            sage: a = Zhat(4, 27)
-            sage: a[3]
-            1 + 3 + O(3^3)
-            sage: b = Zhat(5, 2^6 * 5^12)
-            sage: b[2]
-            1 + 2^2 + O(2^6)
-            sage: b[3]
-            O(3^0)
-            sage: b[5]
-            5 + O(5^12)
-            sage: c = Zhat(-1, 7^5)
-            sage: c[7]
-            6 + 6*7 + 6*7^2 + 6*7^3 + 6*7^4 + O(7^5)
-            sage: c[7].parent()
-            7-adic Ring with capped relative precision 20
-
-        TESTS::
-
-            sage: d[2]
-            Traceback (most recent call last):
-            ...
-            NotImplementedError: projection to `p`-adics only implemented over rationals
-            sage: d[K.prime_above(5)]
-            Traceback (most recent call last):
-            ...
-            NotImplementedError: projection to `p`-adics only implemented over rationals
-            sage: c[-1]
-            Traceback (most recent call last):
-            ...
-            ValueError: p must be a prime number
-            sage: c[6]
-            Traceback (most recent call last):
-            ...
-            ValueError: p must be a prime number
+            sage: Zhat(3, 6).value()
+            3
+            sage: Zhat(7, 6).value() # the value is reduced
+            1
         """
-        from sage.rings.padics.factory import Zp
-        if self.parent().number_field() is not QQ:
-            raise NotImplementedError("projection to `p`-adics only implemented over rationals")
-        if p not in Primes():
-            raise ValueError("p must be a prime number")
-        e = self.modulus().valuation(p)
-        return Zp(p)(self.value(), e)
+        return self._value
+
+    def modulus(self):
+        """
+        Return the modulus of this profinite integer
+
+        This is an integer if the base number field is ``QQ``.
+        Otherwise it is an ideal of the base maximal order.
+
+        EXAMPLES::
+
+            sage: Zhat(50, 100).modulus()
+            100
+
+        ::
+
+            sage: K.<a> = NumberField(x^4-17)
+            sage: Ohat = ProfiniteIntegers(K)
+            sage: Ohat(a^3, a*160).modulus()
+            Fractional ideal (2720, 160*a)
+        """
+        return self._modulus
+
+    def represents(self, element):
+        r"""
+        Return whether or not this profinite integer represents ``element``
+
+        The *represented subset* of this profinite integer is `x + m \hat{O}`,
+        where `x` is our value, `m` is our modulus and `\hat{O}` is the ring
+        of profinite numbers over our base field.
+        Hence this profinite number represents `\alpha \in \hat{O}` if and only
+        if `\alpha \in x + m \hat{O}`.
+
+        INPUT:
+
+        - ``element`` -- an integral element of the base number field
+
+        EXAMPLES::
+
+            sage: b = Zhat(3, 10)
+            sage: [n for n in range(-50, 50) if b.represents(n)]
+            [-47, -37, -27, -17, -7, 3, 13, 23, 33, 43]
+
+        ::
+
+            sage: K.<a> = NumberField(x^2+2)
+            sage: Ohat = ProfiniteIntegers(K)
+            sage: c = Ohat(a+1, 3*a)
+            sage: [m*a+n for m in range(-7, 7) for n in range(-7, 7) if c.represents(m*a+n)]
+            [-5*a - 5, -5*a + 1, -2*a - 5, -2*a + 1, a - 5, a + 1, 4*a - 5, 4*a + 1]
+        """
+        if self.parent().base() is ZZ:
+            return (self.value() - element) % self.modulus() == 0
+        return self.value() - element in self.modulus()
 
     def is_unit(self):
         r"""
@@ -790,39 +879,16 @@ class ProfiniteInteger(CommutativeAlgebraElement):
         # We check if x is coprime to our modulus:
         return x + self.modulus() == 1
 
-    def value(self):
+    def is_integral(self):
         """
-        Return the value of this profinite integer
+        Return ``True``, indicating that this profinite integer is integral
 
         EXAMPLES::
 
-            sage: Zhat(3, 6).value()
-            3
-            sage: Zhat(7, 6).value() # the value is reduced
-            1
+            sage: Zhat(-5, 12).is_integral()
+            True
         """
-        return self._value
-
-    def modulus(self):
-        """
-        Return the modulus of this profinite integer
-
-        This is an integer if the base number field is ``QQ``.
-        Otherwise it is an ideal of the base maximal order.
-
-        EXAMPLES::
-
-            sage: Zhat(50, 100).modulus()
-            100
-
-        ::
-
-            sage: K.<a> = NumberField(x^4-17)
-            sage: Ohat = ProfiniteIntegers(K)
-            sage: Ohat(a^3, a*160).modulus()
-            Fractional ideal (2720, 160*a)
-        """
-        return self._modulus
+        return True
 
     def factorial_digits(self):
         r"""
@@ -930,17 +996,6 @@ class ProfiniteInteger(CommutativeAlgebraElement):
         # right = left + ZZ(1)/k_fac
         # return left, right
 
-    def is_integral(self):
-        """
-        Return ``True``, indicating that this profinite integer is integral
-
-        EXAMPLES::
-
-            sage: Zhat(-5, 12).is_integral()
-            True
-        """
-        return True
-
 
 class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
     """
@@ -1014,6 +1069,7 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
             sage: loads(dumps(ProfiniteIntegers(K))) is ProfiniteIntegers(K)
             True
         """
+        # Note that the input O is checked by __classcall__().
         CommutativeAlgebra.__init__(self, O)
 
     def _repr_(self):
@@ -1024,9 +1080,9 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
 
             sage: K = NumberField(x^3+x+1, 'a')
             sage: ProfiniteIntegers(K)
-            Profinite Integers of Number Field in a with defining polynomial x^3 + x + 1
+            Ring of Profinite Integers of Number Field in a with defining polynomial x^3 + x + 1
         """
-        return "Profinite Integers of {}".format(self.number_field())
+        return "Ring of Profinite Integers of {}".format(self.number_field())
 
     def _latex_(self):
         r"""
@@ -1042,128 +1098,6 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
         """
         from sage.misc.latex import latex
         return r" \widehat{ \mathcal{O}_{" + latex(self.number_field()) + "} } "
-
-    def number_field(self):
-        """
-        Return the base number field of this ring of profinite integers
-
-        The base number field equals the fraction field of ``self.base()``.
-
-        EXAMPLES::
-
-            sage: Zhat = ProfiniteIntegers()
-            sage: Zhat.number_field()
-            Rational Field
-            sage: K.<a> = NumberField(x^2+x-7)
-            sage: Ohat = ProfiniteIntegers(K)
-            sage: Ohat.number_field()
-            Number Field in a with defining polynomial x^2 + x - 7
-        """
-        return self.base().fraction_field()
-
-    def characteristic(self):
-        """
-        Return the characteristic of this ring, which is zero
-
-        EXAMPLES::
-
-            sage: Zhat = ProfiniteIntegers()
-            sage: Zhat.characteristic()
-            0
-        """
-        return ZZ(0)
-
-    def is_exact(self):
-        """
-        Return ``False``, indicating that doing arithmetic can lead to precision
-        loss
-
-        EXAMPLES::
-
-            sage: Zhat.is_exact()
-            False
-        """
-        return False
-
-    def is_field(self, proof=True):
-        """
-        Return ``False``, indicating that this ring is not a field
-
-        Note that this ring of profinite integers is (canonically isomorphic to)
-        the product of all completions of `K` at the finite primes of `K`, where
-        `K` denotes our base number field.
-        As a product of non-trivial rings, this ring is clearly not a field.
-
-        EXAMPLES::
-
-            sage: Zhat.is_field()
-            False
-        """
-        return False
-
-    def is_integral_domain(self, proof=None):
-        r"""
-        Return ``False``, indicating that this ring is not an integral domain
-
-        Note that this ring of profinite integers is (canonically isomorphic to)
-        the product of all completions of `K` at the finite primes of `K`, where
-        `K` denotes our base number field.
-        As a product of non-trivial rings, this ring is clearly not an integral
-        domain.
-
-        EXAMPLES::
-
-            sage: Zhat = ProfiniteIntegers()
-            sage: Zhat.is_integral_domain()
-            False
-        """
-        return False
-
-    def is_noetherian(self):
-        """
-        Return ``False``, indicating that this ring is not Noetherian
-
-        Note that this ring of profinite integers is (canonically isomorphic to)
-        the product of all completions of `K` at the finite primes of `K`, where
-        `K` denotes our base number field.
-        As a product of infinitely many non-trivial rings, this ring is clearly
-        not Noetherian.
-
-        EXAMPLES::
-
-            sage: Zhat.is_noetherian()
-            False
-        """
-        return False
-    
-    def krull_dimension(self):
-        """
-        Return ``1``, indiciting that the Krull dimension of this ring is one
-
-        Note that this ring of profinite integers is (canonically isomorphic to)
-        the product of all completions of `K` at the finite primes of `K`, where
-        `K` denotes our base number field. Each such completion has Krull
-        dimension one and therefore this ring has Krull dimension one as well.
-
-        EXAMPLES::
-
-            sage: Zhat.krull_dimension()
-            1
-        """
-        return ZZ(1)
-
-    def order(self):
-        """
-        Return ``Infinity``, indicating that this ring has infinitely many
-        elements
-
-        EXAMPLES::
-
-            sage: Zhat.order()
-            +Infinity
-        """
-        from sage.rings.infinity import Infinity
-        return Infinity
 
     def _element_constructor_(self, x, y=None):
         r"""
@@ -1251,7 +1185,7 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
             sage: Zhat([Zp(2)(20, 5), Zp(3)(7, 2)])
             52 mod 288
         """
-        from profinite_number import ProfiniteNumbers
+        import profinite_number
         from sage.rings.quotient_ring import is_QuotientRing
         from sage.rings.padics.generic_nodes import is_pAdicRing, is_pAdicField
         is_pAdic = lambda P: is_pAdicRing(P) or is_pAdicField(P)
@@ -1264,7 +1198,7 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
                 return self.element_class(self, x.value(), x.modulus())
 
             # Check if x is a profinite K-number for some subfield K of our base field:
-            if isinstance(P, ProfiniteNumbers) and self.number_field().has_coerce_map_from(P.number_field()):
+            if isinstance(P, profinite_number.ProfiniteNumbers) and self.number_field().has_coerce_map_from(P.number_field()):
                 return self._from_profinite_number(x)
             
             # Check if x is an element of a quotient of our base maximal order:
@@ -1502,9 +1436,9 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
         EXAMPLES::
 
             sage: Zhat.some_elements()
-            [0, 2 mod 6, 1, 97, 66 mod 79]
+            [0, 2 mod 6, 1, 66 mod 79, 20, 10 mod 100]
         """
-        return [self.zero(), self.an_element(), self.one(), self.element_class(self, ZZ(-13), ZZ(79))]
+        return [self.zero(), self.an_element(), self.one(), self(66, 79), self(20), self(10, 100)]
 
     def random_element(self):
         """
@@ -1559,6 +1493,189 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
             
         return self.element_class(self, value, modulus)
 
+    def gens(self):
+        """
+        Return a tuple of generators of this ring, which is ``(1,)``
+
+        EXAMPLES::
+
+            sage: Zhat.gens()
+            (1,)
+        """
+        return (self(1), )
+
+    def gen(self, n=0):
+        """
+        Return the ``n``-th generator of this ring
+
+        As this ring has only one generator, we only accept ``n == 0``.
+
+        INPUT:
+
+        - ``n`` -- the index of the generator to return (default: ``0``); must
+          be zero
+
+        EXAMPLES::
+
+            sage: Zhat.gen()
+            1
+            sage: Zhat.gen(0)
+            1
+
+        TESTS::
+
+            sage: Zhat.gen(1)
+            Traceback (most recent call last):
+            ...
+            IndexError: n must be 0
+        """
+        if n == 0:
+            return self(1)
+        else:
+            raise IndexError("n must be 0")
+
+    def ngens(self):
+        """
+        Return the number of generators of this ring, which is `1`
+
+        EXAMPLES::
+
+            sage: Zhat.ngens()
+            1
+        """
+        return ZZ(1)
+
+    def is_finite(self):
+        """
+        Return ``False``, indicating that this ring is not finite
+
+        EXAMPLES::
+
+            sage: Zhat.is_finite()
+            False
+        """
+        return False
+
+    def is_exact(self):
+        """
+        Return ``False``, indicating that doing arithmetic can lead to precision
+        loss
+
+        EXAMPLES::
+
+            sage: Zhat.is_exact()
+            False
+        """
+        return False
+
+    def is_integral_domain(self, proof=None):
+        r"""
+        Return ``False``, indicating that this ring is not an integral domain
+
+        Note that this ring of profinite integers is (canonically isomorphic to)
+        the product of all completions of `K` at the finite primes of `K`, where
+        `K` denotes our base number field.
+        As a product of non-trivial rings, this ring is clearly not an integral
+        domain.
+
+        EXAMPLES::
+
+            sage: Zhat = ProfiniteIntegers()
+            sage: Zhat.is_integral_domain()
+            False
+        """
+        return False
+
+    def is_field(self, proof=True):
+        """
+        Return ``False``, indicating that this ring is not a field
+
+        Note that this ring of profinite integers is (canonically isomorphic to)
+        the product of all completions of `K` at the finite primes of `K`, where
+        `K` denotes our base number field.
+        As a product of non-trivial rings, this ring is clearly not a field.
+
+        EXAMPLES::
+
+            sage: Zhat.is_field()
+            False
+        """
+        return False
+
+    def is_noetherian(self):
+        """
+        Return ``False``, indicating that this ring is not Noetherian
+
+        Note that this ring of profinite integers is (canonically isomorphic to)
+        the product of all completions of `K` at the finite primes of `K`, where
+        `K` denotes our base number field.
+        As a product of infinitely many non-trivial rings, this ring is clearly
+        not Noetherian.
+
+        EXAMPLES::
+
+            sage: Zhat.is_noetherian()
+            False
+        """
+        return False
+
+    def krull_dimension(self):
+        """
+        Return ``1``, indiciting that the Krull dimension of this ring is one
+
+        Note that this ring of profinite integers is (canonically isomorphic to)
+        the product of all completions of `K` at the finite primes of `K`, where
+        `K` denotes our base number field. Each such completion has Krull
+        dimension one and therefore this ring has Krull dimension one as well.
+
+        EXAMPLES::
+
+            sage: Zhat.krull_dimension()
+            1
+        """
+        return ZZ(1)
+
+    def characteristic(self):
+        """
+        Return the characteristic of this ring, which is zero
+
+        EXAMPLES::
+
+            sage: Zhat = ProfiniteIntegers()
+            sage: Zhat.characteristic()
+            0
+        """
+        return ZZ(0)
+
+    def order(self):
+        """
+        Return ``Infinity``, indicating that this ring has infinitely many
+        elements
+
+        EXAMPLES::
+
+            sage: Zhat.order()
+            +Infinity
+        """
+        from sage.rings.infinity import Infinity
+        return Infinity
+
+    def epsilon(self):
+        """
+        Return the precision error of elements in this ring
+
+        As this depends on the elements, we can give no reasonable answer and
+        hence raise a ``NotImplementedError``.
+
+        EXAMPLES::
+
+            sage: Zhat.epsilon()
+            Traceback (most recent call last):
+            ...
+            NotImplementedError: precision error depends on the elements involved
+        """
+        raise NotImplementedError("precision error depends on the elements involved")
+
     def construction(self):
         """
         Return a pair ``(functor, parent)`` such that ``functor(parent)``
@@ -1583,9 +1700,25 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
         """
         return ProfiniteCompletionFunctor(), self.base()
 
+    def number_field(self):
+        """
+        Return the base number field of this ring of profinite integers
 
-from sage.categories.pushout import ConstructionFunctor
-from sage.categories.integral_domains import IntegralDomains
+        The base number field equals the fraction field of ``self.base()``.
+
+        EXAMPLES::
+
+            sage: Zhat = ProfiniteIntegers()
+            sage: Zhat.number_field()
+            Rational Field
+            sage: K.<a> = NumberField(x^2+x-7)
+            sage: Ohat = ProfiniteIntegers(K)
+            sage: Ohat.number_field()
+            Number Field in a with defining polynomial x^2 + x - 7
+        """
+        return self.base().fraction_field()
+
+
 class ProfiniteCompletionFunctor(ConstructionFunctor):
     """
     The functor sending (the maximal order of) a number field to its profinite
@@ -1636,14 +1769,31 @@ class ProfiniteCompletionFunctor(ConstructionFunctor):
         - ``R`` -- a number field or the maximal order of a number field
 
         OUPUT:
+
         If ``R`` is a number field, then we return the ring of profinite
         `R`-numbers.
         If ``R`` is the maximal order of a number field, then we return the ring
         of profinite `R`-integers.
+
+        EXAMPLES::
+
+            sage: F = ProfiniteCompletionFunctor()
+            sage: F(ZZ)
+            Ring of Profinite Integers of Rational Field
+            sage: F(QQ)
+            Ring of Profinite Numbers of Rational Field
+
+        ::
+
+            sage: K.<a> = NumberField(x^4+2)
+            sage: F(K.maximal_order())
+            Ring of Profinite Integers of Number Field in a with defining polynomial x^4 + 2
+            sage: F(K)
+            Ring of Profinite Numbers of Number Field in a with defining polynomial x^4 + 2
         """
         if R.is_field():
-            from profinite_number import ProfiniteNumbers
-            return ProfiniteNumbers(R, *self.args, **self.kwds)
+            import profinite_number
+            return profinite_number.ProfiniteNumbers(R, *self.args, **self.kwds)
         return ProfiniteIntegers(R, *self.args, **self.kwds)
 
 
