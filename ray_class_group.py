@@ -10,9 +10,7 @@ file also implements moduli of number fields.
 
 AUTHORS:
 
-- ??? (???): Initial version
 - Robert Harron (2016-08-15): implemented ray class groups and moduli
-- Mathé Hertogh (2021-02-25): copied code from trac ticket 15829 into this standalone .sage file
 
 EXAMPLES:
 
@@ -47,6 +45,7 @@ Nevertheless, one can be demanded. The returned ideal should be somewhat
     Fractional ideal (2)
 
 """
+
 # ****************************************************************************
 #       Copyright (C) 2004, 2005, 2006, 2007 William Stein <wstein@gmail.com>
 #                     2014 Julian Rueth <julian.rueth@fsfe.org>
@@ -116,8 +115,8 @@ def pari_extended_ideal_to_sage(K, Ix):
     Convert an 'extended ideal' in pari format to an ideal in Sage.
 
     INPUT:
-	
-	- ``K`` -- number field to which the ideal belongs
+    
+    - ``K`` -- number field to which the ideal belongs
     - ``Ix`` -- A pair whose first entry is a pari ideal and whose second entry
       is a pari factorization matrix representing an algebraic number.
 
@@ -681,7 +680,7 @@ class RayClassGroup(AbelianGroup_class):
                     I = nf.idealmul(I, nf.idealpow(g, e, flag=1), flag=1)
             exps = tuple(ZZ(c) for c in bnr.bnrisprincipal(nf.idealmul(I[0], nf.nffactorback(I[1])), flag = 0))
             return self.element_class(self, exps)
-        elif hasattr(args[0], "parent") and args[0].parent()._repr_()[0:11] == 'Idele Group' and args[0].parent().number_field() == self._number_field: #TODO: isinstance(args[0], Idele):
+        elif isinstance(args[0], Idele):
             return args[0].to_ray_class(self.modulus())
         else:
             I = self._number_field.ideal(*args, **kwds)
