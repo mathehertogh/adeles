@@ -8,6 +8,7 @@ adèles and idèles. It is based on and part of the master's thesis [Her2021].
 [Her2021] Mathé Hertogh, Computing with adèles and idèles, master's thesis,
 Leiden University, 2021.
 
+
 Contents of the package
 -----------------------
 
@@ -46,6 +47,7 @@ reciprocity law. It consists of the files:
 - ``shimura.py`` -- Shimura's connecting homomorphism
 - ``hilbert.py`` -- example hilbert class field computations
 
+
 How to view the contents and discover the functionality
 -------------------------------------------------------
 
@@ -58,14 +60,14 @@ Make sure you have `(a recent version of) SageMath
 <https://www.sagemath.org/download.html>`_ installed.
 
 Download the contents of this repository and save it somewhere on your drive,
-say in the directory `/path/to/adeles`.
+say in the directory ``/path/to/adeles``.
 
 In order to generate the HTML documentation (which we prefer) of
-``profinite_integer.py``, perform the command
+``profinite_integer.py``, perform the command ::
 
 	$ sage --docbuild "file=/path/to/adeles/profinite_integer.py" html
 
-The output of this command will look like this:
+The output of this command will look like this::
 
 	$ ...
 	$ Build finished. The built documents can be found in /home/mathe/.sage/docbuild/profinite_integer/output/html
@@ -76,4 +78,23 @@ in a browser to view the documentation of ``profinite_integer.py``.
 How to use this package
 -----------------------
 
+We assume you have a working SageMath installation.
 
+To use the
+
+
+
+
+Copyright
+---------
+::
+
+	# ****************************************************************************
+	#       Copyright (C) 2021 Mathé Hertogh <m.c.hertogh@gmail.com>
+	#
+	# This program is free software: you can redistribute it and/or modify
+	# it under the terms of the GNU General Public License as published by
+	# the Free Software Foundation, either version 2 of the License, or
+	# (at your option) any later version.
+	#                  https://www.gnu.org/licenses/
+	# ****************************************************************************
