@@ -182,7 +182,7 @@ class ProfiniteGraph:
     By left clicking we zoom in to the area `(3+6\hat{\ZZ}) \times
     (2+6\hat{\ZZ})`, i.e. ``(3 mod 6) x (2 mod 6)``:
 
-    .. image:: fibonacci_graph_3mod6x2mod6.png
+    .. image:: Fibonacci_graph_3mod6x2mod6.png
 
     Now we see that within `3+6\hat{\ZZ}`, the open subsets `3+24\hat{\ZZ}` and
     `21+24\hat{\ZZ}` are actually mapped to `2+24\hat{\ZZ}`. Apparently, the
