@@ -88,7 +88,7 @@ Go the the directory ``path/to`` and start up SageMath::
 
 Then within SageMath, import the package::
 
-	sage: from adeles import *
+	sage: from adeles.all import *
 	sage: Adeles(QQ)
 	Adèle Ring of Rational Field
 
