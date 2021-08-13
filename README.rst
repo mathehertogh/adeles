@@ -8,6 +8,8 @@ adèles and idèles. It is based on and part of the master's thesis [Her2021].
 [Her2021] Mathé Hertogh, Computing with adèles and idèles, master's thesis,
 Leiden University, 2021.
 
+In the root of this repository you can find [Her2021] as a PDF-file.
+
 
 Contents of the package
 -----------------------
@@ -48,56 +50,63 @@ reciprocity law. It consists of the files:
 - ``hilbert.py`` -- example hilbert class field computations
 
 
-How to view the contents and discover the functionality
--------------------------------------------------------
+Installing the package
+----------------------
 
-First of all, we recommomend the user to read/get acquainted to the files in the
-same order as we listed them above. Secondly, we recommend reading the
-documentation instead of the source code. The documentation can be generated
-from the source code as follows.
-
-Make sure you have `(a recent version of) SageMath
+First of all you should make sure you have `(a recent version of) SageMath
 <https://www.sagemath.org/download.html>`_ installed.
 
-Download the contents of this repository and save it somewhere on your drive,
-say in the directory ``/path/to/adeles``.
+Download this repository to your local machine, for example using ``git``::
 
-In order to generate the HTML documentation (which we prefer) of
-``profinite_integer.py``, perform the command ::
+		$ git clone https://github.com/mathehertogh/adeles.git
 
-	$ sage --docbuild "file=/path/to/adeles/profinite_integer.py" html
+On your local machine, move to the root directory of the local copy of the
+repository. Then install the package with the command::
 
-The output of this command will look like this::
+		$ make
 
-	$ ...
-	$ Build finished. The built documents can be found in /home/mathe/.sage/docbuild/profinite_integer/output/html
+This will both install the package and build its documentation.
 
-Now open the file ``/home/mathe/.sage/docbuild/profinite_integer/output/html/index.html``
-in a browser to view the documentation of ``profinite_integer.py``.
+The documentation resides in the directory ``docs/html``: open the file
+``index.html`` in a browser to view the documentation.
 
-How to use this package
------------------------
+To use the package, from anywhere on your computer, open ``sage`` ::
 
-We assume you have a working SageMath installation.
+		$ sage
 
-Download this repository to your drive, for example to ``path/to/adeles``.
+and within the ``sage`` prompt, load the package::
 
-Go the the directory ``path/to`` and start up SageMath::
+		sage: from adeles.all import *
 
-	$ sage
+Now you will have all functionality available, for example::
 
-Then within SageMath, import the package::
+		sage: Adeles(QQ)
+		Adèle Ring of Rational Field
 
-	sage: from adeles.all import *
-	sage: Adeles(QQ)
-	Adèle Ring of Rational Field
+
+Getting acquainted with the package
+-----------------------------------
+
+Instead of browsing through the source code files, we recommend browsing the
+documentation, which is nicer formatted. It contains many examples to illustrate
+the functionality.
+
+
+Background information
+----------------------
+
+For more detailed information on this implementation of adèles and idèles, we
+refer to [Her2021]. There we elaborate on properties of our representations of
+adèles and idèles, design choices we made and implementation details.
+
+For questions you can contact the author via email (see below).
 
 
 Copyright
 ---------
 ::
 
-	# ****************************************************************************
+	# **************************************************************************
 	#       Copyright (C) 2021 Mathé Hertogh <m.c.hertogh@gmail.com>
 	#
 	# This program is free software: you can redistribute it and/or modify
@@ -105,4 +114,4 @@ Copyright
 	# the Free Software Foundation, either version 2 of the License, or
 	# (at your option) any later version.
 	#                  https://www.gnu.org/licenses/
-	# ****************************************************************************
+	# **************************************************************************
