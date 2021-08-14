@@ -53,8 +53,9 @@ reciprocity law. It consists of the files:
 Installing the package
 ----------------------
 
-First of all you should make sure you have `(a recent version of) SageMath
-<https://www.sagemath.org/download.html>`_ installed.
+First of all you should make sure you have a recent version of `SageMath
+<https://www.sagemath.org/download.html>`_ installed, specifically *SageMath
+version 9.2 or newer*.
 
 Download this repository to your local machine, for example using ``git``::
 
