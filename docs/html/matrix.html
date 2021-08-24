@@ -1,0 +1,659 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adèlic Matrix Factorization &#8212; Computing with adèles and idèles</title>
+    <link rel="stylesheet" href="_static/sage.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="_static/MathJax.js?config=TeX-AMS_HTML-full,../mathjax_sage.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Modular Functions and their Action" href="modular.html" />
+    <link rel="prev" title="Profinite Graphs" href="profinite_graph.html" />
+    <link rel="icon" href="_static/sageicon.png" type="image/x-icon" />
+    <script src="_static/thebe.js" type="text/javascript"></script>
+    <script src="_static/thebe-sage.js" type="text/javascript"></script>
+
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="modular.html" title="Modular Functions and their Action"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="profinite_graph.html" title="Profinite Graphs"
+             accesskey="P">previous</a> |</li>
+  
+    
+      <a href="../index.html"><img src="_static/logo_sagemath_black.svg" height="28" style="vertical-align: middle" title="Sage Logo"></a>
+    
+  
+  
+        <li class="nav-item nav-item-0"><a href="index.html">Home</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Adèlic Matrix Factorization</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-adeles.matrix">
+<span id="adelic-matrix-factorization"></span><h1>Adèlic Matrix Factorization<a class="headerlink" href="#module-adeles.matrix" title="Permalink to this headline">¶</a></h1>
+<p>Adèlic Matrix Factorization</p>
+<p>This file implements the adèlic matrix factorization algorithms described in
+Chapter 8 of [Her2021].</p>
+<p>The function <a class="reference internal" href="#adeles.matrix.factor_GLQhat" title="adeles.matrix.factor_GLQhat"><code class="xref py py-func docutils literal notranslate"><span class="pre">factor_GLQhat()</span></code></a> implements Algorithm 8.4 of [Her2021], which
+factors an adèlic matrix <span class="math notranslate nohighlight">\(M \in GL_n(\hat{\QQ})\)</span> as <span class="math notranslate nohighlight">\(M = BA\)</span> with
+<span class="math notranslate nohighlight">\(B \in GL_n(\hat{\ZZ})\)</span> and <span class="math notranslate nohighlight">\(A \in GL_n^+(\QQ)\)</span>.</p>
+<p>The function <a class="reference internal" href="#adeles.matrix.factor_GSpQhat" title="adeles.matrix.factor_GSpQhat"><code class="xref py py-func docutils literal notranslate"><span class="pre">factor_GSpQhat()</span></code></a> implements Algorithm 8.9 of [Her201], which
+factors a general symplectic matrix <span class="math notranslate nohighlight">\(M \in GSp_{2g}(\hat{\QQ})\)</span> as <span class="math notranslate nohighlight">\(M = BA\)</span> with
+<span class="math notranslate nohighlight">\(B \in GSp_{2g}(\hat{\ZZ})\)</span> and <span class="math notranslate nohighlight">\(A \in GSp_{2g}^+(\QQ)\)</span>.</p>
+<p>REFERENCES:</p>
+<p>[Her2021] Mathé Hertogh, Computing with adèles and idèles, master’s thesis,
+Leiden University, 2021.</p>
+<p>AUTHORS:</p>
+<ul class="simple">
+<li><p>Mathé Hertogh (2021-07): initial version based on [Her2021]</p></li>
+</ul>
+<dl class="py function">
+<dt id="adeles.matrix.Omega">
+<code class="sig-prename descclassname">adeles.matrix.</code><code class="sig-name descname">Omega</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">g</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.matrix.Omega" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the matrix <span class="math notranslate nohighlight">\(\Omega_{2g}\)</span></p>
+<p>The matrix <span class="math notranslate nohighlight">\(\Omega_{2g}\)</span> is the <span class="math notranslate nohighlight">\(2g \times 2g\)</span>-matrix given in
+<span class="math notranslate nohighlight">\(g \times g\)</span>-blocks by <span class="math notranslate nohighlight">\((0, 1; -1, 0)\)</span>.</p>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">Omega</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="p">[</span> <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">1</span>  <span class="mi">0</span>  <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">1</span>  <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">1</span><span class="p">]</span>
+<span class="p">[</span><span class="o">-</span><span class="mi">1</span>  <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">0</span> <span class="o">-</span><span class="mi">1</span>  <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">0</span>  <span class="mi">0</span> <span class="o">-</span><span class="mi">1</span>  <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="adeles.matrix.denominator">
+<code class="sig-prename descclassname">adeles.matrix.</code><code class="sig-name descname">denominator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">M</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.matrix.denominator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the denominator of the <span class="math notranslate nohighlight">\(\hat{\QQ}\)</span>-matrix <code class="docutils literal notranslate"><span class="pre">M</span></code></p>
+<p>This is the least common multiple of the denominators of the entries of
+<code class="docutils literal notranslate"><span class="pre">M</span></code>.</p>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">M</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="n">Qhat</span><span class="p">,</span> <span class="p">[[</span><span class="n">Qhat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="o">/</span><span class="mi">6</span><span class="p">),</span> <span class="n">Qhat</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">)],</span>
+<span class="o">....</span><span class="p">:</span>                   <span class="p">[</span> <span class="n">Qhat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span>  <span class="n">Qhat</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">18</span><span class="p">)]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">denominator</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+<span class="mi">6</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="adeles.matrix.denominator_matrix">
+<code class="sig-prename descclassname">adeles.matrix.</code><code class="sig-name descname">denominator_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">M</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.matrix.denominator_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the denominator matrix of the <span class="math notranslate nohighlight">\(\hat{\QQ}\)</span>-matrix <code class="docutils literal notranslate"><span class="pre">M</span></code></p>
+<p>This is the diagonal matrix <span class="math notranslate nohighlight">\(D\)</span> with <span class="math notranslate nohighlight">\(D_{jj}\)</span> equal to to least common
+multiple of the denominators of the entries of the <span class="math notranslate nohighlight">\(j\)</span>-th column of <code class="docutils literal notranslate"><span class="pre">M</span></code>.</p>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">M</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="n">Qhat</span><span class="p">,</span> <span class="p">[[</span><span class="n">Qhat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="o">/</span><span class="mi">6</span><span class="p">),</span> <span class="n">Qhat</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">)],</span>
+<span class="o">....</span><span class="p">:</span>                   <span class="p">[</span> <span class="n">Qhat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span>  <span class="n">Qhat</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">18</span><span class="p">)]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">denominator_matrix</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+<span class="p">[</span><span class="mi">6</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">3</span><span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="adeles.matrix.factor_GLQhat">
+<code class="sig-prename descclassname">adeles.matrix.</code><code class="sig-name descname">factor_GLQhat</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">M</span></em>, <em class="sig-param"><span class="n">detM</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.matrix.factor_GLQhat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Factor the <span class="math notranslate nohighlight">\(GL_n(\hat{\QQ})\)</span>-matrix <span class="math notranslate nohighlight">\(M\)</span> as <span class="math notranslate nohighlight">\(M = BA\)</span> with
+<span class="math notranslate nohighlight">\(B \in GL_n(\hat{\ZZ})\)</span> and <span class="math notranslate nohighlight">\(A \in GL_n^+(\QQ)\)</span></p>
+<p>Here <span class="math notranslate nohighlight">\(GL_n\)</span> denotes the general linear group, i.e. the group of invertible
+<span class="math notranslate nohighlight">\(n \times n\)</span>-matrices. <span class="math notranslate nohighlight">\(GL_n^+(\QQ)\)</span> denotes the subgroup of <span class="math notranslate nohighlight">\(GL_n(\QQ)\)</span>
+of matrices with positive determinant.</p>
+<p>INPUT:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">M</span></code> – an <span class="math notranslate nohighlight">\(n \times n\)</span>-matrix over the ring of profinite <span class="math notranslate nohighlight">\(\QQ\)</span>-numbers
+having good precision with respect to <code class="docutils literal notranslate"><span class="pre">detM</span></code>
+(cf. <a class="reference internal" href="#adeles.matrix.has_good_precision" title="adeles.matrix.has_good_precision"><code class="xref py py-func docutils literal notranslate"><span class="pre">has_good_precision()</span></code></a>) and representing at least one element of
+<span class="math notranslate nohighlight">\(GL_n(\hat{\QQ})\)</span> of determinant <span class="math notranslate nohighlight">\(d\)</span> satisfying
+<span class="math notranslate nohighlight">\(d\hat{\ZZ} = detM\hat{\ZZ}\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">detM</span></code> – a positive rational number</p></li>
+</ul>
+<p>OUTPUT:</p>
+<p>A matrix <span class="math notranslate nohighlight">\(A \in GL_n^+(\QQ)\)</span> such that for every matrix
+<span class="math notranslate nohighlight">\(N \in GL_n(\hat{\QQ})\)</span> that <span class="math notranslate nohighlight">\(M\)</span> represents and satisfying
+<span class="math notranslate nohighlight">\(\det(N)\hat{\ZZ} = detM \hat{\ZZ}\)</span> we have <span class="math notranslate nohighlight">\(N A^{-1} \in GL_n(\hat{\ZZ})\)</span>.</p>
+<p>ALGORITHM:</p>
+<p>We perform Algorithm 8.4 of [Her2021].</p>
+<p>EXAMPLES:</p>
+<p>Let <span class="math notranslate nohighlight">\(I\)</span> be the <span class="math notranslate nohighlight">\(2 \times 2\)</span>-identity matrix, i.e. <span class="math notranslate nohighlight">\((1, 0; 0, 1)\)</span>. Let
+<span class="math notranslate nohighlight">\(N \in GL_2(\hat{\QQ})\)</span> be given by <span class="math notranslate nohighlight">\(N_2 = (1, 0; 0, 2)\)</span> and <span class="math notranslate nohighlight">\(N_p = I\)</span> for
+all odd <span class="math notranslate nohighlight">\(p\)</span> (where <span class="math notranslate nohighlight">\(N_p\)</span> denotes the projection of <span class="math notranslate nohighlight">\(N\)</span> to <span class="math notranslate nohighlight">\(GL_2(\QQ_p)\)</span>).
+Note that <span class="math notranslate nohighlight">\(\det(N)\hat{\ZZ} = 2\hat{\ZZ}\)</span>. The following matrix <code class="docutils literal notranslate"><span class="pre">M</span></code>
+represents <span class="math notranslate nohighlight">\(N\)</span> and has good precision with respect to <span class="math notranslate nohighlight">\(2\)</span>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">M</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">([[</span><span class="n">Qhat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">Qhat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)],</span>
+<span class="o">....</span><span class="p">:</span>             <span class="p">[</span><span class="n">Qhat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">Qhat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]]);</span> <span class="n">M</span>
+<span class="p">[</span><span class="mi">1</span> <span class="n">mod</span> <span class="mi">2</span> <span class="mi">0</span> <span class="n">mod</span> <span class="mi">2</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="n">mod</span> <span class="mi">2</span> <span class="mi">0</span> <span class="n">mod</span> <span class="mi">2</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">has_good_precision</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+<p>This function returns the following <span class="math notranslate nohighlight">\(A\)</span>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">A</span> <span class="o">=</span> <span class="n">factor_GLQhat</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span> <span class="n">A</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">2</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Now it is indeed the case that <span class="math notranslate nohighlight">\(N A^{-1} \in GL_2(\hat{\ZZ})\)</span>: at <span class="math notranslate nohighlight">\(2\)</span> this
+matrix equals <span class="math notranslate nohighlight">\(I\)</span> and at every odd prime <span class="math notranslate nohighlight">\(p\)</span> it equals the inverse of <span class="math notranslate nohighlight">\(A\)</span>
+and we have <span class="math notranslate nohighlight">\(A \in GL_2(\ZZ_p)\)</span>.</p>
+<p>Next we let <span class="math notranslate nohighlight">\(N \in GL_2(\hat{\QQ})\)</span> at <span class="math notranslate nohighlight">\(2\)</span> be given by</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">N_2</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">]]);</span> <span class="n">N_2</span>
+<span class="p">[</span>  <span class="mi">1</span>   <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span> <span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>and at <span class="math notranslate nohighlight">\(3\)</span> by</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">N_3</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">5</span><span class="p">]]);</span> <span class="n">N_3</span>
+<span class="p">[</span>  <span class="mi">0</span>   <span class="mi">2</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">3</span> <span class="mi">1</span><span class="o">/</span><span class="mi">5</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>and at the other primes by <span class="math notranslate nohighlight">\(N_p = I\)</span>. In this case we have
+<span class="math notranslate nohighlight">\(\det(N)\hat{\ZZ} = 3/4\hat{\ZZ}\)</span>. A matrix representing <span class="math notranslate nohighlight">\(N\)</span> and having good
+precision with respect to <span class="math notranslate nohighlight">\(3/4\)</span> is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">M</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">([[</span><span class="n">Qhat</span><span class="p">(</span><span class="mi">21</span><span class="p">,</span> <span class="mi">60</span><span class="p">),</span> <span class="n">Qhat</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">60</span><span class="p">)],</span>
+<span class="o">....</span><span class="p">:</span>             <span class="p">[</span><span class="n">Qhat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">60</span><span class="p">),</span> <span class="n">Qhat</span><span class="p">(</span><span class="mi">209</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> <span class="mi">60</span><span class="p">)]]);</span> <span class="n">M</span>
+<span class="p">[</span>   <span class="mi">21</span> <span class="n">mod</span> <span class="mi">60</span>    <span class="mi">20</span> <span class="n">mod</span> <span class="mi">60</span><span class="p">]</span>
+<span class="p">[</span>    <span class="mi">0</span> <span class="n">mod</span> <span class="mi">60</span> <span class="mi">209</span><span class="o">/</span><span class="mi">4</span> <span class="n">mod</span> <span class="mi">60</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">has_good_precision</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+<p>We obtain the following <span class="math notranslate nohighlight">\(A \in GL_2^+(\QQ)\)</span>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">A</span> <span class="o">=</span> <span class="n">factor_GLQhat</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">);</span> <span class="n">A</span>
+<span class="p">[</span>  <span class="mi">3</span>   <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span> <span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>We check that this is correct by checking that <span class="math notranslate nohighlight">\(N_p A^{-1} \in GL_2(\ZZ_p)\)</span>
+for all prime numbers <span class="math notranslate nohighlight">\(p\)</span>. This is clear for <span class="math notranslate nohighlight">\(p \geq 5\)</span> since we then have
+<span class="math notranslate nohighlight">\(I, A \in GL_2(\ZZ_p)\)</span>. At <span class="math notranslate nohighlight">\(2\)</span> and <span class="math notranslate nohighlight">\(3\)</span> we have</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">N_2</span> <span class="o">*</span> <span class="o">~</span><span class="n">A</span><span class="p">,</span> <span class="n">N_3</span> <span class="o">*</span> <span class="o">~</span><span class="n">A</span>
+<span class="p">(</span>
+<span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span>   <span class="mi">0</span><span class="p">]</span>  <span class="p">[</span>  <span class="mi">0</span>   <span class="mi">8</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span>   <span class="mi">1</span><span class="p">],</span> <span class="p">[</span>  <span class="mi">1</span> <span class="mi">4</span><span class="o">/</span><span class="mi">5</span><span class="p">]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>which indeed lie in <span class="math notranslate nohighlight">\(GL_2(\ZZ_2)\)</span> and <span class="math notranslate nohighlight">\(GL_3(\ZZ_3)\)</span> respectively.</p>
+<p>Let’s do an example with <span class="math notranslate nohighlight">\(n=3\)</span>; consider <span class="math notranslate nohighlight">\(N \in GL_3(\hat{\QQ})\)</span> given at
+<span class="math notranslate nohighlight">\(3\)</span> by</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">N_3</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="mi">14</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">]]);</span> <span class="n">N_3</span>
+<span class="p">[</span> <span class="mi">14</span> <span class="mi">1</span><span class="o">/</span><span class="mi">3</span>   <span class="mi">1</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">7</span>   <span class="mi">2</span>   <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">5</span>   <span class="mi">3</span> <span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>and at <span class="math notranslate nohighlight">\(5\)</span> by</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">N_5</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="mi">15</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="o">-</span><span class="mi">9</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]);</span> <span class="n">N_5</span>
+<span class="p">[</span><span class="mi">15</span>  <span class="mi">5</span>  <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">9</span> <span class="mi">11</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">5</span> <span class="o">-</span><span class="mi">9</span>  <span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>and at all other primes <span class="math notranslate nohighlight">\(p\)</span> by the <span class="math notranslate nohighlight">\(3 \times 3\)</span>-identity matrix <span class="math notranslate nohighlight">\(I\)</span>. We have</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">det</span><span class="p">(</span><span class="n">N_3</span><span class="p">)</span><span class="o">.</span><span class="n">valuation</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">det</span><span class="p">(</span><span class="n">N_5</span><span class="p">)</span><span class="o">.</span><span class="n">valuation</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>and so <span class="math notranslate nohighlight">\(det(N) \hat{\ZZ} = 5/9\hat{\ZZ}\)</span>. The following matrix represents
+<span class="math notranslate nohighlight">\(N\)</span> and has good precision with respect to <span class="math notranslate nohighlight">\(5/9\)</span>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">M</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">([[</span><span class="n">Qhat</span><span class="p">([</span><span class="n">Qp</span><span class="p">(</span><span class="mi">3</span><span class="p">)(</span><span class="n">N_3</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">],</span> <span class="mi">0</span><span class="p">),</span> <span class="n">Qp</span><span class="p">(</span><span class="mi">5</span><span class="p">)(</span><span class="n">N_5</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">],</span> <span class="mi">1</span><span class="p">)])</span>
+<span class="o">....</span><span class="p">:</span>             <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">M</span>
+<span class="p">[</span>   <span class="mi">0</span> <span class="n">mod</span> <span class="mi">5</span> <span class="mi">10</span><span class="o">/</span><span class="mi">3</span> <span class="n">mod</span> <span class="mi">5</span>    <span class="mi">0</span> <span class="n">mod</span> <span class="mi">5</span><span class="p">]</span>
+<span class="p">[</span>   <span class="mi">4</span> <span class="n">mod</span> <span class="mi">5</span>    <span class="mi">1</span> <span class="n">mod</span> <span class="mi">5</span>    <span class="mi">4</span> <span class="n">mod</span> <span class="mi">5</span><span class="p">]</span>
+<span class="p">[</span>   <span class="mi">0</span> <span class="n">mod</span> <span class="mi">5</span>    <span class="mi">1</span> <span class="n">mod</span> <span class="mi">5</span>  <span class="mi">8</span><span class="o">/</span><span class="mi">3</span> <span class="n">mod</span> <span class="mi">5</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">has_good_precision</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">5</span><span class="o">/</span><span class="mi">9</span><span class="p">)</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+<p>Hence we compute:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">A</span> <span class="o">=</span> <span class="n">factor_GLQhat</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">5</span><span class="o">/</span><span class="mi">9</span><span class="p">);</span> <span class="n">A</span>
+<span class="p">[</span>  <span class="mi">1</span>   <span class="mi">0</span> <span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span> <span class="mi">1</span><span class="o">/</span><span class="mi">3</span> <span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span>   <span class="mi">0</span> <span class="mi">5</span><span class="o">/</span><span class="mi">3</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>and we check correctness by checking that <span class="math notranslate nohighlight">\(N_3 A^{-1} \in GL_3(\ZZ_3)\)</span> and
+<span class="math notranslate nohighlight">\(N_5 A^{-1} \in GL_5(\ZZ_5)\)</span>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">N_3</span> <span class="o">*</span> <span class="o">~</span><span class="n">A</span><span class="p">,</span> <span class="n">N_5</span> <span class="o">*</span> <span class="o">~</span><span class="n">A</span>
+<span class="p">(</span>
+<span class="p">[</span>   <span class="mi">14</span>     <span class="mi">1</span> <span class="o">-</span><span class="mi">12</span><span class="o">/</span><span class="mi">5</span><span class="p">]</span>  <span class="p">[</span> <span class="mi">15</span>  <span class="mi">15</span>  <span class="o">-</span><span class="mi">6</span><span class="p">]</span>
+<span class="p">[</span>    <span class="mi">7</span>     <span class="mi">6</span> <span class="o">-</span><span class="mi">13</span><span class="o">/</span><span class="mi">5</span><span class="p">]</span>  <span class="p">[</span>  <span class="mi">9</span>  <span class="mi">33</span>  <span class="o">-</span><span class="mi">9</span><span class="p">]</span>
+<span class="p">[</span>    <span class="mi">5</span>     <span class="mi">9</span> <span class="o">-</span><span class="mi">12</span><span class="o">/</span><span class="mi">5</span><span class="p">],</span> <span class="p">[</span>  <span class="mi">5</span> <span class="o">-</span><span class="mi">27</span>   <span class="mi">5</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">det</span><span class="p">(</span><span class="n">N_3</span><span class="o">*~</span><span class="n">A</span><span class="p">)</span><span class="o">.</span><span class="n">valuation</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+<span class="kc">True</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">det</span><span class="p">(</span><span class="n">N_5</span><span class="o">*~</span><span class="n">A</span><span class="p">)</span><span class="o">.</span><span class="n">valuation</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+<p>If the matrix does not have good precision, we throw an exception.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>sage: M = matrix([[Qhat(1,2), Qhat(0,2)], [Qhat(0, 2), Qhat(0,2)]])
+sage: factor_GLQhat(M, 4)
+Traceback (most recent call last):
+...
+ValueError: matrix precision too low!
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="adeles.matrix.factor_GSpQhat">
+<code class="sig-prename descclassname">adeles.matrix.</code><code class="sig-name descname">factor_GSpQhat</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">M</span></em>, <em class="sig-param"><span class="n">detM</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.matrix.factor_GSpQhat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Factor the <span class="math notranslate nohighlight">\(GSp_{2g}(\hat{\QQ})\)</span>-matrix <span class="math notranslate nohighlight">\(M\)</span> as <span class="math notranslate nohighlight">\(M = BA\)</span> with
+<span class="math notranslate nohighlight">\(B \in GSp_{2g}(\hat{\ZZ})\)</span> and <span class="math notranslate nohighlight">\(A \in GSp_{2g}^+(\QQ)\)</span></p>
+<p>Here <span class="math notranslate nohighlight">\(GSp_{2g}(R)\)</span> denotes the general symplectic group over the ring <span class="math notranslate nohighlight">\(R\)</span>
+and <span class="math notranslate nohighlight">\(GSp_{2g}^+(\QQ)\)</span> denotes the subgroup of matrcies with positive
+mulitplier. See Chapter 8 of [Her2021] for details.</p>
+<p>INPUT:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">M</span></code> – a matrix over the ring of profinite <span class="math notranslate nohighlight">\(\QQ\)</span>-numbers having good
+precision with respect to <code class="docutils literal notranslate"><span class="pre">detM</span></code> (cf. <a class="reference internal" href="#adeles.matrix.has_good_precision" title="adeles.matrix.has_good_precision"><code class="xref py py-func docutils literal notranslate"><span class="pre">has_good_precision()</span></code></a>) and
+representing at least one element in <span class="math notranslate nohighlight">\(GSp_{2g}(\hat{\QQ})\)</span> of determinant
+<span class="math notranslate nohighlight">\(d\)</span> satisfying <span class="math notranslate nohighlight">\(d\hat{\ZZ} = detM\hat{\ZZ}\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">detM</span></code> – a positive rational number</p></li>
+</ul>
+<p>OUTPUT:</p>
+<p>A matrix <span class="math notranslate nohighlight">\(A \in GSp_{2g}^+(\QQ)\)</span> such that for every matrix
+<span class="math notranslate nohighlight">\(N \in GSp_{2g}(\hat{\QQ})\)</span> that <span class="math notranslate nohighlight">\(M\)</span> represents and satisfying
+<span class="math notranslate nohighlight">\(\det(N)\hat{\ZZ} = detM \hat{\ZZ}\)</span> we have
+<span class="math notranslate nohighlight">\(N A^{-1} \in GSp_{2g}(\hat{\ZZ})\)</span>.</p>
+<p>ALGORITHM:</p>
+<p>We perform Algorithm 8.9 of [Her2021].</p>
+<p>EXAMPLES:</p>
+<p>Consider the following symplectic matrix over <span class="math notranslate nohighlight">\(\QQ\)</span>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">I</span> <span class="o">=</span> <span class="n">identity_matrix</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">S</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">N_2</span> <span class="o">=</span> <span class="n">block_matrix</span><span class="p">([[</span><span class="n">I</span><span class="p">,</span> <span class="n">S</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="o">*</span><span class="n">I</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="n">I</span><span class="p">]],</span> <span class="n">subdivide</span><span class="o">=</span><span class="kc">False</span><span class="p">);</span> <span class="n">N_2</span>
+<span class="p">[</span>  <span class="mi">1</span>   <span class="mi">0</span>   <span class="mi">1</span>   <span class="mi">2</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span>   <span class="mi">1</span>   <span class="mi">2</span>   <span class="mi">3</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span>   <span class="mi">0</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span>   <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">N_2</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span> <span class="o">*</span> <span class="n">Omega</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">N_2</span> <span class="o">==</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span> <span class="o">*</span> <span class="n">Omega</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+<p>It has multiplier <span class="math notranslate nohighlight">\(1/2\)</span> and hence determinant <span class="math notranslate nohighlight">\(1/4\)</span>. Now consider the matrix
+<span class="math notranslate nohighlight">\(N \in GSp_4(\hat{\QQ})\)</span> given at <span class="math notranslate nohighlight">\(2\)</span> by <span class="math notranslate nohighlight">\(N_2\)</span> and at all other primes by
+the <span class="math notranslate nohighlight">\(4 \times 4\)</span>-identity matrix. We have <span class="math notranslate nohighlight">\(\det(N)\hat{\ZZ} = 1/4\hat{\ZZ}\)</span>.</p>
+<p>The following matrix represents <span class="math notranslate nohighlight">\(N\)</span> and has good precision with respect to
+<span class="math notranslate nohighlight">\(1/4\)</span>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">z</span> <span class="o">=</span> <span class="n">Qhat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">e</span> <span class="o">=</span> <span class="n">Qhat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">h</span> <span class="o">=</span> <span class="n">Qhat</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">M</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">([[</span><span class="n">e</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="n">z</span><span class="p">],[</span><span class="n">z</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">e</span><span class="p">],[</span><span class="n">z</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">h</span><span class="p">,</span><span class="n">z</span><span class="p">],[</span><span class="n">z</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">h</span><span class="p">]]);</span> <span class="n">M</span>
+<span class="p">[</span>  <span class="mi">1</span> <span class="n">mod</span> <span class="mi">2</span>   <span class="mi">0</span> <span class="n">mod</span> <span class="mi">2</span>   <span class="mi">1</span> <span class="n">mod</span> <span class="mi">2</span>   <span class="mi">0</span> <span class="n">mod</span> <span class="mi">2</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span> <span class="n">mod</span> <span class="mi">2</span>   <span class="mi">1</span> <span class="n">mod</span> <span class="mi">2</span>   <span class="mi">0</span> <span class="n">mod</span> <span class="mi">2</span>   <span class="mi">1</span> <span class="n">mod</span> <span class="mi">2</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span> <span class="n">mod</span> <span class="mi">2</span>   <span class="mi">0</span> <span class="n">mod</span> <span class="mi">2</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span> <span class="n">mod</span> <span class="mi">2</span>   <span class="mi">0</span> <span class="n">mod</span> <span class="mi">2</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span> <span class="n">mod</span> <span class="mi">2</span>   <span class="mi">0</span> <span class="n">mod</span> <span class="mi">2</span>   <span class="mi">0</span> <span class="n">mod</span> <span class="mi">2</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span> <span class="n">mod</span> <span class="mi">2</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">has_good_precision</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+<p>Hence we can compute:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">A</span> <span class="o">=</span> <span class="n">factor_GSpQhat</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">);</span> <span class="n">A</span>
+<span class="p">[</span>  <span class="mi">1</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span>   <span class="mi">1</span>   <span class="mi">0</span>   <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span>   <span class="mi">0</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span>   <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Then indeed <span class="math notranslate nohighlight">\(A\)</span> is symplectic:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">A</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span> <span class="o">*</span> <span class="n">Omega</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">A</span> <span class="o">==</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span> <span class="o">*</span> <span class="n">Omega</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+<p>and for every odd prime number <span class="math notranslate nohighlight">\(p\)</span> we have <span class="math notranslate nohighlight">\(A \in GSp_4(\ZZ_p)\)</span>. Hence
+to check that <span class="math notranslate nohighlight">\(N A^{-1} \in GSp_4(\hat{\ZZ})\)</span> is suffices to check that
+<span class="math notranslate nohighlight">\(N_2 A^{-1} \in GSp_4(\ZZ_2)\)</span>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">N_2</span> <span class="o">*</span> <span class="o">~</span><span class="n">A</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">0</span> <span class="mi">2</span> <span class="mi">4</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">1</span> <span class="mi">4</span> <span class="mi">6</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">det</span><span class="p">(</span><span class="n">N_2</span><span class="o">*~</span><span class="n">A</span><span class="p">)</span>
+<span class="mi">1</span>
+</pre></div>
+</div>
+<p>Let’s now do a bigger example. We construct two rational symplectic matrices</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">I</span> <span class="o">=</span> <span class="n">identity_matrix</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">S</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">([[</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">5</span><span class="p">]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">N_2</span> <span class="o">=</span> <span class="n">block_matrix</span><span class="p">([[</span><span class="mi">6</span><span class="o">*</span><span class="n">I</span><span class="p">,</span> <span class="n">S</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="o">*</span><span class="n">I</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">I</span><span class="p">]],</span> <span class="n">subdivide</span><span class="o">=</span><span class="kc">False</span><span class="p">);</span> <span class="n">N_2</span>
+<span class="p">[</span>  <span class="mi">6</span>   <span class="mi">0</span>   <span class="mi">0</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span>   <span class="mi">1</span>   <span class="mi">2</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span>   <span class="mi">6</span>   <span class="mi">0</span>   <span class="mi">1</span>   <span class="mi">2</span>   <span class="mi">3</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">6</span>   <span class="mi">2</span>   <span class="mi">3</span> <span class="mi">1</span><span class="o">/</span><span class="mi">5</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">2</span>   <span class="mi">0</span>   <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">2</span>   <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">2</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">N_2</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span> <span class="o">*</span> <span class="n">Omega</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">N_2</span> <span class="o">==</span> <span class="mi">12</span> <span class="o">*</span> <span class="n">Omega</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+<p>and</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">U</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">([[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">X</span> <span class="o">=</span> <span class="n">block_matrix</span><span class="p">([[</span><span class="n">I</span><span class="p">,</span> <span class="mi">0</span><span class="o">*</span><span class="n">I</span><span class="p">],</span> <span class="p">[</span><span class="n">S</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="o">*</span><span class="n">I</span><span class="p">]],</span> <span class="n">subdivide</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">block_matrix</span><span class="p">([[</span><span class="n">U</span><span class="p">,</span> <span class="mi">0</span><span class="o">*</span><span class="n">I</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="o">*</span><span class="n">I</span><span class="p">,</span> <span class="o">~</span><span class="n">U</span><span class="o">.</span><span class="n">transpose</span><span class="p">()]],</span> <span class="n">subdivide</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">N_3</span> <span class="o">=</span> <span class="n">X</span><span class="o">*</span><span class="n">Y</span><span class="p">;</span> <span class="n">N_3</span>
+<span class="p">[</span>      <span class="mi">3</span>       <span class="mi">2</span>     <span class="mi">1</span><span class="o">/</span><span class="mi">2</span>       <span class="mi">0</span>       <span class="mi">0</span>       <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span>      <span class="mi">1</span>      <span class="o">-</span><span class="mi">3</span>      <span class="o">-</span><span class="mi">3</span>       <span class="mi">0</span>       <span class="mi">0</span>       <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span>      <span class="mi">4</span>      <span class="o">-</span><span class="mi">2</span>       <span class="mi">5</span>       <span class="mi">0</span>       <span class="mi">0</span>       <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span>   <span class="mi">21</span><span class="o">/</span><span class="mi">2</span>      <span class="o">-</span><span class="mi">6</span>    <span class="mi">29</span><span class="o">/</span><span class="mi">4</span>    <span class="mi">7</span><span class="o">/</span><span class="mi">92</span>  <span class="mi">17</span><span class="o">/</span><span class="mi">276</span>  <span class="o">-</span><span class="mi">5</span><span class="o">/</span><span class="mi">138</span><span class="p">]</span>
+<span class="p">[</span>     <span class="mi">17</span>     <span class="o">-</span><span class="mi">10</span>    <span class="mi">19</span><span class="o">/</span><span class="mi">2</span>  <span class="mi">11</span><span class="o">/</span><span class="mi">276</span> <span class="o">-</span><span class="mi">13</span><span class="o">/</span><span class="mi">276</span>  <span class="o">-</span><span class="mi">7</span><span class="o">/</span><span class="mi">138</span><span class="p">]</span>
+<span class="p">[</span>   <span class="mi">49</span><span class="o">/</span><span class="mi">5</span>   <span class="o">-</span><span class="mi">27</span><span class="o">/</span><span class="mi">5</span>      <span class="o">-</span><span class="mi">7</span>   <span class="mi">3</span><span class="o">/</span><span class="mi">184</span> <span class="o">-</span><span class="mi">19</span><span class="o">/</span><span class="mi">552</span>  <span class="mi">11</span><span class="o">/</span><span class="mi">276</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">N_3</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span> <span class="o">*</span> <span class="n">Omega</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">N_3</span> <span class="o">==</span> <span class="mi">1</span><span class="o">/</span><span class="mi">3</span> <span class="o">*</span> <span class="n">Omega</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+<p>We let <span class="math notranslate nohighlight">\(N \in GSp_6(\hat{\QQ})\)</span> at <span class="math notranslate nohighlight">\(2\)</span> be given by <span class="math notranslate nohighlight">\(N_2\)</span>, at <span class="math notranslate nohighlight">\(3\)</span> by <span class="math notranslate nohighlight">\(N_3\)</span>
+and by the identity matrix at all other primes. Then because we have</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">det</span><span class="p">(</span><span class="n">N_2</span><span class="p">)</span><span class="o">.</span><span class="n">valuation</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="mi">6</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">det</span><span class="p">(</span><span class="n">N_3</span><span class="p">)</span><span class="o">.</span><span class="n">valuation</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="o">-</span><span class="mi">3</span>
+</pre></div>
+</div>
+<p>the determinant of <span class="math notranslate nohighlight">\(N\)</span> satisfies <span class="math notranslate nohighlight">\(det(N)\hat{\ZZ} = 64/27\hat{\ZZ}\)</span>.</p>
+<p>We construct a representation <span class="math notranslate nohighlight">\(M\)</span> of <span class="math notranslate nohighlight">\(N\)</span> of good precision:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">M</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">([[</span><span class="n">Qhat</span><span class="p">([</span><span class="n">Qp</span><span class="p">(</span><span class="mi">2</span><span class="p">)(</span><span class="n">N_2</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">],</span> <span class="mi">7</span><span class="p">),</span> <span class="n">Qp</span><span class="p">(</span><span class="mi">3</span><span class="p">)(</span><span class="n">N_3</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">],</span> <span class="mi">1</span><span class="p">)])</span>
+<span class="o">....</span><span class="p">:</span>             <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">)]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">)])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">M</span>
+<span class="p">[</span>    <span class="mi">6</span> <span class="n">mod</span> <span class="mi">384</span>   <span class="mi">128</span> <span class="n">mod</span> <span class="mi">384</span>   <span class="mi">128</span> <span class="n">mod</span> <span class="mi">384</span> <span class="mi">513</span><span class="o">/</span><span class="mi">2</span> <span class="n">mod</span> <span class="mi">384</span>   <span class="mi">129</span> <span class="n">mod</span> <span class="mi">384</span>   <span class="mi">258</span> <span class="n">mod</span> <span class="mi">384</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">256</span> <span class="n">mod</span> <span class="mi">384</span>     <span class="mi">6</span> <span class="n">mod</span> <span class="mi">384</span>     <span class="mi">0</span> <span class="n">mod</span> <span class="mi">384</span>   <span class="mi">129</span> <span class="n">mod</span> <span class="mi">384</span>   <span class="mi">258</span> <span class="n">mod</span> <span class="mi">384</span>     <span class="mi">3</span> <span class="n">mod</span> <span class="mi">384</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">256</span> <span class="n">mod</span> <span class="mi">384</span>   <span class="mi">256</span> <span class="n">mod</span> <span class="mi">384</span>   <span class="mi">134</span> <span class="n">mod</span> <span class="mi">384</span>   <span class="mi">258</span> <span class="n">mod</span> <span class="mi">384</span>     <span class="mi">3</span> <span class="n">mod</span> <span class="mi">384</span>   <span class="mi">333</span> <span class="n">mod</span> <span class="mi">384</span><span class="p">]</span>
+<span class="p">[</span>    <span class="mi">0</span> <span class="n">mod</span> <span class="mi">384</span>     <span class="mi">0</span> <span class="n">mod</span> <span class="mi">384</span>   <span class="mi">128</span> <span class="n">mod</span> <span class="mi">384</span>     <span class="mi">2</span> <span class="n">mod</span> <span class="mi">384</span> <span class="mi">256</span><span class="o">/</span><span class="mi">3</span> <span class="n">mod</span> <span class="mi">384</span> <span class="mi">256</span><span class="o">/</span><span class="mi">3</span> <span class="n">mod</span> <span class="mi">384</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">128</span> <span class="n">mod</span> <span class="mi">384</span>   <span class="mi">128</span> <span class="n">mod</span> <span class="mi">384</span>   <span class="mi">128</span> <span class="n">mod</span> <span class="mi">384</span> <span class="mi">640</span><span class="o">/</span><span class="mi">3</span> <span class="n">mod</span> <span class="mi">384</span> <span class="mi">646</span><span class="o">/</span><span class="mi">3</span> <span class="n">mod</span> <span class="mi">384</span> <span class="mi">128</span><span class="o">/</span><span class="mi">3</span> <span class="n">mod</span> <span class="mi">384</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">128</span> <span class="n">mod</span> <span class="mi">384</span>     <span class="mi">0</span> <span class="n">mod</span> <span class="mi">384</span>   <span class="mi">128</span> <span class="n">mod</span> <span class="mi">384</span>     <span class="mi">0</span> <span class="n">mod</span> <span class="mi">384</span> <span class="mi">128</span><span class="o">/</span><span class="mi">3</span> <span class="n">mod</span> <span class="mi">384</span> <span class="mi">262</span><span class="o">/</span><span class="mi">3</span> <span class="n">mod</span> <span class="mi">384</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">has_good_precision</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">64</span><span class="o">/</span><span class="mi">27</span><span class="p">)</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+<p>Now we can use this factorization function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">A</span> <span class="o">=</span> <span class="n">factor_GSpQhat</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">64</span><span class="o">/</span><span class="mi">27</span><span class="p">);</span> <span class="n">A</span>
+<span class="p">[</span>  <span class="mi">2</span>   <span class="mi">0</span>   <span class="mi">0</span> <span class="mi">1</span><span class="o">/</span><span class="mi">6</span> <span class="mi">1</span><span class="o">/</span><span class="mi">3</span>   <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span>   <span class="mi">2</span>   <span class="mi">0</span> <span class="mi">1</span><span class="o">/</span><span class="mi">3</span>   <span class="mi">0</span> <span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">2</span>   <span class="mi">0</span> <span class="mi">1</span><span class="o">/</span><span class="mi">3</span> <span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span> <span class="mi">2</span><span class="o">/</span><span class="mi">3</span>   <span class="mi">0</span>   <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span> <span class="mi">2</span><span class="o">/</span><span class="mi">3</span>   <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span> <span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Let’s check that <span class="math notranslate nohighlight">\(A\)</span> does indeed lie in <span class="math notranslate nohighlight">\(GSp_6^+(\QQ)\)</span>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">A</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span> <span class="o">*</span> <span class="n">Omega</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">A</span> <span class="o">==</span> <span class="mi">4</span><span class="o">/</span><span class="mi">3</span> <span class="o">*</span> <span class="n">Omega</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+<p>From the entries of <span class="math notranslate nohighlight">\(A\)</span> and the fact that <span class="math notranslate nohighlight">\(A\)</span> has multiplier <span class="math notranslate nohighlight">\(4/3\)</span> it
+follows that <span class="math notranslate nohighlight">\(A \in GSp_6(\ZZ_p)\)</span> for all prime numbers bigger than <span class="math notranslate nohighlight">\(3\)</span>.
+At the primes <span class="math notranslate nohighlight">\(2\)</span> and <span class="math notranslate nohighlight">\(3\)</span> we have</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="nb">min</span><span class="p">([</span><span class="n">entry</span><span class="o">.</span><span class="n">valuation</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="p">(</span><span class="n">N_2</span> <span class="o">*</span> <span class="o">~</span><span class="n">A</span><span class="p">)</span><span class="o">.</span><span class="n">list</span><span class="p">()])</span>
+<span class="mi">0</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">det</span><span class="p">(</span><span class="n">N_2</span><span class="o">*~</span><span class="n">A</span><span class="p">)</span><span class="o">.</span><span class="n">valuation</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="mi">0</span>
+<span class="n">sage</span><span class="p">:</span> <span class="nb">min</span><span class="p">([</span><span class="n">entry</span><span class="o">.</span><span class="n">valuation</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="p">(</span><span class="n">N_3</span> <span class="o">*</span> <span class="o">~</span><span class="n">A</span><span class="p">)</span><span class="o">.</span><span class="n">list</span><span class="p">()])</span>
+<span class="mi">0</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">det</span><span class="p">(</span><span class="n">N_3</span><span class="o">*~</span><span class="n">A</span><span class="p">)</span><span class="o">.</span><span class="n">valuation</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="mi">0</span>
+</pre></div>
+</div>
+<p>Therefore <span class="math notranslate nohighlight">\(N A^{-1} \in GSp_6(\hat{\ZZ})\)</span> as desired.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="adeles.matrix.has_good_precision">
+<code class="sig-prename descclassname">adeles.matrix.</code><code class="sig-name descname">has_good_precision</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">M</span></em>, <em class="sig-param"><span class="n">Delta</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.matrix.has_good_precision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return wether or not the sqaure matrix <code class="docutils literal notranslate"><span class="pre">M</span></code> over <code class="docutils literal notranslate"><span class="pre">Qhat</span></code> has good
+precision with respect to <code class="docutils literal notranslate"><span class="pre">Delta</span></code></p>
+<p>By <span class="math notranslate nohighlight">\(M\)</span> having <em>good precision</em> with respect to <span class="math notranslate nohighlight">\(\Delta \in \QQ_{&gt;0}\)</span> we mean
+the following. Let <span class="math notranslate nohighlight">\(D\)</span> be the denominator matrix of <span class="math notranslate nohighlight">\(M\)</span> and let <span class="math notranslate nohighlight">\(m\)</span>
+be the precision (i.e. modulus) of <span class="math notranslate nohighlight">\(MD\)</span>. Then <span class="math notranslate nohighlight">\(M\)</span> has <em>good precision</em> with
+respect to <span class="math notranslate nohighlight">\(\Delta\)</span> if for all prime numbers <span class="math notranslate nohighlight">\(p\)</span> we have
+<span class="math notranslate nohighlight">\(ord_p(m) \geq ord_p(\Delta \det(D))\)</span>.</p>
+<p>INPUT:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">M</span></code> – a square matrix over the profinite <span class="math notranslate nohighlight">\(\QQ\)</span>-integers</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Delta</span></code> – a positive rational number</p></li>
+</ul>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">M</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">([[</span><span class="n">Qhat</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="o">/</span><span class="mi">7</span><span class="p">),</span> <span class="n">Qhat</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">20</span><span class="p">)],</span>
+<span class="o">....</span><span class="p">:</span>             <span class="p">[</span><span class="n">Qhat</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">5</span><span class="p">,</span> <span class="mi">20</span><span class="o">/</span><span class="mi">7</span><span class="p">),</span> <span class="n">Qhat</span><span class="p">(</span><span class="mi">5</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span> <span class="mi">30</span><span class="p">)]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">has_good_precision</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">2</span><span class="o">/</span><span class="mi">21</span><span class="p">)</span>
+<span class="kc">True</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">has_good_precision</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">4</span><span class="o">/</span><span class="mi">21</span><span class="p">)</span>
+<span class="kc">False</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">has_good_precision</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">2</span><span class="o">/</span><span class="mi">7</span><span class="p">)</span>
+<span class="kc">False</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">has_good_precision</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
+<span class="kc">False</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">has_good_precision</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">21</span><span class="p">)</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="adeles.matrix.matrix_modulo">
+<code class="sig-prename descclassname">adeles.matrix.</code><code class="sig-name descname">matrix_modulo</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">A</span></em>, <em class="sig-param"><span class="n">N</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.matrix.matrix_modulo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Project a matrix over <span class="math notranslate nohighlight">\(\hat{\ZZ}\)</span> to a matrix over <span class="math notranslate nohighlight">\(\ZZ/N\ZZ\)</span></p>
+<p>INPUT:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">A</span></code> – a matrix with entries <em>integral</em> elements of <span class="math notranslate nohighlight">\(\hat{\QQ}\)</span> and with
+modulus divisible by <code class="docutils literal notranslate"><span class="pre">N</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">N</span></code> – an integer</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py function">
+<dt id="adeles.matrix.modulus">
+<code class="sig-prename descclassname">adeles.matrix.</code><code class="sig-name descname">modulus</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">M</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.matrix.modulus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the modulus (i.e. precision) of the <span class="math notranslate nohighlight">\(\hat{\QQ}\)</span>-matrix <code class="docutils literal notranslate"><span class="pre">M</span></code></p>
+<p>This is the greatest common divisor of the moduli of the entries of <code class="docutils literal notranslate"><span class="pre">M</span></code>.</p>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">M</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="n">Qhat</span><span class="p">,</span> <span class="p">[[</span><span class="n">Qhat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="o">/</span><span class="mi">6</span><span class="p">),</span> <span class="n">Qhat</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">)],</span>
+<span class="o">....</span><span class="p">:</span>                   <span class="p">[</span> <span class="n">Qhat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span>  <span class="n">Qhat</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">18</span><span class="p">)]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">modulus</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+<span class="mi">1</span><span class="o">/</span><span class="mi">6</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="adeles.matrix.value_matrix">
+<code class="sig-prename descclassname">adeles.matrix.</code><code class="sig-name descname">value_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">M</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.matrix.value_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the value matrix of the <span class="math notranslate nohighlight">\(\hat{\QQ}\)</span>-matrix <code class="docutils literal notranslate"><span class="pre">M</span></code></p>
+<p>This is the matrix consisting of the values of the entries of <code class="docutils literal notranslate"><span class="pre">M</span></code>.</p>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">M</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="n">Qhat</span><span class="p">,</span> <span class="p">[[</span><span class="n">Qhat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="o">/</span><span class="mi">6</span><span class="p">),</span> <span class="n">Qhat</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">)],</span>
+<span class="o">....</span><span class="p">:</span>                   <span class="p">[</span> <span class="n">Qhat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span>  <span class="n">Qhat</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">18</span><span class="p">)]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">value_matrix</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">1</span> <span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span>   <span class="mi">5</span><span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="profinite_graph.html"
+                        title="previous chapter">Profinite Graphs</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="modular.html"
+                        title="next chapter">Modular Functions and their Action</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/matrix.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="modular.html" title="Modular Functions and their Action"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="profinite_graph.html" title="Profinite Graphs"
+             >previous</a> |</li>
+  
+    
+      <a href="../index.html"><img src="_static/logo_sagemath_black.svg" height="28" style="vertical-align: middle" title="Sage Logo"></a>
+    
+  
+  
+        <li class="nav-item nav-item-0"><a href="index.html">Home</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Adèlic Matrix Factorization</a></li> 
+      </ul>
+    </div>
+    
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Mathé Hertogh.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.1.2.
+    </div>
+    <script type="text/javascript">
+/*global jQuery, window */
+/* Sphinx sidebar toggle.  Putting this code at the end of the body
+ * enables the toggle for the live, static, and offline docs.  Note:
+ * sage.misc.html.math_parse() eats jQuery's dollar-sign shortcut. */
+var jq = jQuery;
+jq(document).ready(function () {
+    var bar, bod, bg, fg, key, tog, wid_old, wid_new, get_state, set_state;
+    bod = jq('div.bodywrapper');
+    bar = jq('div.sphinxsidebar');
+    tog = jq('<div class="sphinxsidebartoggle"></div>');
+
+    /* The sidebar toggle adapts its height to the bodywrapper height. */
+    const resizeObserver = new ResizeObserver(entries => {
+        tog.height(bod.height());
+    });
+    resizeObserver.observe(bod[0]);
+
+    /* Setup and add the toggle. See Sphinx v0.5.1 default.css. */
+    fg = jq('div.sphinxsidebar p a').css('color') || 'rgb(152, 219, 204)';
+    bg = jq('div.document').css('background-color') || 'rgb(28, 78, 99)';
+    wid_old = '230px';
+    wid_new = '5px';
+    tog.css('background-color', bg)
+        .css('border-width', '0px')
+        .css('border-right', wid_new + ' ridge ' + bg)
+        .css('cursor', 'pointer')
+        .css('position', 'absolute')
+        .css('left', '-' + wid_new)
+        .css('top', '0px')
+        .css('width', wid_new);
+    bod.css('position', 'relative');
+    bod.prepend(tog);
+
+    /* Cookie helpers. */
+    key = 'sphinxsidebar=';
+    set_state = function (s) {
+        var date = new Date();
+        /* Expiry in 7 days. */
+        date.setTime(date.getTime() + (7 * 24 * 3600 * 1000));
+        document.cookie = key + encodeURIComponent(s) + '; expires=' +
+            date.toUTCString() + '; path=/';
+    };
+    get_state = function () {
+        var i, c, crumbs = document.cookie.split(';');
+        for (i = 0; i < crumbs.length; i += 1) {
+            c = crumbs[i].replace(/^\s+/, '');
+            if (c.indexOf(key) === 0) {
+                return decodeURIComponent(c.substring(key.length, c.length));
+            }
+        }
+        return null;
+    };
+
+    /* Event handlers. */
+    tog.mouseover(function (ev) {
+        tog.css('border-right-color', fg);
+    }).mouseout(function (ev) {
+        tog.css('border-right-color', bg);
+    }).click(function (ev) {
+        if (bod.hasClass('wide')) {
+            bod.removeClass('wide');
+            bod.css('margin-left', wid_old);
+            bar.css('width', wid_old);
+            bar.show();
+            set_state('visible');
+        } else {
+            set_state('hidden');
+            bar.hide();
+            bar.css('width', '0px');
+            bod.css('margin-left', wid_new);
+            bod.addClass('wide');
+        }
+    });
+
+    /* Hide the normally visible sidebar? */
+    if (get_state() === 'hidden') {
+        tog.trigger('click');
+    } else {
+        set_state('visible');
+    }
+});
+    </script>
+  </body>
+</html>

@@ -1,0 +1,388 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shimura Connecting Homomorphism &#8212; Computing with adèles and idèles</title>
+    <link rel="stylesheet" href="_static/sage.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="_static/MathJax.js?config=TeX-AMS_HTML-full,../mathjax_sage.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Hilbert Class Field Computations" href="hilbert.html" />
+    <link rel="prev" title="Modular Functions and their Action" href="modular.html" />
+    <link rel="icon" href="_static/sageicon.png" type="image/x-icon" />
+    <script src="_static/thebe.js" type="text/javascript"></script>
+    <script src="_static/thebe-sage.js" type="text/javascript"></script>
+
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="hilbert.html" title="Hilbert Class Field Computations"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="modular.html" title="Modular Functions and their Action"
+             accesskey="P">previous</a> |</li>
+  
+    
+      <a href="../index.html"><img src="_static/logo_sagemath_black.svg" height="28" style="vertical-align: middle" title="Sage Logo"></a>
+    
+  
+  
+        <li class="nav-item nav-item-0"><a href="index.html">Home</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Shimura Connecting Homomorphism</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-adeles.shimura">
+<span id="shimura-connecting-homomorphism"></span><h1>Shimura Connecting Homomorphism<a class="headerlink" href="#module-adeles.shimura" title="Permalink to this headline">¶</a></h1>
+<p>Shimura’s Connecting Homomorphism</p>
+<p>Let <span class="math notranslate nohighlight">\(K\)</span> be an imaginary quadratic number field, let <span class="math notranslate nohighlight">\(\theta\)</span> be a generator of
+its ring of integers. View the ring <span class="math notranslate nohighlight">\(\hat{K}\)</span> of profinite <span class="math notranslate nohighlight">\(K\)</span>-numbers as a
+<span class="math notranslate nohighlight">\(\hat{\QQ}\)</span>-vector space with basis <span class="math notranslate nohighlight">\((\theta, 1)\)</span>. Then <em>Shimura’s connecting
+homomorphism</em> is the map <span class="math notranslate nohighlight">\(g_\theta: \hat{K}^* \to GL_2(\hat{\QQ})\)</span> that sends
+<span class="math notranslate nohighlight">\(x \in \hat{K}^*\)</span> to the transpose of the matrix that represents the
+<span class="math notranslate nohighlight">\(\hat{\QQ}\)</span>-linear map <span class="math notranslate nohighlight">\(\hat{K} \to \hat{K}\)</span> given by multiplication by <span class="math notranslate nohighlight">\(x\)</span>.</p>
+<p>This file implements Shimura’s connecting homomorphism in the function
+<a class="reference internal" href="#adeles.shimura.shimura_connecting_homomorphism" title="adeles.shimura.shimura_connecting_homomorphism"><code class="xref py py-func docutils literal notranslate"><span class="pre">shimura_connecting_homomorphism()</span></code></a>.</p>
+<p>Moreover the function <a class="reference internal" href="#adeles.shimura.factored_shimura_connecting_homomorphism" title="adeles.shimura.factored_shimura_connecting_homomorphism"><code class="xref py py-func docutils literal notranslate"><span class="pre">factored_shimura_connecting_homomorphism()</span></code></a>
+evaluations Shimura’s connecting homomorphism and factors the resulting
+<span class="math notranslate nohighlight">\(GL_2(\hat{\QQ})\)</span>-matrix into a product of a matrix <span class="math notranslate nohighlight">\(B \in GL_2(\hat{\ZZ})\)</span> and
+a matrix <span class="math notranslate nohighlight">\(A \in GL_2^+(\QQ)\)</span>, using <code class="xref py py-func docutils literal notranslate"><span class="pre">matrix.factor_GLQhat()</span></code>.</p>
+<p>REFERENCES:</p>
+<p>[Her2021] Mathé Hertogh, Computing with adèles and idèles, master’s thesis,
+Leiden University, 2021.</p>
+<p>For context on the utility of these function, see Chapter 9 of [Her2021].
+This file is in particular based on Sections 9.3.2 and 9.3.3 of [Her2021].</p>
+<p>AUTHORS:</p>
+<ul class="simple">
+<li><p>Mathé Hertogh (2021-07): initial version based on [Her2021]</p></li>
+</ul>
+<dl class="py function">
+<dt id="adeles.shimura.factored_shimura_connecting_homomorphism">
+<code class="sig-prename descclassname">adeles.shimura.</code><code class="sig-name descname">factored_shimura_connecting_homomorphism</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">u</span></em>, <em class="sig-param"><span class="n">output_prec</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.shimura.factored_shimura_connecting_homomorphism" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate Shimura’s connecting homomorphism at the idèle <code class="docutils literal notranslate"><span class="pre">u</span></code> and factor
+the result into a matrix in <span class="math notranslate nohighlight">\(GL_2(\hat{\ZZ})\)</span> and a matrix in <span class="math notranslate nohighlight">\(GL_2^+(\QQ)\)</span></p>
+<p>INPUT:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">u</span></code> – a <span class="math notranslate nohighlight">\(K\)</span>-idèle for some imaginary quadratic number field <span class="math notranslate nohighlight">\(K\)</span> whose
+ring of integers is generated by <code class="docutils literal notranslate"><span class="pre">K.gen()</span></code>; the point to evaluate the
+homomorphism in</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">output_prec</span></code> – a positive integer; the desired output precision</p></li>
+</ul>
+<p>OUTPUT:</p>
+<p>A pair <span class="math notranslate nohighlight">\((B, A)\)</span> where <span class="math notranslate nohighlight">\(B\)</span> is an integral <span class="math notranslate nohighlight">\(2 \times 2\)</span>-matrix over the ring
+of profinite <span class="math notranslate nohighlight">\(\QQ\)</span>-numbers with precision (i.e. modulus) divisible by
+<code class="docutils literal notranslate"><span class="pre">output_prec</span></code> and <span class="math notranslate nohighlight">\(A \in GL_2^+(\QQ)\)</span> such that for some <span class="math notranslate nohighlight">\(x \in \hat{K}^*\)</span>
+that <code class="docutils literal notranslate"><span class="pre">u</span></code> represents <span class="math notranslate nohighlight">\(g(x)A^{-1}\)</span> is represented by <span class="math notranslate nohighlight">\(B\)</span>.</p>
+<p>ALGORITHM:</p>
+<p>We perform Algorithm 9.2 of [Her2021]</p>
+<p>EXAMPLES:</p>
+<p>We create an imaginary quadratic number field whose generator also generates
+the ring of integers.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">K</span><span class="o">.&lt;</span><span class="n">a</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">QuadraticField</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">K</span><span class="o">.</span><span class="n">integral_basis</span><span class="p">()</span>
+<span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">a</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">J</span> <span class="o">=</span> <span class="n">Ideles</span><span class="p">(</span><span class="n">K</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p5</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">ideal</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">a</span><span class="p">),</span> <span class="n">K</span><span class="o">.</span><span class="n">ideal</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We evaluate the corresponding Shimura homomorphism at some idèles.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">u</span> <span class="o">=</span> <span class="n">J</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">{</span><span class="n">p2</span><span class="p">:</span> <span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="mi">3</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">p5</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)});</span> <span class="n">u</span>
+<span class="n">Idèle</span> <span class="k">with</span> <span class="n">values</span><span class="p">:</span>
+  <span class="n">infinity_0</span><span class="p">:</span>   <span class="o">-</span><span class="mi">1</span>
+  <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">a</span><span class="p">):</span>       <span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">U</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+  <span class="p">(</span><span class="mi">3</span><span class="p">):</span>          <span class="mi">3</span> <span class="o">*</span> <span class="n">U</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+  <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">a</span><span class="p">):</span>       <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">U</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+  <span class="n">other</span> <span class="n">primes</span><span class="p">:</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">U</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">factored_shimura_connecting_homomorphism</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="p">(</span>
+<span class="p">[</span><span class="mi">133</span> <span class="n">mod</span> <span class="mi">150</span> <span class="mi">150</span> <span class="n">mod</span> <span class="mi">300</span><span class="p">]</span>  <span class="p">[</span><span class="mi">3</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">15</span> <span class="n">mod</span> <span class="mi">30</span> <span class="mi">133</span> <span class="n">mod</span> <span class="mi">150</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span> <span class="mi">3</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">factored_shimura_connecting_homomorphism</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span>
+<span class="p">(</span>
+<span class="p">[</span> <span class="mi">583</span> <span class="n">mod</span> <span class="mi">1500</span> <span class="mi">2250</span> <span class="n">mod</span> <span class="mi">3000</span><span class="p">]</span>  <span class="p">[</span><span class="mi">3</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span>   <span class="mi">75</span> <span class="n">mod</span> <span class="mi">300</span>  <span class="mi">583</span> <span class="n">mod</span> <span class="mi">1500</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span> <span class="mi">3</span><span class="p">]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">v</span> <span class="o">=</span> <span class="n">J</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">I</span><span class="p">,</span> <span class="p">{</span><span class="n">p2</span><span class="p">:</span> <span class="p">(</span><span class="n">a</span><span class="o">/</span><span class="mi">7</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">p5</span><span class="p">:</span> <span class="p">(</span><span class="n">a</span><span class="o">/</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">)});</span> <span class="n">v</span>
+<span class="n">Idèle</span> <span class="k">with</span> <span class="n">values</span><span class="p">:</span>
+  <span class="n">infinity_0</span><span class="p">:</span>   <span class="mi">3</span><span class="o">*</span><span class="n">I</span>
+  <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">a</span><span class="p">):</span>       <span class="mi">1</span><span class="o">/</span><span class="mi">7</span><span class="o">*</span><span class="n">a</span> <span class="o">*</span> <span class="n">U</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+  <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">a</span><span class="p">):</span>       <span class="mi">1</span><span class="o">/</span><span class="mi">5</span><span class="o">*</span><span class="n">a</span> <span class="o">*</span> <span class="n">U</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+  <span class="n">other</span> <span class="n">primes</span><span class="p">:</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">U</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">factored_shimura_connecting_homomorphism</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">(</span>
+<span class="p">[</span><span class="mi">0</span> <span class="n">mod</span> <span class="mi">250</span> <span class="mi">49</span> <span class="n">mod</span> <span class="mi">50</span><span class="p">]</span>  <span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="mi">5</span>   <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">1</span> <span class="n">mod</span> <span class="mi">50</span>  <span class="mi">0</span> <span class="n">mod</span> <span class="mi">25</span><span class="p">],</span> <span class="p">[</span>  <span class="mi">0</span>   <span class="mi">2</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">factored_shimura_connecting_homomorphism</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="mi">18</span><span class="p">)</span>
+<span class="p">(</span>
+<span class="p">[</span><span class="mi">500</span> <span class="n">mod</span> <span class="mi">4500</span>  <span class="mi">549</span> <span class="n">mod</span> <span class="mi">900</span><span class="p">]</span>  <span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="mi">5</span>   <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">351</span> <span class="n">mod</span> <span class="mi">900</span>   <span class="mi">50</span> <span class="n">mod</span> <span class="mi">450</span><span class="p">],</span> <span class="p">[</span>  <span class="mi">0</span>   <span class="mi">2</span><span class="p">]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="adeles.shimura.shimura_connecting_homomorphism">
+<code class="sig-prename descclassname">adeles.shimura.</code><code class="sig-name descname">shimura_connecting_homomorphism</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">u</span></em>, <em class="sig-param"><span class="n">output_prec</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.shimura.shimura_connecting_homomorphism" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate Shimura’s connecting homomorphism at the idele <code class="docutils literal notranslate"><span class="pre">u</span></code></p>
+<p>INPUT:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">u</span></code> – a <span class="math notranslate nohighlight">\(K\)</span>-idèle for some imaginary quadratic number field <span class="math notranslate nohighlight">\(K\)</span> whose
+ring of integers is generated by <code class="docutils literal notranslate"><span class="pre">K.gen()</span></code>; the point to evaluate the
+homomorphism in</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">output_prec</span></code> – a positive integer; the desired output precision</p></li>
+</ul>
+<p>OUTPUT:</p>
+<p>A pair <span class="math notranslate nohighlight">\((v, M)\)</span> where <span class="math notranslate nohighlight">\(v\)</span> is a <span class="math notranslate nohighlight">\(K\)</span>-idèle whose represented subset is
+contained in that of <span class="math notranslate nohighlight">\(u\)</span> and <span class="math notranslate nohighlight">\(M\)</span> is a pair <span class="math notranslate nohighlight">\(M = (E, \Delta)\)</span> with <span class="math notranslate nohighlight">\(M\)</span> a
+<span class="math notranslate nohighlight">\(2 \times 2\)</span>-matrix over the ring of profinite <span class="math notranslate nohighlight">\(\QQ\)</span>-numbers with integral
+precision (i.e. modulus) divisible by <code class="docutils literal notranslate"><span class="pre">output_prec</span></code> and <span class="math notranslate nohighlight">\(\Delta\)</span> a
+positive rational number such that every <span class="math notranslate nohighlight">\(x \in \hat{K}^*\)</span> that <span class="math notranslate nohighlight">\(v\)</span>
+represents satisfies <span class="math notranslate nohighlight">\(g(x)\hat{\ZZ} = \Delta\hat{\ZZ}\)</span> and <span class="math notranslate nohighlight">\(E\)</span> represents
+<span class="math notranslate nohighlight">\(g(x)\)</span>. Here <span class="math notranslate nohighlight">\(g: \hat{K}^* \to GL_2(\hat{\QQ})\)</span> denotes Shimura’s connecting
+homomorphism with respect to the basis <code class="docutils literal notranslate"><span class="pre">(K.gen(),</span> <span class="pre">1)</span></code>.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">output_prec</span></code> is not specified, then <span class="math notranslate nohighlight">\(v\)</span> equals <span class="math notranslate nohighlight">\(u\)</span> and no guarantees
+are made about the precision of <span class="math notranslate nohighlight">\(E\)</span>. In this case we only return <span class="math notranslate nohighlight">\(M\)</span> (not
+<span class="math notranslate nohighlight">\(v\)</span>).</p>
+<p>ALGORITHM:</p>
+<p>We perform Algorithm 9.1 of [Her2021].</p>
+<p>EXAMPLES:</p>
+<p>First we create an appropriate number field and check that its generator
+generates the ring of integers.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">K</span><span class="o">.&lt;</span><span class="n">a</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">NumberField</span><span class="p">(</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span> <span class="o">-</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">K</span><span class="o">.</span><span class="n">integral_basis</span><span class="p">()</span>
+<span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">a</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">J</span> <span class="o">=</span> <span class="n">Ideles</span><span class="p">(</span><span class="n">K</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Let’s try to evaluate Shimura’s connecting homomorphism without specifying
+an output precision.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">u</span> <span class="o">=</span> <span class="n">J</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">{</span><span class="n">a</span><span class="p">:</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="mi">3</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">5</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">)});</span> <span class="n">u</span>
+<span class="n">Idèle</span> <span class="k">with</span> <span class="n">values</span><span class="p">:</span>
+  <span class="n">infinity_0</span><span class="p">:</span>   <span class="mi">1</span>
+  <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">a</span><span class="p">):</span>       <span class="n">a</span> <span class="o">*</span> <span class="n">U</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+  <span class="p">(</span><span class="mi">3</span><span class="p">):</span>          <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">U</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+  <span class="p">(</span><span class="mi">5</span><span class="p">):</span>          <span class="mi">1</span><span class="o">/</span><span class="mi">5</span> <span class="o">*</span> <span class="n">U</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+  <span class="n">other</span> <span class="n">primes</span><span class="p">:</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">U</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">shimura_connecting_homomorphism</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+<span class="p">(</span>
+<span class="p">[</span> <span class="mi">1</span><span class="o">/</span><span class="mi">5</span> <span class="n">mod</span> <span class="mi">6</span><span class="o">/</span><span class="mi">5</span> <span class="mi">6</span><span class="o">/</span><span class="mi">5</span> <span class="n">mod</span> <span class="mi">12</span><span class="o">/</span><span class="mi">5</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">3</span><span class="o">/</span><span class="mi">5</span> <span class="n">mod</span> <span class="mi">6</span><span class="o">/</span><span class="mi">5</span>  <span class="mi">4</span><span class="o">/</span><span class="mi">5</span> <span class="n">mod</span> <span class="mi">6</span><span class="o">/</span><span class="mi">5</span><span class="p">],</span> <span class="mi">2</span><span class="o">/</span><span class="mi">25</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>And now let’s get an output precision of at least <span class="math notranslate nohighlight">\(12\)</span>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">v</span><span class="p">,</span> <span class="n">M</span> <span class="o">=</span> <span class="n">shimura_connecting_homomorphism</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">v</span>
+<span class="n">Idèle</span> <span class="k">with</span> <span class="n">values</span><span class="p">:</span>
+  <span class="n">infinity_0</span><span class="p">:</span>   <span class="mi">1</span>
+  <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">a</span><span class="p">):</span>       <span class="n">a</span> <span class="o">*</span> <span class="n">U</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+  <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">a</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>   <span class="n">a</span> <span class="o">*</span> <span class="n">U</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+  <span class="p">(</span><span class="mi">3</span><span class="p">):</span>          <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">U</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+  <span class="p">(</span><span class="mi">5</span><span class="p">):</span>          <span class="mi">1</span><span class="o">/</span><span class="mi">5</span> <span class="o">*</span> <span class="n">U</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+  <span class="n">other</span> <span class="n">primes</span><span class="p">:</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">U</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">M</span>
+<span class="p">(</span>
+<span class="p">[</span> <span class="mi">1</span><span class="o">/</span><span class="mi">5</span> <span class="n">mod</span> <span class="mi">12</span>    <span class="mi">6</span> <span class="n">mod</span> <span class="mi">24</span><span class="p">]</span>
+<span class="p">[</span>   <span class="mi">9</span> <span class="n">mod</span> <span class="mi">12</span> <span class="mi">16</span><span class="o">/</span><span class="mi">5</span> <span class="n">mod</span> <span class="mi">12</span><span class="p">],</span> <span class="mi">2</span><span class="o">/</span><span class="mi">25</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Or output precision <span class="math notranslate nohighlight">\(1000\)</span>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">v</span><span class="p">,</span> <span class="n">M</span> <span class="o">=</span> <span class="n">shimura_connecting_homomorphism</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">v</span>
+<span class="n">Idèle</span> <span class="k">with</span> <span class="n">values</span><span class="p">:</span>
+  <span class="n">infinity_0</span><span class="p">:</span>   <span class="mi">1</span>
+  <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">a</span><span class="p">):</span>       <span class="n">a</span> <span class="o">*</span> <span class="n">U</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+  <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">a</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>   <span class="n">a</span> <span class="o">*</span> <span class="n">U</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+  <span class="p">(</span><span class="mi">3</span><span class="p">):</span>          <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">U</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+  <span class="p">(</span><span class="mi">5</span><span class="p">):</span>          <span class="mi">1</span><span class="o">/</span><span class="mi">5</span> <span class="o">*</span> <span class="n">U</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+  <span class="n">other</span> <span class="n">primes</span><span class="p">:</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">U</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">M</span>
+<span class="p">(</span>
+<span class="p">[</span><span class="mi">7501</span><span class="o">/</span><span class="mi">5</span> <span class="n">mod</span> <span class="mi">3000</span>    <span class="mi">750</span> <span class="n">mod</span> <span class="mi">6000</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">2625</span> <span class="n">mod</span> <span class="mi">3000</span> <span class="mi">9376</span><span class="o">/</span><span class="mi">5</span> <span class="n">mod</span> <span class="mi">3000</span><span class="p">],</span> <span class="mi">2</span><span class="o">/</span><span class="mi">25</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="modular.html"
+                        title="previous chapter">Modular Functions and their Action</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="hilbert.html"
+                        title="next chapter">Hilbert Class Field Computations</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/shimura.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="hilbert.html" title="Hilbert Class Field Computations"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="modular.html" title="Modular Functions and their Action"
+             >previous</a> |</li>
+  
+    
+      <a href="../index.html"><img src="_static/logo_sagemath_black.svg" height="28" style="vertical-align: middle" title="Sage Logo"></a>
+    
+  
+  
+        <li class="nav-item nav-item-0"><a href="index.html">Home</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Shimura Connecting Homomorphism</a></li> 
+      </ul>
+    </div>
+    
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Mathé Hertogh.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.1.2.
+    </div>
+    <script type="text/javascript">
+/*global jQuery, window */
+/* Sphinx sidebar toggle.  Putting this code at the end of the body
+ * enables the toggle for the live, static, and offline docs.  Note:
+ * sage.misc.html.math_parse() eats jQuery's dollar-sign shortcut. */
+var jq = jQuery;
+jq(document).ready(function () {
+    var bar, bod, bg, fg, key, tog, wid_old, wid_new, get_state, set_state;
+    bod = jq('div.bodywrapper');
+    bar = jq('div.sphinxsidebar');
+    tog = jq('<div class="sphinxsidebartoggle"></div>');
+
+    /* The sidebar toggle adapts its height to the bodywrapper height. */
+    const resizeObserver = new ResizeObserver(entries => {
+        tog.height(bod.height());
+    });
+    resizeObserver.observe(bod[0]);
+
+    /* Setup and add the toggle. See Sphinx v0.5.1 default.css. */
+    fg = jq('div.sphinxsidebar p a').css('color') || 'rgb(152, 219, 204)';
+    bg = jq('div.document').css('background-color') || 'rgb(28, 78, 99)';
+    wid_old = '230px';
+    wid_new = '5px';
+    tog.css('background-color', bg)
+        .css('border-width', '0px')
+        .css('border-right', wid_new + ' ridge ' + bg)
+        .css('cursor', 'pointer')
+        .css('position', 'absolute')
+        .css('left', '-' + wid_new)
+        .css('top', '0px')
+        .css('width', wid_new);
+    bod.css('position', 'relative');
+    bod.prepend(tog);
+
+    /* Cookie helpers. */
+    key = 'sphinxsidebar=';
+    set_state = function (s) {
+        var date = new Date();
+        /* Expiry in 7 days. */
+        date.setTime(date.getTime() + (7 * 24 * 3600 * 1000));
+        document.cookie = key + encodeURIComponent(s) + '; expires=' +
+            date.toUTCString() + '; path=/';
+    };
+    get_state = function () {
+        var i, c, crumbs = document.cookie.split(';');
+        for (i = 0; i < crumbs.length; i += 1) {
+            c = crumbs[i].replace(/^\s+/, '');
+            if (c.indexOf(key) === 0) {
+                return decodeURIComponent(c.substring(key.length, c.length));
+            }
+        }
+        return null;
+    };
+
+    /* Event handlers. */
+    tog.mouseover(function (ev) {
+        tog.css('border-right-color', fg);
+    }).mouseout(function (ev) {
+        tog.css('border-right-color', bg);
+    }).click(function (ev) {
+        if (bod.hasClass('wide')) {
+            bod.removeClass('wide');
+            bod.css('margin-left', wid_old);
+            bar.css('width', wid_old);
+            bar.show();
+            set_state('visible');
+        } else {
+            set_state('hidden');
+            bar.hide();
+            bar.css('width', '0px');
+            bod.css('margin-left', wid_new);
+            bod.addClass('wide');
+        }
+    });
+
+    /* Hide the normally visible sidebar? */
+    if (get_state() === 'hidden') {
+        tog.trigger('click');
+    } else {
+        set_state('visible');
+    }
+});
+    </script>
+  </body>
+</html>

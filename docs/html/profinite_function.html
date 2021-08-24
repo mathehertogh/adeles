@@ -1,0 +1,383 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profinite Functions &#8212; Computing with adèles and idèles</title>
+    <link rel="stylesheet" href="_static/sage.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="_static/MathJax.js?config=TeX-AMS_HTML-full,../mathjax_sage.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Profinite Graphs" href="profinite_graph.html" />
+    <link rel="prev" title="Ray Class Groups" href="ray_class_group.html" />
+    <link rel="icon" href="_static/sageicon.png" type="image/x-icon" />
+    <script src="_static/thebe.js" type="text/javascript"></script>
+    <script src="_static/thebe-sage.js" type="text/javascript"></script>
+
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="profinite_graph.html" title="Profinite Graphs"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ray_class_group.html" title="Ray Class Groups"
+             accesskey="P">previous</a> |</li>
+  
+    
+      <a href="../index.html"><img src="_static/logo_sagemath_black.svg" height="28" style="vertical-align: middle" title="Sage Logo"></a>
+    
+  
+  
+        <li class="nav-item nav-item-0"><a href="index.html">Home</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Profinite Functions</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-adeles.profinite_function">
+<span id="profinite-functions"></span><h1>Profinite Functions<a class="headerlink" href="#module-adeles.profinite_function" title="Permalink to this headline">¶</a></h1>
+<p>Profinite Functions</p>
+<p>This file describes an interface for implementations of profinite functions
+<span class="math notranslate nohighlight">\(\hat{\ZZ} \to \hat{\ZZ}\)</span> in the form of the abstract class
+<a class="reference internal" href="#adeles.profinite_function.ProfiniteFunction" title="adeles.profinite_function.ProfiniteFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProfiniteFunction</span></code></a>.</p>
+<p>It also implements a good example of such a profinite function, namely the
+Profinite Fibonacci function, in <a class="reference internal" href="#adeles.profinite_function.ProfiniteFibonacci" title="adeles.profinite_function.ProfiniteFibonacci"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProfiniteFibonacci</span></code></a>.</p>
+<p>REFERENCES:</p>
+<p>[Her2021] Mathé Hertogh, Computing with adèles and idèles, master’s thesis,
+Leiden University, 2021.</p>
+<p>These profinite functions, aspecially the profinite Fibonacci function, is
+introduced in Chapter 7 of [Her2021].</p>
+<p>AUTHORS:</p>
+<ul class="simple">
+<li><p>Mathé Hertogh (2021-7): initial version based on [Her2021]</p></li>
+</ul>
+<dl class="py class">
+<dt id="adeles.profinite_function.ProfiniteFibonacci">
+<em class="property">class </em><code class="sig-prename descclassname">adeles.profinite_function.</code><code class="sig-name descname">ProfiniteFibonacci</code><a class="headerlink" href="#adeles.profinite_function.ProfiniteFibonacci" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#adeles.profinite_function.ProfiniteFunction" title="adeles.profinite_function.ProfiniteFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">adeles.profinite_function.ProfiniteFunction</span></code></a></p>
+<p>The profinite Fibonacci function</p>
+<p>The Fibonacci function <span class="math notranslate nohighlight">\(F\)</span> is defined on the integers by <span class="math notranslate nohighlight">\(F(0)=0\)</span>, <span class="math notranslate nohighlight">\(F(1)=1\)</span>
+and <span class="math notranslate nohighlight">\(F(n) = F(n-1) + F(n-2)\)</span> for all integers  <span class="math notranslate nohighlight">\(n \in \ZZ\)</span>.
+There exists a unique continuous extension <span class="math notranslate nohighlight">\(F: \hat{\ZZ} \to \hat{\ZZ}\)</span> of
+the Fibonacci function, called the <em>profinite Fibonacci function</em>. This is
+an implementation of it.</p>
+<dl class="py method">
+<dt id="adeles.profinite_function.ProfiniteFibonacci.__call__">
+<code class="sig-name descname">__call__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">des_mod</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.profinite_function.ProfiniteFibonacci.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the <code class="docutils literal notranslate"><span class="pre">x</span></code>-th profinite Fibonacci number, for <code class="docutils literal notranslate"><span class="pre">x</span></code> a profinite
+integer</p>
+<p>We refer to <code class="xref py py-meth docutils literal notranslate"><span class="pre">ProfiniteFunction.__call__</span></code>
+for a description of the input and output.</p>
+<p>The modulus of the output will always be a divisor of <code class="docutils literal notranslate"><span class="pre">des_mod</span></code>, so we
+never compute up to a higher precision than the user asks for.</p>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">fibonacci</span> <span class="o">=</span> <span class="n">ProfiniteFibonacci</span><span class="p">()</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">fibonacci</span><span class="p">(</span><span class="n">Zhat</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="mi">2</span> <span class="n">mod</span> <span class="mi">11</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">fibonacci</span><span class="p">(</span><span class="n">Zhat</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">18</span><span class="p">))</span>
+<span class="mi">3</span> <span class="n">mod</span> <span class="mi">76</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">fibonacci</span><span class="p">(</span><span class="n">Zhat</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span>
+<span class="mi">5</span> <span class="n">mod</span> <span class="mi">12586269025</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">fibonacci</span><span class="p">(</span><span class="n">Zhat</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="mi">100</span><span class="p">)</span>
+<span class="mi">5</span> <span class="n">mod</span> <span class="mi">25</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">fibonacci</span><span class="p">(</span><span class="n">Zhat</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">10</span><span class="o">^</span><span class="mi">7</span><span class="p">),</span> <span class="mi">10</span><span class="o">^</span><span class="mi">10</span><span class="p">)</span>
+<span class="mi">8</span> <span class="n">mod</span> <span class="mi">78125</span>
+</pre></div>
+</div>
+<p>All computations above finish “instantly”. But if we remove the
+<code class="docutils literal notranslate"><span class="pre">des_mod=10^10</span></code> in the last example, the computation takes multiple
+seconds. See the warning below.</p>
+<p>ALGORITHM:</p>
+<p>Write <span class="math notranslate nohighlight">\(F\)</span> for the Fibonacci function <span class="math notranslate nohighlight">\(\ZZ \to \ZZ\)</span>. Let <span class="math notranslate nohighlight">\(m\)</span> be the
+modulus of <code class="docutils literal notranslate"><span class="pre">x</span></code>. Then the modulus of the output is computed as
+<span class="math notranslate nohighlight">\(\gcd(F(m), F(m+1)-1)\)</span>. The value of the output is computed as <span class="math notranslate nohighlight">\(F(v)\)</span>
+where <span class="math notranslate nohighlight">\(v\)</span> denotes the value of <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p>
+<p>These Fibonacci numbers in <span class="math notranslate nohighlight">\(\ZZ\)</span> are computed using the formula</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{pmatrix} 1 &amp; 1 \\ 1 &amp; 0 \end{pmatrix}^n
+=
+\begin{pmatrix} F(n+1) &amp; F(n) \\ F(n) &amp; F(n-1) \end{pmatrix}\end{split}\]</div>
+<p>The matrix exponentiation is done using a square-and-multiply method.
+For <span class="math notranslate nohighlight">\(F(m)\)</span> and <span class="math notranslate nohighlight">\(F(m+1)\)</span> we do this exponentiation in the ring of
+matrices over <span class="math notranslate nohighlight">\(\ZZ/\texttt{des_mod}\ZZ\)</span>; for <span class="math notranslate nohighlight">\(F(v)\)</span> over <span class="math notranslate nohighlight">\(\ZZ/N\ZZ\)</span>,
+where <span class="math notranslate nohighlight">\(N\)</span> denotes the output modulus.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Not specifying <code class="docutils literal notranslate"><span class="pre">des_mod</span></code>, or setting it to 0, requires the exact
+computation of <code class="docutils literal notranslate"><span class="pre">F(x.modulus())</span></code>, which may be huge (<span class="math notranslate nohighlight">\(F(m) \approx
+1.6^m\)</span>). Hence the computation with bounded desired modulus is
+significantly faster than for unbounded.</p>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>See the class <code class="xref py py-class docutils literal notranslate"><span class="pre">profinite_graph.ProfiniteGraph</span></code> for a
+visualization of the graph of this function.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="adeles.profinite_function.ProfiniteFunction">
+<em class="property">class </em><code class="sig-prename descclassname">adeles.profinite_function.</code><code class="sig-name descname">ProfiniteFunction</code><a class="headerlink" href="#adeles.profinite_function.ProfiniteFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Abstract class representing a function from and to the profinite integers</p>
+<p>An instance <span class="math notranslate nohighlight">\(P\)</span> of this class represents a function <span class="math notranslate nohighlight">\(F: \hat{\ZZ} \to
+\hat{\ZZ}\)</span> and should implement the abstract method <a class="reference internal" href="#adeles.profinite_function.ProfiniteFunction.__call__" title="adeles.profinite_function.ProfiniteFunction.__call__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__call__()</span></code></a> to
+evaluate this function in a point. For a profinite <span class="math notranslate nohighlight">\(\QQ\)</span>-integer <span class="math notranslate nohighlight">\(x\)</span> the
+call <span class="math notranslate nohighlight">\(P(x)\)</span> should return a profinite <span class="math notranslate nohighlight">\(\QQ\)</span>-inter and this evaluation must
+satisfy the following conditions:</p>
+<ol class="arabic simple">
+<li><p>for every profinite <span class="math notranslate nohighlight">\(\QQ\)</span>-integer <span class="math notranslate nohighlight">\(x\)</span> and for every <span class="math notranslate nohighlight">\(\alpha \in
+\hat{\ZZ}\)</span> that <span class="math notranslate nohighlight">\(x\)</span> represents, <span class="math notranslate nohighlight">\(F(\alpha)\)</span> is represented by <span class="math notranslate nohighlight">\(P(x)\)</span>;</p></li>
+<li><p>for every <span class="math notranslate nohighlight">\(k \in \ZZ_{&gt;0}\)</span> there exists <span class="math notranslate nohighlight">\(m \in \ZZ_{\geq k}\)</span> such
+that for all <span class="math notranslate nohighlight">\(n \in \ZZ_{\geq m}\)</span> and for all profintie <span class="math notranslate nohighlight">\(\QQ\)</span>-integers
+<span class="math notranslate nohighlight">\(x\)</span> of modulus divisible by <span class="math notranslate nohighlight">\(n!\)</span>, the modulus of <span class="math notranslate nohighlight">\(P(x)\)</span> is divisible by
+<span class="math notranslate nohighlight">\(k!\)</span>.</p></li>
+</ol>
+<p>Condition 1 ensures that the evaluation is “correct” and Condition 2 states
+that the profinite function can be evulated with “arbitrarily high
+precision”.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>See the class <code class="xref py py-class docutils literal notranslate"><span class="pre">profinite_graph.ProfiniteGraph</span></code> for visualizations
+of the graphs of profinite functions.</p>
+</div>
+<dl class="py method">
+<dt id="adeles.profinite_function.ProfiniteFunction.__call__">
+<code class="sig-name descname">__call__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adeles.profinite_function.ProfiniteFunction.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate this function in <code class="docutils literal notranslate"><span class="pre">x</span></code></p>
+<p>This is an abstract method that should be implemented by subclasses.</p>
+<p>The evulation should always satisfy Condition 1 stated in the docstring
+of the class <a class="reference internal" href="#adeles.profinite_function.ProfiniteFunction" title="adeles.profinite_function.ProfiniteFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProfiniteFunction</span></code></a>.
+For <code class="docutils literal notranslate"><span class="pre">des_mod</span> <span class="pre">==</span> <span class="pre">0</span></code> it should also satisfy Condition 2.</p>
+<p>INPUT:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">x</span></code> – profinite <span class="math notranslate nohighlight">\(\QQ\)</span>-integer; point to evaluate this profinite
+function in</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">des_mod</span></code> – integer (default: <span class="math notranslate nohighlight">\(0\)</span>); the desired modulus of
+the output. Set to 0 for “as high as possible”.</p></li>
+</ul>
+<p>OUTPUT:</p>
+<p>The profinite integer <code class="docutils literal notranslate"><span class="pre">self(x)</span></code>. If <code class="docutils literal notranslate"><span class="pre">des_mod</span></code> is set to a non-zero
+value, then this function returns the profinite integer
+<code class="docutils literal notranslate"><span class="pre">self(x)</span> <span class="pre">+</span> <span class="pre">Zhat(0,</span> <span class="pre">m)</span></code> for some multiple <span class="math notranslate nohighlight">\(m\)</span> of <code class="docutils literal notranslate"><span class="pre">des_mod</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">des_mod</span></code> option can be used by implementers of profinite
+functions to speed up the evaluation: the user can specify a 
+precision up to which he/she is interested in the result. If this
+desired output precision is much lower than the maximal precision
+(returend for <code class="docutils literal notranslate"><span class="pre">des_mod</span> <span class="pre">==</span> <span class="pre">0</span></code>), the evaluation of the profinite
+function may be much faster. For a good example of such a situation,
+see <a class="reference internal" href="#adeles.profinite_function.ProfiniteFibonacci" title="adeles.profinite_function.ProfiniteFibonacci"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProfiniteFibonacci</span></code></a>.</p>
+</div>
+<p>EXAMPLES:</p>
+<p>We create a profinite function implementing the constant zero map
+<span class="math notranslate nohighlight">\(\hat{\ZZ} \to \hat{\ZZ}, x \mapsto 0\)</span>. We only return zero modulo the
+desired modulus, although we know the result is exactly zero:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="k">class</span> <span class="nc">ConstantZero</span><span class="p">(</span><span class="n">ProfiniteFunction</span><span class="p">):</span>
+<span class="o">....</span><span class="p">:</span>     <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">des_mod</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="o">....</span><span class="p">:</span>         <span class="k">return</span> <span class="n">Zhat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">des_mod</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">zero</span> <span class="o">=</span> <span class="n">ConstantZero</span><span class="p">()</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">zero</span><span class="p">(</span><span class="n">Zhat</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">20</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+<span class="mi">0</span> <span class="n">mod</span> <span class="mi">0</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">zero</span><span class="p">(</span><span class="n">Zhat</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">20</span><span class="p">),</span> <span class="mi">30</span><span class="p">)</span>
+<span class="mi">0</span> <span class="n">mod</span> <span class="mi">30</span>
+</pre></div>
+</div>
+<p>Next we create a profinite function implementing the squaring map
+<span class="math notranslate nohighlight">\(\hat{\ZZ} \to \hat{\ZZ}, x \mapsto x^2\)</span>. This time we simply ignore
+the desired input modulus given by the user.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="k">class</span> <span class="nc">Square</span><span class="p">(</span><span class="n">ProfiniteFunction</span><span class="p">):</span>
+<span class="o">....</span><span class="p">:</span>     <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">des_mod</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="o">....</span><span class="p">:</span>         <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">square</span> <span class="o">=</span> <span class="n">Square</span><span class="p">()</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">square</span><span class="p">(</span><span class="n">Zhat</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+<span class="mi">4</span> <span class="n">mod</span> <span class="mi">40</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">square</span><span class="p">(</span><span class="n">Zhat</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span> <span class="mi">15</span><span class="p">)</span>
+<span class="mi">4</span> <span class="n">mod</span> <span class="mi">40</span>
+</pre></div>
+</div>
+<p>In the last example, <code class="docutils literal notranslate"><span class="pre">4</span> <span class="pre">mod</span> <span class="pre">5</span></code> would also have been an acceptable
+answer, since <code class="docutils literal notranslate"><span class="pre">gcd(40,</span> <span class="pre">15)=5</span></code>. But instead, we choose to return an
+answer with strictly more precision: the multiple 40 of 5.</p>
+<p>For a good “real world” example, take a look at the
+<a class="reference internal" href="#adeles.profinite_function.ProfiniteFibonacci" title="adeles.profinite_function.ProfiniteFibonacci"><code class="xref py py-class docutils literal notranslate"><span class="pre">profinite</span> <span class="pre">Fibonacci</span> <span class="pre">function</span></code></a>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="ray_class_group.html"
+                        title="previous chapter">Ray Class Groups</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="profinite_graph.html"
+                        title="next chapter">Profinite Graphs</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/profinite_function.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="profinite_graph.html" title="Profinite Graphs"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="ray_class_group.html" title="Ray Class Groups"
+             >previous</a> |</li>
+  
+    
+      <a href="../index.html"><img src="_static/logo_sagemath_black.svg" height="28" style="vertical-align: middle" title="Sage Logo"></a>
+    
+  
+  
+        <li class="nav-item nav-item-0"><a href="index.html">Home</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Profinite Functions</a></li> 
+      </ul>
+    </div>
+    
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Mathé Hertogh.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.1.2.
+    </div>
+    <script type="text/javascript">
+/*global jQuery, window */
+/* Sphinx sidebar toggle.  Putting this code at the end of the body
+ * enables the toggle for the live, static, and offline docs.  Note:
+ * sage.misc.html.math_parse() eats jQuery's dollar-sign shortcut. */
+var jq = jQuery;
+jq(document).ready(function () {
+    var bar, bod, bg, fg, key, tog, wid_old, wid_new, get_state, set_state;
+    bod = jq('div.bodywrapper');
+    bar = jq('div.sphinxsidebar');
+    tog = jq('<div class="sphinxsidebartoggle"></div>');
+
+    /* The sidebar toggle adapts its height to the bodywrapper height. */
+    const resizeObserver = new ResizeObserver(entries => {
+        tog.height(bod.height());
+    });
+    resizeObserver.observe(bod[0]);
+
+    /* Setup and add the toggle. See Sphinx v0.5.1 default.css. */
+    fg = jq('div.sphinxsidebar p a').css('color') || 'rgb(152, 219, 204)';
+    bg = jq('div.document').css('background-color') || 'rgb(28, 78, 99)';
+    wid_old = '230px';
+    wid_new = '5px';
+    tog.css('background-color', bg)
+        .css('border-width', '0px')
+        .css('border-right', wid_new + ' ridge ' + bg)
+        .css('cursor', 'pointer')
+        .css('position', 'absolute')
+        .css('left', '-' + wid_new)
+        .css('top', '0px')
+        .css('width', wid_new);
+    bod.css('position', 'relative');
+    bod.prepend(tog);
+
+    /* Cookie helpers. */
+    key = 'sphinxsidebar=';
+    set_state = function (s) {
+        var date = new Date();
+        /* Expiry in 7 days. */
+        date.setTime(date.getTime() + (7 * 24 * 3600 * 1000));
+        document.cookie = key + encodeURIComponent(s) + '; expires=' +
+            date.toUTCString() + '; path=/';
+    };
+    get_state = function () {
+        var i, c, crumbs = document.cookie.split(';');
+        for (i = 0; i < crumbs.length; i += 1) {
+            c = crumbs[i].replace(/^\s+/, '');
+            if (c.indexOf(key) === 0) {
+                return decodeURIComponent(c.substring(key.length, c.length));
+            }
+        }
+        return null;
+    };
+
+    /* Event handlers. */
+    tog.mouseover(function (ev) {
+        tog.css('border-right-color', fg);
+    }).mouseout(function (ev) {
+        tog.css('border-right-color', bg);
+    }).click(function (ev) {
+        if (bod.hasClass('wide')) {
+            bod.removeClass('wide');
+            bod.css('margin-left', wid_old);
+            bar.css('width', wid_old);
+            bar.show();
+            set_state('visible');
+        } else {
+            set_state('hidden');
+            bar.hide();
+            bar.css('width', '0px');
+            bod.css('margin-left', wid_new);
+            bod.addClass('wide');
+        }
+    });
+
+    /* Hide the normally visible sidebar? */
+    if (get_state() === 'hidden') {
+        tog.trigger('click');
+    } else {
+        set_state('visible');
+    }
+});
+    </script>
+  </body>
+</html>
