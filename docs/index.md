@@ -1,6 +1,10 @@
 <html>
-  <head></head>
+  <head>
+    <script>
+      window.location.href = '/html';
+    </script>
+  </head>
   <body>
-    <h1>hallo</h1>
+    <h1>Redirecting to the documentation...</h1>
   </body>
 </html>
