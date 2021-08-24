@@ -14,7 +14,7 @@ install:
 	sage -pip install --upgrade .
 
 docs:
-	sage -sh -c "sphinx-build -b html docs/src docs/html"
+	sage -sh -c "sphinx-build -b html docs/src docs"
 
 clean:
 	rm -rf docs/html
