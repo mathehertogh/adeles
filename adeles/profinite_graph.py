@@ -586,7 +586,12 @@ class ProfiniteGraph:
         self.canvas.configure(background="white")
         self.canvas.pack()
         self.canvas.bind("<Button-1>", self._zoom_in) # left mouse click
-        self.canvas.bind("<Button-3>", self._zoom_out) # right mouse click
+        # According to the documentation of tkinter, Button-2 is the middle
+        # (wheel) mouse button and Button-3 is the right mouse button. But on
+        # some MacBooks these names seem to be swichted. Hence we just register
+        # zooming out for both Button-2 and Button-3.
+        self.canvas.bind("<Button-2>", self._zoom_out)
+        self.canvas.bind("<Button-3>", self._zoom_out)
         self.canvas.bind("<Motion>", self._update_highlight) # mouse movement
 
 
