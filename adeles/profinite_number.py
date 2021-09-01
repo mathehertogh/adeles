@@ -971,7 +971,7 @@ class ProfiniteNumbers(UniqueRepresentation, CommutativeAlgebra):
             sage: Khat(a)
             a
         
-        Now we construct some profinite numbers by numerator/denominator paris::
+        Now we construct some profinite numbers by numerator/denominator pairs::
 
             sage: Qhat(Zhat(1, 10), 2)
             1/2 mod 5
@@ -984,6 +984,15 @@ class ProfiniteNumbers(UniqueRepresentation, CommutativeAlgebra):
             1/2*a mod (3)
             sage: Khat(Ohat(2, 4*a))
             2 mod (4*a)
+
+        For `L/K` a field extensions, profinite `K`-numbers can be converted to
+        profinite `L`-numbers::
+
+            sage: R.<t> = K[]
+            sage: L.<b> = K.extension(t^2-a)
+            sage: Lhat = ProfiniteNumbers(L)
+            sage: Lhat(Khat(1/2*a, 10))
+            1/2*a mod (10)
 
         Lastly, we can also give a list of `p`-adic numbers to ``Qhat``::
 
@@ -1010,6 +1019,13 @@ class ProfiniteNumbers(UniqueRepresentation, CommutativeAlgebra):
         K = self.base()
         O = K.maximal_order()
         Ohat = ProfiniteIntegers(K)
+
+        if y is None:
+            P = x.parent() if hasattr(x, "parent") else None
+
+            # Check if x is a profinite K-number for some subfield of K:
+            if isinstance(P, ProfiniteNumbers) and K.has_coerce_map_from(P.number_field()):
+                return self.element_class(self, x.numerator(), x.denominator())
 
         if x in K:
             value = K(x)

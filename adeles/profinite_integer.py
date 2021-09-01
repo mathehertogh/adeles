@@ -280,7 +280,8 @@ class ProfiniteInteger(CommutativeAlgebraElement):
         CommutativeAlgebraElement.__init__(self, parent)
         O = parent.base()
         K = parent.number_field()
-        if value not in O:
+        # if value not in O:
+        if value not in K or not K(value).is_integral():
             raise TypeError("value must be an element of {}".format(O))
         self._value = O(value)
         if O is ZZ:
@@ -1408,7 +1409,7 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
         """
         if self.base().has_coerce_map_from(S):
             return True
-        if isinstance(S, ProfiniteIntegers) and self.base().has_coerce_map_from(S.base()):
+        if isinstance(S, ProfiniteIntegers) and self.number_field().has_coerce_map_from(S.number_field()):
             return True
         from sage.rings.quotient_ring import is_QuotientRing
         if is_QuotientRing(S) and S.ambient() in [self.base(), self.number_field()]:
