@@ -506,7 +506,7 @@ class ProfiniteInteger(CommutativeAlgebraElement):
                 sage: a * a
                 1 mod 2
                 sage: a^2 # not tested
-                1 mod 4
+                1 mod 8
         """
         # We seperate the zero-modulus case because multiplying a non-principal
         # ideal with the zero-ideal is not implemented in Sage.
@@ -557,6 +557,7 @@ class ProfiniteInteger(CommutativeAlgebraElement):
             raise ValueError("division by profinite integer with non-zero modulus")
         if other.value() == 0:
             raise ZeroDivisionError("profinite integer division by zero")
+        from .profinite_number import ProfiniteNumbers
         Khat = ProfiniteNumbers(self.parent().number_field())
         return Khat(self, other.value())
 
