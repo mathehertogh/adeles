@@ -948,7 +948,7 @@ class ProfiniteNumbers(UniqueRepresentation, CommutativeAlgebra):
           (default: ``1``); the denominator
 
         If the base number field is `\QQ`, then we also accept a list of
-        `p`-adic number, for distinct prime number `p`.
+        `p`-adic numbers, for distinct prime numbers `p`.
         See :meth:`_from_padic_numbers` for details.
 
         EXAMPLES:
