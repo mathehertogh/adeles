@@ -186,9 +186,9 @@ def is_finite_prime(p, K):
 
     TESTS::
 
-        sage: is_finite_prime("blah", QQ) # 11 is inert
+        sage: is_finite_prime("blah", QQ)
         False
-        sage: is_finite_prime([], K) # 11 is inert
+        sage: is_finite_prime([], K)
         False
     """
     if K is QQ:
