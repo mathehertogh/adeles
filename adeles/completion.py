@@ -1,9 +1,15 @@
-"""
+r"""
 Infinite Completions of Number Fields
 
-This file implements the functionality that `K.places()` claims to provide (for
-`K` a number field), but does not provide, in the function
-:func:`infinite_completions`.
+This file implements the function ``infinite_completions()``, which computes the
+infinite completions of a number field `K`, i.e. the real embeddings `K \to \RR`
+and the pairs of complex embeddings `K \to \CC`.
+The domains of the embeddings we return are interval fields (``RIF`` and
+``CIF``). As `trac-ticket #31604 <https://trac.sagemath.org/ticket/31604>`_
+describes, the method ``K.places()`` of number fields claims to provide
+embeddings into interval fields in its documentation, but the code does not
+actually do this. As this ticket is not yet resolved in SageMath version 9.2,
+we use the function below instead for our adèles and idèles.
 
 AUTHORS:
 
