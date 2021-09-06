@@ -2,8 +2,14 @@
 r"""
 Class Groups of Number Fields
 
-Sage can compute class groups, ray class groups, and `S`-class groups of number
-fields, and does so by wrapping the functionality from the PARI C-library. Some
+`Trac-ticket #15829 <https://trac.sagemath.org/ticket/15829>`_ adds (among other
+things) ray class groups to SageMath. The ticket is not yet finished and
+included into SageMath. It does already contain this file, from Robbert Harron,
+implementing ray class groups in SageMath. We use this file to have ray class
+groups functionality available for our adèles and idèles package.
+
+We can compute class groups, ray class groups, and `S`-class groups of number
+fields, and we do so by wrapping the functionality from the PARI C-library. Some
 of what can be computed includes the group structure, representative ideals, the
 class of a given ideal, generators of the group, and products of elements. This
 file also implements moduli of number fields.
