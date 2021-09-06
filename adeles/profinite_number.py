@@ -985,7 +985,7 @@ class ProfiniteNumbers(UniqueRepresentation, CommutativeAlgebra):
             sage: Khat(Ohat(2, 4*a))
             2 mod (4*a)
 
-        For `L/K` a field extensions, profinite `K`-numbers can be converted to
+        For `L/K` a field extension, profinite `K`-numbers can be converted to
         profinite `L`-numbers::
 
             sage: R.<t> = K[]
