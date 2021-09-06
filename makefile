@@ -17,5 +17,12 @@ docs:
 	sage -sh -c "sphinx-build -b html docs/src docs"
 
 clean:
-	rm -rf docs/html
+	rm -f docs/*.html
+	rm -f docs/searchindex.js
+	rm -f docs/objects.inv
+	rm -f docs/.buildinfo
+	rm -rf docs/_static
+	rm -rf docs/_images
+	rm -rf docs/_sources
+	rm -rf docs/.doctrees
 
