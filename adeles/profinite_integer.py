@@ -132,13 +132,13 @@ of ``ProfiniteInteger``, as opposed to element of `\hat{O}`.
 .. SEEALSO::
 
     To see an application of these profinite integers, see for example
-    :class:`profinite_graph.ProfiniteGraph`. There a graph of the profinite
-    Fibonacci function `\hat{\ZZ} \to \hat{\ZZ}` is created using these
-    profinite integers.
+    :class:`~adeles.profinite_graph.ProfiniteGraph`. There a graph of the
+    profinite Fibonacci function `\hat{\ZZ} \to \hat{\ZZ}` is created using
+    these profinite integers.
 
 .. SEEALSO::
 
-    :mod:`profinite_number`
+    :mod:`~adeles.profinite_number`
 
 .. NOTE::
 
@@ -1125,8 +1125,8 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
         accepted, namely:
 
         - a factorial digit list, i.e. a list of non-negative integers such that
-          the `i`-th entry is at most `i+1`
-          (see :meth:`factorial_digits <ProfiniteInteger.factorial_digits>`).
+          the `i`-th entry is at most `i+1` (see
+          :meth:`~adeles.profinite_integer.ProfiniteInteger.factorial_digits`).
         - a `p`-adic integer, for some prime number `p`
         - a list of `p`-adic integers for distinct prime numbers `p`
 
@@ -1369,7 +1369,7 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
         This is the ``ProfiniteInteger`` with smallest represented subset such
         that the start of the factorial digit sequence of each profinite integer
         it represents is given by ``digits`` (cf.
-        :meth:`factorial_digits <ProfiniteInteger.factorial_digits`).
+        :meth:`~adeles.profinite_integer.ProfiniteInteger.factorial_digits`).
 
         EXAMPLES::
 

@@ -265,6 +265,10 @@ def _integer_n_tuple_L1_iterator(n):
 
 
 class Modulus(SageObject):
+    """
+    Modulus of a number field
+    """
+
     def __init__(self, finite, infinite=None, check=True):
         r"""
         Create a modulus of a number field.
@@ -568,6 +572,9 @@ class Modulus(SageObject):
         return hash((self._finite, self._infinite))
 
 class RayClassGroupElement(AbelianGroupElement):
+    """
+    Element of a ray class group
+    """
 
     def ideal(self, reduce=True):
         """
@@ -636,6 +643,10 @@ class RayClassGroupElement(AbelianGroupElement):
         return I
 
 class RayClassGroup(AbelianGroup_class):
+    """
+    Ray class group of a number field
+    """
+
     Element = RayClassGroupElement
 
     def __init__(self, gens_orders, names, modulus, gens, bnr, proof=True):
@@ -711,19 +722,20 @@ class RayClassGroup(AbelianGroup_class):
 
     def ray_class_field(self, subgroup=None, names=None, algorithm='stark'):
         r"""
-        Two different algorithms are possible: pari's :pari:`bnrstark` and
-        :pari:`rnfkummer`. The first one uses the Stark conjecture and only
-        deals with totally real extensions of a totally real base
-        field. The second one uses Kummer theory and only deals with
-        extensions of prime degree.
+        Two different algorithms are possible: pari's
+        `bnrstark <https://pari.math.u-bordeaux.fr/dochtml/html/General_number_fields.html#se:bnrstark>`_ and
+        `rnfkummer <https://pari.math.u-bordeaux.fr/dochtml/html/General_number_fields.html#se:rnfkummer>`_.
+        The first one uses the Stark conjecture and only deals with totally real
+        extensions of a totally real base field. The second one uses Kummer
+        theory and only deals with extensions of prime degree.
 
         INPUT:
 
         - algorithm -- (default: ``stark``) if the value is ``stark``,
-          then pari's :pari:`bnrstark` function is tried first, and if that
-          fails, :pari:`rnfkummer` will be attempted. If the value is
-          ``kummer``, then pari's :pari:`rnfkummer` is tried first, with
-          :pari:`bnrstark` as a backup. Using ``stark_only`` or ``kummer_only``
+          then pari's ``bnrstark`` function is tried first, and if that
+          fails, ``rnfkummer`` will be attempted. If the value is
+          ``kummer``, then pari's ``rnfkummer`` is tried first, with
+          ``bnrstark`` as a backup. Using ``stark_only`` or ``kummer_only``
           will just raise an exception if the first attempt fails.
 
         OUTPUT:
@@ -750,7 +762,7 @@ class RayClassGroup(AbelianGroup_class):
             sage: R.ray_class_field(S, names='b')
             Number Field in b with defining polynomial x^2 + (a - 1)*x + 2*a - 4 over its base field
 
-        An example where :pari:`bnrstark` fails, but :pari:`rnfkummer` saves the day::
+        An example where pari's ``bnrstark`` fails, but ``rnfkummer`` saves the day::
 
             sage: F.<a> = NumberField(x^8 - 12*x^6 + 36*x^4 - 36*x^2 + 9)
             sage: m = F.ideal(2).modulus()

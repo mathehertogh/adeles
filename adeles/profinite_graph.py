@@ -2,16 +2,17 @@ r"""
 Profinite Graph
 
 Let `F: \hat{\ZZ} \to \hat{\ZZ}` be a function and let `P` be a
-:class:`profinite_function.ProfiniteFunction` implementing `F`. This file
-implements interactive profinite graphs in the class :class:`ProfiniteGraph`:
-a user can view arbitrarily high precision approximations of the graph
-`\{(x, F(x)) \mid x \in \hat{\ZZ}\}` of `F` by zooming in and out.
+:class:`~adeles.profinite_function.ProfiniteFunction` implementing `F`. This
+file implements interactive profinite graphs in the class
+:class:`ProfiniteGraph`: a user can view arbitrarily high precision
+approximations of the graph `\{(x, F(x)) \mid x \in \hat{\ZZ}\}` of `F` by
+zooming in and out.
 
 The idea of these kind of profinite graphs is taken from the paper [Len2005]
 (see below), which contains an image of such a graph for the :class:`profinite
 Fibonacci function <adeles.profinite_function.ProfiniteFibonacci>`.
 
-We use the class :class:`profinite_integer.ProfiniteIntegers` as our
+We use the class :class:`~adeles.profinite_integer.ProfiniteIntegers` as our
 implementation of `\hat{\ZZ}` and by a profinite integer we shall mean an
 instance of ``Zhat``, i.e. ``ProfiniteIntegers(QQ)``. Also by ``3 mod 6`` we
 shall mean the profinite integer ``Zhat(3, 6)``.
@@ -128,19 +129,20 @@ class ProfiniteGraph:
     r"""
     Interactive graph of a function from and to profinite integers
     
-    Every :class:`profinite_function.ProfiniteFunction` can be graphed, as well
-    as callables that behave like such profinite functions (see below for
-    examples).
+    Every :class:`~adeles.profinite_function.ProfiniteFunction` can be graphed,
+    as well as callables that behave like such profinite functions (see below
+    for examples).
 
     The graph allows the user to zoom in (and back out) to arbitrary high
     precisions. Left-click on an area in the graph to zoom into that area.
     Right-click anywhere on the graph to zoom out.
 
     The profinite integers are drawn based on the
-    :meth:`profinite_integer.ProfiniteInteger.visual` method of profinite
-    integers. So `\hat{\ZZ} \times \hat{\ZZ}` is identified with the unit square
-    `[0,1] \times [0,1]` and a pair of profinite integers (``x mod m``, ``y mod
-    n``) is identified with a rectangle `[a,b] \times [c,d]` in the unit square.
+    :meth:`~adeles.profinite_integer.ProfiniteInteger.visual` method of
+    profinite integers. So `\hat{\ZZ} \times \hat{\ZZ}` is identified with the
+    unit square `[0,1] \times [0,1]` and a pair of profinite integers
+    (``x mod m``, ``y mod n``) is identified with a rectangle `[a,b] \times
+    [c,d]` in the unit square.
 
     The idea of this kind of graph is taken from the paper "Profinite Fibonacci
     numbers" by Hendrik Lenstra, cf. [Len2005]. Some default settings such as
@@ -199,7 +201,7 @@ class ProfiniteGraph:
     mapped to ``2 mod 120`` and that ``27 mod 120`` is mapped to ``98 mod 120``.
     But a user can also zoom in again to see this more clearly of course.
 
-    Any profinite function (cf. :class:`profinite_function.ProfiniteFunction`)
+    Any :class:`~adeles.profinite_function.ProfiniteFunction`
     can be graphed. We can even graph any callable that behaves like a
     profinite function. Here is an example of how to produce a graph of the
     square function `\hat{\ZZ} \to \hat{\ZZ}, x \mapsto x^2`::
@@ -258,9 +260,8 @@ class ProfiniteGraph:
 
         INPUT:
 
-        - ``function`` -- a profinite function (cf.
-          :class:`profinite_function.ProfiniteFunction`), or a callable that
-          behaves like a profinite function.
+        - ``function`` -- a :class:`~adeles.profinite_function.ProfiniteFunction`,
+          or a callable that behaves like a profinite function.
 
 
         EXAMPLES::
@@ -270,7 +271,7 @@ class ProfiniteGraph:
 
         An example where we pass in a callable behaving like a profinite
         function, which is not an instance of
-        :class:`profinite_function.ProfiniteFunction`. ::
+        :class:`~adeles.profinite_function.ProfiniteFunction`. ::
 
             sage: cube_graph = ProfiniteGraph(lambda x, des_mod: x*x*x)
 

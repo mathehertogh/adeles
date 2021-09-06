@@ -115,7 +115,7 @@ multiplicative `p`-adic in the following sense: for every neighborhood `U` of
 
 .. SEEALSO::
 
-    :mod:`idele`
+    :mod:`~adeles.idele`
 
 REFERENCES:
 
@@ -162,7 +162,8 @@ def is_finite_prime(p, K):
 
     INPUT:
 
-    - ``p`` -- any object; ``p`` will be checked to see if its a finite prime
+    - ``p`` -- any object; ``p`` will be checked to see if it is a finite prime
+      of ``K``
     - ``K`` -- a number field
 
     EXAMPLES::

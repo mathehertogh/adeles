@@ -176,9 +176,9 @@ The above conversion defines a coercion and hence we can do::
 
 .. SEEALSO::
 
-    :mod:`profinite_number`,
-    :mod:`multiplicative_padic`,
-    :mod:`idele`
+    :mod:`~adeles.profinite_number`,
+    :mod:`~adeles.multiplicative_padic`,
+    :mod:`~adeles.idele`
 
 REFERENCES:
 
@@ -683,7 +683,7 @@ class Adele(CommutativeAlgebraElement):
 
         .. SEEALSO::
 
-            :meth:`profinite_number.ProfiniteNumber.to_profinite_rational_vector`
+            :meth:`~adeles.profinite_number.ProfiniteNumber.to_profinite_rational_vector`
         """
         from sage.modules.free_module_element import vector
         from sage.matrix.constructor import matrix
@@ -1028,8 +1028,9 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
 
         The `\QQ`-adèle with infinite part equal to the real number in the list,
         if it exists, or `\RR` otherwise, and with finite part given by
-        :meth:`profinite_number.ProfiniteNumbers._from_padic_numbers`, which we
-        give as input ``padics`` with the optional real number removed.
+        :meth:`~adeles.profinite_number.ProfiniteNumbers._from_padic_numbers`,
+        to which we give as input ``padics`` with the optional real number
+        removed.
 
         EXAMPLES::
 

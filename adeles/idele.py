@@ -203,8 +203,8 @@ finite represented subset contains `\alpha` and is contained in `U`.
 
 .. SEEALSO::
 
-    :mod:`multiplicative_padic`,
-    :mod:`adele`
+    :mod:`~adeles.multiplicative_padic`,
+    :mod:`~adeles.adele`
 
 REFERENCES:
 
@@ -279,8 +279,8 @@ class Idele(MultiplicativeGroupElement):
           ``RIF``/``CIF``.
         - ``finite`` -- a non-zero element of `K` or a dictionary with keys
           finite primes of `K` (as specified by
-          :func:`multiplicative_padics.is_finite_prime`) such that the value at
-          `p` is (data to construct) a multiplicative `p`-adic.
+          :func:`~adeles.multiplicative_padic.is_finite_prime`) such that the
+          value at `p` is (data to construct) a multiplicative `p`-adic.
 
         EXAMPLES:
 
@@ -351,7 +351,7 @@ class Idele(MultiplicativeGroupElement):
         - ``prime`` - a prime of our base number field `K`, which can be:
 
           - a finite prime of `K`, as specified by
-            :func:`multiplicative_padic.is_finite_prime`;
+            :func:`~adeles.multiplicative_padic.is_finite_prime`;
           - an infinite prime of `K` in the form of a pair ``(Infinity, i)``
             where ``i`` is a non-negative integer specifying the index of the
             infinite prime;
@@ -735,8 +735,8 @@ class Idele(MultiplicativeGroupElement):
 
         Our finite part should be an non-zero element of our base number field
         `K`, or a dictionary with finite primes of `K` (cf.
-        :func:`multiplicative_padic.is_finite_prime`) as keys and with value at
-        `p` a multiplicative `p`-adic.
+        :func:`~adeles.multiplicative_padic.is_finite_prime`) as keys and with
+        value at `p` a multiplicative `p`-adic.
 
         If the data can be converted to the correct type/parent, then we do
         that. If this is not possible, we raise an exception.
@@ -919,7 +919,7 @@ class Idele(MultiplicativeGroupElement):
         INPUT:
 
         - ``prime`` -- a finite prime of our base number field, as described by
-          :func:`multiplicative_padic.is_finite_prime`
+          :func:`~adeles.multiplicative_padic.is_finite_prime`
 
         EXAMPLES::
 
@@ -1220,7 +1220,7 @@ class Idele(MultiplicativeGroupElement):
 
         INPUT:
 
-        - ``modulus`` -- a :class:`Modulus` of `K`
+        - ``modulus`` -- a :class:`~adeles.ray_class_group.Modulus` of `K`
 
         .. WARNING::
 
@@ -1277,7 +1277,7 @@ class Idele(MultiplicativeGroupElement):
         on `v`.
         For Step 2 we use the number field version of the Chinese Remainder
         Theorem (cf. :func:`solve_CRT`). For Step 3 we use
-        :meth:`ray_class_group.Modulus.get_one_mod_star_finite_with_fixed_signs`.
+        :meth:`~adeles.ray_class_group.Modulus.get_one_mod_star_finite_with_fixed_signs`.
 
         Once we have such a `v`, we return the image of the ideal
         `\prod_{p} p^{ord_p(v)}` in ``G``, where `p` ranges over the stored
@@ -1445,9 +1445,9 @@ class Ideles(UniqueRepresentation, Group):
           ``RIF`` and whose last `s` values lie in ``CIF``; the infinite part
         - ``finite`` -- either a non-zero element of `K` or a dictionary with
           keys finite primes of `K` (cf.
-          :func:`multiplicative_padic.is_finite_prime`) such that the value at
-          a finite prime `p` is (data to construct) a multiplicative `p`-adic;
-          the finite part.
+          :func:`~adeles.multiplicative_padic.is_finite_prime`) such that the
+          value at a finite prime `p` is (data to construct) a multiplicative
+          `p`-adic; the finite part.
 
         One can also give one of the following objects:
 

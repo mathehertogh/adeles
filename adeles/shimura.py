@@ -14,7 +14,7 @@ This file implements Shimura's connecting homomorphism in the function
 Moreover the function :func:`factored_shimura_connecting_homomorphism`
 evaluations Shimura's connecting homomorphism and factors the resulting
 `GL_2(\hat{\QQ})`-matrix into a product of a matrix `B \in GL_2(\hat{\ZZ})` and
-a matrix `A \in GL_2^+(\QQ)`, using :func:`matrix.factor_GLQhat`.
+a matrix `A \in GL_2^+(\QQ)`, using :func:`~adeles.matrix.factor_GLQhat`.
 
 REFERENCES:
 

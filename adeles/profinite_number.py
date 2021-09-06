@@ -2,17 +2,17 @@ r"""
 Profinite Numbers of Number Fields
 
 Let `K` be a number field with ring of integers `O`. Let `\hat{O}` be the ring
-of profinite `K`-integers (cf. :mod:`profinite_integer`). The ring of profinite
-`K`-numbers `\hat{K}` is the ring of fractions of `\hat{O}` with respect to
-`\ZZ \setminus \{0\}`. So a profinite `K`-integer is a fraction `a/b` with
-`a \in \hat{O}` and `b \in \ZZ \setminus \{0\}`. With
+of profinite `K`-integers (cf. :mod:`~adeles.profinite_integer`). The ring of
+profinite `K`-numbers `\hat{K}` is the ring of fractions of `\hat{O}` with
+respect to `\ZZ \setminus \{0\}`. So a profinite `K`-integer is a fraction `a/b`
+with `a \in \hat{O}` and `b \in \ZZ \setminus \{0\}`. With
 `\{n\hat{\ZZ} \mid n \in \ZZ_{>0}\}` as a basis of open neighborhoods of zero,
 `\hat{K}` is a topological ring. It is also a commutative `K`-algebra.
 
 In SageMath profinite numbers are implemented in the class
 :class:`ProfiniteNumber` as a pair `a = (n, d)` where `n` is a
-:class:`profinite_integer.ProfiniteInteger`, called the *numerator*, and `d` is
-a positive integer, called the *denominator*.
+:class:`~adeles.profinite_integer.ProfiniteInteger`, called the *numerator*, and
+`d` is a positive integer, called the *denominator*.
 We define the *represented subset* of `a` to be the represented subset of `n`
 divided by `d`, so an `\alpha \in \hat{K}` is represented by `a` if and only if
 `d \cdot \alpha` is represented by `n`.
@@ -180,8 +180,8 @@ Profinite `K`-integers coerce to profinite `K`-numbers with denominator `1`::
 
 .. SEEALSO::
 
-    :mod:`profinite_integer`,
-    :mod:`adele`
+    :mod:`~adeles.profinite_integer`,
+    :mod:`~adeles.adele`
 
 REFERENCES:
 

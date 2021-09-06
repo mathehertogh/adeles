@@ -64,8 +64,8 @@ class ProfiniteFunction:
         
     .. SEEALSO::
         
-        See the class :class:`profinite_graph.ProfiniteGraph` for visualizations
-        of the graphs of profinite functions.
+        See the class :class:`~adeles.profinite_graph.ProfiniteGraph` for
+        visualizations of the graphs of profinite functions.
 
     .. automethod:: __call__
     """
@@ -159,8 +159,8 @@ class ProfiniteFibonacci(ProfiniteFunction):
         Return the ``x``-th profinite Fibonacci number, for ``x`` a profinite
         integer
 
-        We refer to :meth:`ProfiniteFunction.__call__
-        <sage.rings.adeles.profinite_functions.ProfiniteFunction.__call__>`
+        We refer to :meth:`ProfiniteFunction.__call__()
+        <adeles.profinite_function.ProfiniteFunction.__call__>`
         for a description of the input and output.
 
         The modulus of the output will always be a divisor of ``des_mod``, so we
@@ -213,7 +213,7 @@ class ProfiniteFibonacci(ProfiniteFunction):
         
         .. SEEALSO::
             
-            See the class :class:`profinite_graph.ProfiniteGraph` for a
+            See the class :class:`~adeles.profinite_graph.ProfiniteGraph` for a
             visualization of the graph of this function.
         """
         if des_mod is None:

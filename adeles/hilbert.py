@@ -9,8 +9,9 @@ Each of these three examples also features in [GS1998]. That paper performs a
 very similar computation, except that it translates the idèlic results from
 Shimura to statements about ideals, in order to perform their computations using
 ideals. In contrast, we will perform the computation using idèles directly,
-namely using :class:`idele.Ideles` and the related adèlic classes
-:class:`adele.Adeles` and :class:`profinite_number.ProfiniteNumbers`.
+namely using :class:`~adeles.idele.Ideles` and the related adèlic classes
+:class:`~adeles.adele.Adeles` and
+:class:`~adeles.profinite_number.ProfiniteNumbers`.
 
 REFERENCES:
 
