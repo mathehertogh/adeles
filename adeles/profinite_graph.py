@@ -7,6 +7,10 @@ implements interactive profinite graphs in the class :class:`ProfiniteGraph`:
 a user can view arbitrarily high precision approximations of the graph
 `\{(x, F(x)) \mid x \in \hat{\ZZ}\}` of `F` by zooming in and out.
 
+The idea of these kind of profinite graphs is taken from the paper [Len2005]
+(see below), which contains an image of such a graph for the :class:`profinite
+Fibonacci function <adeles.profinite_function.ProfiniteFibonacci>`.
+
 We use the class :class:`profinite_integer.ProfiniteIntegers` as our
 implementation of `\hat{\ZZ}` and by a profinite integer we shall mean an
 instance of ``Zhat``, i.e. ``ProfiniteIntegers(QQ)``. Also by ``3 mod 6`` we
