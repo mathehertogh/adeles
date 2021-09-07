@@ -130,6 +130,7 @@ Adèles over Number Fields
 Let's create a non-trivial number field and the corresponding adèle ring. ::
 
     sage: K.<a> = NumberField(x^5 - x^3 - 2*x + 1)
+    sage: Khat = ProfiniteNumbers(K)
     sage: Ak = Adeles(K); Ak
     Adèle Ring of Number Field in a with defining polynomial x^5 - x^3 - 2*x + 1
     sage: K.signature()
@@ -578,7 +579,7 @@ class Adele(CommutativeAlgebraElement):
             sage: b != c
             False
 
-        TESTS:
+        TESTS::
             
             sage: b < c
             Traceback (most recent call last):
