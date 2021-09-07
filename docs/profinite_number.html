@@ -59,16 +59,16 @@
 <span id="profinite-numbers"></span><h1>Profinite Numbers<a class="headerlink" href="#module-adeles.profinite_number" title="Permalink to this headline">¶</a></h1>
 <p>Profinite Numbers of Number Fields</p>
 <p>Let <span class="math notranslate nohighlight">\(K\)</span> be a number field with ring of integers <span class="math notranslate nohighlight">\(O\)</span>. Let <span class="math notranslate nohighlight">\(\hat{O}\)</span> be the ring
-of profinite <span class="math notranslate nohighlight">\(K\)</span>-integers (cf. <code class="xref py py-mod docutils literal notranslate"><span class="pre">profinite_integer</span></code>). The ring of profinite
-<span class="math notranslate nohighlight">\(K\)</span>-numbers <span class="math notranslate nohighlight">\(\hat{K}\)</span> is the ring of fractions of <span class="math notranslate nohighlight">\(\hat{O}\)</span> with respect to
-<span class="math notranslate nohighlight">\(\ZZ \setminus \{0\}\)</span>. So a profinite <span class="math notranslate nohighlight">\(K\)</span>-integer is a fraction <span class="math notranslate nohighlight">\(a/b\)</span> with
-<span class="math notranslate nohighlight">\(a \in \hat{O}\)</span> and <span class="math notranslate nohighlight">\(b \in \ZZ \setminus \{0\}\)</span>. With
+of profinite <span class="math notranslate nohighlight">\(K\)</span>-integers (cf. <a class="reference internal" href="profinite_integer.html#module-adeles.profinite_integer" title="adeles.profinite_integer"><code class="xref py py-mod docutils literal notranslate"><span class="pre">profinite_integer</span></code></a>). The ring of
+profinite <span class="math notranslate nohighlight">\(K\)</span>-numbers <span class="math notranslate nohighlight">\(\hat{K}\)</span> is the ring of fractions of <span class="math notranslate nohighlight">\(\hat{O}\)</span> with
+respect to <span class="math notranslate nohighlight">\(\ZZ \setminus \{0\}\)</span>. So a profinite <span class="math notranslate nohighlight">\(K\)</span>-integer is a fraction <span class="math notranslate nohighlight">\(a/b\)</span>
+with <span class="math notranslate nohighlight">\(a \in \hat{O}\)</span> and <span class="math notranslate nohighlight">\(b \in \ZZ \setminus \{0\}\)</span>. With
 <span class="math notranslate nohighlight">\(\{n\hat{\ZZ} \mid n \in \ZZ_{&gt;0}\}\)</span> as a basis of open neighborhoods of zero,
 <span class="math notranslate nohighlight">\(\hat{K}\)</span> is a topological ring. It is also a commutative <span class="math notranslate nohighlight">\(K\)</span>-algebra.</p>
 <p>In SageMath profinite numbers are implemented in the class
 <a class="reference internal" href="#adeles.profinite_number.ProfiniteNumber" title="adeles.profinite_number.ProfiniteNumber"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProfiniteNumber</span></code></a> as a pair <span class="math notranslate nohighlight">\(a = (n, d)\)</span> where <span class="math notranslate nohighlight">\(n\)</span> is a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">profinite_integer.ProfiniteInteger</span></code>, called the <em>numerator</em>, and <span class="math notranslate nohighlight">\(d\)</span> is
-a positive integer, called the <em>denominator</em>.
+<a class="reference internal" href="profinite_integer.html#adeles.profinite_integer.ProfiniteInteger" title="adeles.profinite_integer.ProfiniteInteger"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProfiniteInteger</span></code></a>, called the <em>numerator</em>, and
+<span class="math notranslate nohighlight">\(d\)</span> is a positive integer, called the <em>denominator</em>.
 We define the <em>represented subset</em> of <span class="math notranslate nohighlight">\(a\)</span> to be the represented subset of <span class="math notranslate nohighlight">\(n\)</span>
 divided by <span class="math notranslate nohighlight">\(d\)</span>, so an <span class="math notranslate nohighlight">\(\alpha \in \hat{K}\)</span> is represented by <span class="math notranslate nohighlight">\(a\)</span> if and only if
 <span class="math notranslate nohighlight">\(d \cdot \alpha\)</span> is represented by <span class="math notranslate nohighlight">\(n\)</span>.</p>
@@ -228,8 +228,8 @@ inside <code class="docutils literal notranslate"><span class="pre">Khat</span><
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">profinite_integer</span></code>,
-<code class="xref py py-mod docutils literal notranslate"><span class="pre">adele</span></code></p>
+<p><a class="reference internal" href="profinite_integer.html#module-adeles.profinite_integer" title="adeles.profinite_integer"><code class="xref py py-mod docutils literal notranslate"><span class="pre">profinite_integer</span></code></a>,
+<a class="reference internal" href="adele.html#module-adeles.adele" title="adeles.adele"><code class="xref py py-mod docutils literal notranslate"><span class="pre">adele</span></code></a></p>
 </div>
 <p>REFERENCES:</p>
 <p>[Her2021] Mathé Hertogh, Computing with adèles and idèles, master’s thesis,
@@ -695,7 +695,7 @@ zero ideal); the modulus</p></li>
 (default: <code class="docutils literal notranslate"><span class="pre">1</span></code>); the denominator</p></li>
 </ul>
 <p>If the base number field is <span class="math notranslate nohighlight">\(\QQ\)</span>, then we also accept a list of
-<span class="math notranslate nohighlight">\(p\)</span>-adic number, for distinct prime number <span class="math notranslate nohighlight">\(p\)</span>.
+<span class="math notranslate nohighlight">\(p\)</span>-adic numbers, for distinct prime numbers <span class="math notranslate nohighlight">\(p\)</span>.
 See <a class="reference internal" href="#adeles.profinite_number.ProfiniteNumbers._from_padic_numbers" title="adeles.profinite_number.ProfiniteNumbers._from_padic_numbers"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_from_padic_numbers()</span></code></a> for details.</p>
 <p>EXAMPLES:</p>
 <p>First we create some profinite numbers by value/modulus pairs:</p>
@@ -715,7 +715,7 @@ See <a class="reference internal" href="#adeles.profinite_number.ProfiniteNumber
 <span class="n">a</span>
 </pre></div>
 </div>
-<p>Now we construct some profinite numbers by numerator/denominator paris:</p>
+<p>Now we construct some profinite numbers by numerator/denominator pairs:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">Qhat</span><span class="p">(</span><span class="n">Zhat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
 <span class="mi">1</span><span class="o">/</span><span class="mi">2</span> <span class="n">mod</span> <span class="mi">5</span>
 <span class="n">sage</span><span class="p">:</span> <span class="n">Qhat</span><span class="p">(</span><span class="n">Zhat</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">17</span><span class="p">))</span>
@@ -726,6 +726,15 @@ See <a class="reference internal" href="#adeles.profinite_number.ProfiniteNumber
 <span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="n">a</span> <span class="n">mod</span> <span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 <span class="n">sage</span><span class="p">:</span> <span class="n">Khat</span><span class="p">(</span><span class="n">Ohat</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="o">*</span><span class="n">a</span><span class="p">))</span>
 <span class="mi">2</span> <span class="n">mod</span> <span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">a</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For <span class="math notranslate nohighlight">\(L/K\)</span> a field extension, profinite <span class="math notranslate nohighlight">\(K\)</span>-numbers can be converted to
+profinite <span class="math notranslate nohighlight">\(L\)</span>-numbers:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">R</span><span class="o">.&lt;</span><span class="n">t</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">K</span><span class="p">[]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">L</span><span class="o">.&lt;</span><span class="n">b</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">extension</span><span class="p">(</span><span class="n">t</span><span class="o">^</span><span class="mi">2</span><span class="o">-</span><span class="n">a</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">Lhat</span> <span class="o">=</span> <span class="n">ProfiniteNumbers</span><span class="p">(</span><span class="n">L</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">Lhat</span><span class="p">(</span><span class="n">Khat</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="n">a</span> <span class="n">mod</span> <span class="p">(</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Lastly, we can also give a list of <span class="math notranslate nohighlight">\(p\)</span>-adic numbers to <code class="docutils literal notranslate"><span class="pre">Qhat</span></code>:</p>

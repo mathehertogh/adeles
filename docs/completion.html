@@ -58,9 +58,15 @@
   <div class="section" id="module-adeles.completion">
 <span id="infinite-completions-of-number-fields"></span><h1>Infinite Completions of Number Fields<a class="headerlink" href="#module-adeles.completion" title="Permalink to this headline">¶</a></h1>
 <p>Infinite Completions of Number Fields</p>
-<p>This file implements the functionality that <span class="math notranslate nohighlight">\(K.places()\)</span> claims to provide (for
-<span class="math notranslate nohighlight">\(K\)</span> a number field), but does not provide, in the function
-<a class="reference internal" href="#adeles.completion.infinite_completions" title="adeles.completion.infinite_completions"><code class="xref py py-func docutils literal notranslate"><span class="pre">infinite_completions()</span></code></a>.</p>
+<p>This file implements the function <code class="docutils literal notranslate"><span class="pre">infinite_completions()</span></code>, which computes the
+infinite completions of a number field <span class="math notranslate nohighlight">\(K\)</span>, i.e. the real embeddings <span class="math notranslate nohighlight">\(K \to \RR\)</span>
+and the pairs of complex embeddings <span class="math notranslate nohighlight">\(K \to \CC\)</span>.
+The domains of the embeddings we return are interval fields (<code class="docutils literal notranslate"><span class="pre">RIF</span></code> and
+<code class="docutils literal notranslate"><span class="pre">CIF</span></code>). As <a class="reference external" href="https://trac.sagemath.org/ticket/31604">trac-ticket #31604</a>
+describes, the method <code class="docutils literal notranslate"><span class="pre">K.places()</span></code> of number fields claims to provide
+embeddings into interval fields in its documentation, but the code does not
+actually do this. As this ticket is not yet resolved in SageMath version 9.2,
+we use the function below instead for our adèles and idèles.</p>
 <p>AUTHORS:</p>
 <ul class="simple">
 <li><p>Mathé Hertogh (2021-07): initial version</p></li>

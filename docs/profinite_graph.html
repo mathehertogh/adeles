@@ -59,11 +59,15 @@
 <span id="profinite-graphs"></span><h1>Profinite Graphs<a class="headerlink" href="#module-adeles.profinite_graph" title="Permalink to this headline">¶</a></h1>
 <p>Profinite Graph</p>
 <p>Let <span class="math notranslate nohighlight">\(F: \hat{\ZZ} \to \hat{\ZZ}\)</span> be a function and let <span class="math notranslate nohighlight">\(P\)</span> be a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">profinite_function.ProfiniteFunction</span></code> implementing <span class="math notranslate nohighlight">\(F\)</span>. This file
-implements interactive profinite graphs in the class <a class="reference internal" href="#adeles.profinite_graph.ProfiniteGraph" title="adeles.profinite_graph.ProfiniteGraph"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProfiniteGraph</span></code></a>:
-a user can view arbitrarily high precision approximations of the graph
-<span class="math notranslate nohighlight">\(\{(x, F(x)) \mid x \in \hat{\ZZ}\}\)</span> of <span class="math notranslate nohighlight">\(F\)</span> by zooming in and out.</p>
-<p>We use the class <code class="xref py py-class docutils literal notranslate"><span class="pre">profinite_integer.ProfiniteIntegers</span></code> as our
+<a class="reference internal" href="profinite_function.html#adeles.profinite_function.ProfiniteFunction" title="adeles.profinite_function.ProfiniteFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProfiniteFunction</span></code></a> implementing <span class="math notranslate nohighlight">\(F\)</span>. This
+file implements interactive profinite graphs in the class
+<a class="reference internal" href="#adeles.profinite_graph.ProfiniteGraph" title="adeles.profinite_graph.ProfiniteGraph"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProfiniteGraph</span></code></a>: a user can view arbitrarily high precision
+approximations of the graph <span class="math notranslate nohighlight">\(\{(x, F(x)) \mid x \in \hat{\ZZ}\}\)</span> of <span class="math notranslate nohighlight">\(F\)</span> by
+zooming in and out.</p>
+<p>The idea of these kind of profinite graphs is taken from the paper [Len2005]
+(see below), which contains an image of such a graph for the <a class="reference internal" href="profinite_function.html#adeles.profinite_function.ProfiniteFibonacci" title="adeles.profinite_function.ProfiniteFibonacci"><code class="xref py py-class docutils literal notranslate"><span class="pre">profinite</span>
+<span class="pre">Fibonacci</span> <span class="pre">function</span></code></a>.</p>
+<p>We use the class <a class="reference internal" href="profinite_integer.html#adeles.profinite_integer.ProfiniteIntegers" title="adeles.profinite_integer.ProfiniteIntegers"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProfiniteIntegers</span></code></a> as our
 implementation of <span class="math notranslate nohighlight">\(\hat{\ZZ}\)</span> and by a profinite integer we shall mean an
 instance of <code class="docutils literal notranslate"><span class="pre">Zhat</span></code>, i.e. <code class="docutils literal notranslate"><span class="pre">ProfiniteIntegers(QQ)</span></code>. Also by <code class="docutils literal notranslate"><span class="pre">3</span> <span class="pre">mod</span> <span class="pre">6</span></code> we
 shall mean the profinite integer <code class="docutils literal notranslate"><span class="pre">Zhat(3,</span> <span class="pre">6)</span></code>.</p>
@@ -144,17 +148,18 @@ Wiskunde, 5/6(4):297-300, december 2005.
 <em class="property">class </em><code class="sig-prename descclassname">adeles.profinite_graph.</code><code class="sig-name descname">ProfiniteGraph</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">function</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.profinite_graph.ProfiniteGraph" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Interactive graph of a function from and to profinite integers</p>
-<p>Every <code class="xref py py-class docutils literal notranslate"><span class="pre">profinite_function.ProfiniteFunction</span></code> can be graphed, as well
-as callables that behave like such profinite functions (see below for
-examples).</p>
+<p>Every <a class="reference internal" href="profinite_function.html#adeles.profinite_function.ProfiniteFunction" title="adeles.profinite_function.ProfiniteFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProfiniteFunction</span></code></a> can be graphed,
+as well as callables that behave like such profinite functions (see below
+for examples).</p>
 <p>The graph allows the user to zoom in (and back out) to arbitrary high
 precisions. Left-click on an area in the graph to zoom into that area.
 Right-click anywhere on the graph to zoom out.</p>
 <p>The profinite integers are drawn based on the
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">profinite_integer.ProfiniteInteger.visual()</span></code> method of profinite
-integers. So <span class="math notranslate nohighlight">\(\hat{\ZZ} \times \hat{\ZZ}\)</span> is identified with the unit square
-<span class="math notranslate nohighlight">\([0,1] \times [0,1]\)</span> and a pair of profinite integers (<code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">mod</span> <span class="pre">m</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span> <span class="pre">mod</span>
-<span class="pre">n</span></code>) is identified with a rectangle <span class="math notranslate nohighlight">\([a,b] \times [c,d]\)</span> in the unit square.</p>
+<a class="reference internal" href="profinite_integer.html#adeles.profinite_integer.ProfiniteInteger.visual" title="adeles.profinite_integer.ProfiniteInteger.visual"><code class="xref py py-meth docutils literal notranslate"><span class="pre">visual()</span></code></a> method of
+profinite integers. So <span class="math notranslate nohighlight">\(\hat{\ZZ} \times \hat{\ZZ}\)</span> is identified with the
+unit square <span class="math notranslate nohighlight">\([0,1] \times [0,1]\)</span> and a pair of profinite integers
+(<code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">mod</span> <span class="pre">m</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span> <span class="pre">mod</span> <span class="pre">n</span></code>) is identified with a rectangle <span class="math notranslate nohighlight">\([a,b] \times
+[c,d]\)</span> in the unit square.</p>
 <p>The idea of this kind of graph is taken from the paper “Profinite Fibonacci
 numbers” by Hendrik Lenstra, cf. [Len2005]. Some default settings such as
 the colors to draw in are taken such that the resulting graph looks like the
@@ -201,7 +206,7 @@ graph to zoom out and than zooming in to the area <code class="docutils literal 
 approximation. From this picture one can already see that <code class="docutils literal notranslate"><span class="pre">3</span> <span class="pre">mod</span> <span class="pre">120</span></code> is
 mapped to <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">mod</span> <span class="pre">120</span></code> and that <code class="docutils literal notranslate"><span class="pre">27</span> <span class="pre">mod</span> <span class="pre">120</span></code> is mapped to <code class="docutils literal notranslate"><span class="pre">98</span> <span class="pre">mod</span> <span class="pre">120</span></code>.
 But a user can also zoom in again to see this more clearly of course.</p>
-<p>Any profinite function (cf. <code class="xref py py-class docutils literal notranslate"><span class="pre">profinite_function.ProfiniteFunction</span></code>)
+<p>Any <a class="reference internal" href="profinite_function.html#adeles.profinite_function.ProfiniteFunction" title="adeles.profinite_function.ProfiniteFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProfiniteFunction</span></code></a>
 can be graphed. We can even graph any callable that behaves like a
 profinite function. Here is an example of how to produce a graph of the
 square function <span class="math notranslate nohighlight">\(\hat{\ZZ} \to \hat{\ZZ}, x \mapsto x^2\)</span>:</p>

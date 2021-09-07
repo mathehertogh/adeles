@@ -166,7 +166,7 @@ multiplicative <span class="math notranslate nohighlight">\(p\)</span>-adic in t
 <span class="math notranslate nohighlight">\(\alpha\)</span> and with represented subset contained in <span class="math notranslate nohighlight">\(U\)</span>.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">idele</span></code></p>
+<p><a class="reference internal" href="idele.html#module-adeles.idele" title="adeles.idele"><code class="xref py py-mod docutils literal notranslate"><span class="pre">idele</span></code></a></p>
 </div>
 <p>REFERENCES:</p>
 <p>[Her2021] Mathé Hertogh, Computing with adèles and idèles, master’s thesis,
@@ -713,7 +713,8 @@ number field, a finite prime of <code class="docutils literal notranslate"><span
 integers of <code class="docutils literal notranslate"><span class="pre">K</span></code></p>
 <p>INPUT:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">p</span></code> – any object; <code class="docutils literal notranslate"><span class="pre">p</span></code> will be checked to see if its a finite prime</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">p</span></code> – any object; <code class="docutils literal notranslate"><span class="pre">p</span></code> will be checked to see if it is a finite prime
+of <code class="docutils literal notranslate"><span class="pre">K</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">K</span></code> – a number field</p></li>
 </ul>
 <p>EXAMPLES:</p>
@@ -735,9 +736,9 @@ integers of <code class="docutils literal notranslate"><span class="pre">K</span
 </pre></div>
 </div>
 <p>TESTS:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">is_finite_prime</span><span class="p">(</span><span class="s2">&quot;blah&quot;</span><span class="p">,</span> <span class="n">QQ</span><span class="p">)</span> <span class="c1"># 11 is inert</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">is_finite_prime</span><span class="p">(</span><span class="s2">&quot;blah&quot;</span><span class="p">,</span> <span class="n">QQ</span><span class="p">)</span>
 <span class="kc">False</span>
-<span class="n">sage</span><span class="p">:</span> <span class="n">is_finite_prime</span><span class="p">([],</span> <span class="n">K</span><span class="p">)</span> <span class="c1"># 11 is inert</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">is_finite_prime</span><span class="p">([],</span> <span class="n">K</span><span class="p">)</span>
 <span class="kc">False</span>
 </pre></div>
 </div>

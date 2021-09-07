@@ -58,8 +58,13 @@
   <div class="section" id="module-adeles.ray_class_group">
 <span id="ray-class-groups"></span><h1>Ray Class Groups<a class="headerlink" href="#module-adeles.ray_class_group" title="Permalink to this headline">¶</a></h1>
 <p>Class Groups of Number Fields</p>
-<p>Sage can compute class groups, ray class groups, and <span class="math notranslate nohighlight">\(S\)</span>-class groups of number
-fields, and does so by wrapping the functionality from the PARI C-library. Some
+<p><a class="reference external" href="https://trac.sagemath.org/ticket/15829">Trac-ticket #15829</a> adds (among other
+things) ray class groups to SageMath. The ticket is not yet finished and
+included into SageMath. It does already contain this file, from Robbert Harron,
+implementing ray class groups in SageMath. We use this file to have ray class
+groups functionality available for our adèles and idèles package.</p>
+<p>We can compute class groups, ray class groups, and <span class="math notranslate nohighlight">\(S\)</span>-class groups of number
+fields, and we do so by wrapping the functionality from the PARI C-library. Some
 of what can be computed includes the group structure, representative ideals, the
 class of a given ideal, generators of the group, and products of elements. This
 file also implements moduli of number fields.</p>
@@ -96,6 +101,186 @@ Nevertheless, one can be demanded. The returned ideal should be somewhat
 <span class="n">Fractional</span> <span class="n">ideal</span> <span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 </pre></div>
 </div>
+<dl class="py class">
+<dt id="adeles.ray_class_group.Modulus">
+<em class="property">class </em><code class="sig-prename descclassname">adeles.ray_class_group.</code><code class="sig-name descname">Modulus</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">finite</span></em>, <em class="sig-param"><span class="n">infinite</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">check</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.ray_class_group.Modulus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sage.structure.sage_object.SageObject</span></code></p>
+<p>Modulus of a number field</p>
+<dl class="py method">
+<dt id="adeles.ray_class_group.Modulus.equivalent_coprime_ideal_multiplier">
+<code class="sig-name descname">equivalent_coprime_ideal_multiplier</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">I</span></em>, <em class="sig-param"><span class="n">other</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.ray_class_group.Modulus.equivalent_coprime_ideal_multiplier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given <code class="docutils literal notranslate"><span class="pre">I</span></code> coprime to this modulus <span class="math notranslate nohighlight">\(m\)</span>, return a number field element <span class="math notranslate nohighlight">\(\beta\)</span>
+such that <span class="math notranslate nohighlight">\(\beta I\)</span> is coprime to the modulus <code class="docutils literal notranslate"><span class="pre">other</span></code> and equivalent to
+<code class="docutils literal notranslate"><span class="pre">I</span></code> <span class="math notranslate nohighlight">\(\mathrm{mod}^\ast m\)</span>; in particular, <span class="math notranslate nohighlight">\(\beta\)</span> will be <span class="math notranslate nohighlight">\(1 \mathrm{mod}^\ast m\)</span>.</p>
+<p>EXAMPLES:</p>
+<p>An example with two prime factors difference between this modulus and <code class="docutils literal notranslate"><span class="pre">other</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">F</span><span class="o">.&lt;</span><span class="n">a</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">QuadraticField</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">m_small</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">modulus</span><span class="p">(</span><span class="mi">3</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="n">a</span> <span class="o">-</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">m_big</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">modulus</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">a</span> <span class="o">-</span> <span class="mi">30</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">m_small</span><span class="o">.</span><span class="n">equivalent_coprime_ideal_multiplier</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">ideal</span><span class="p">(</span><span class="mi">6</span><span class="p">),</span> <span class="n">m_big</span><span class="p">)</span>
+<span class="mi">109</span><span class="o">/</span><span class="mi">54</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="adeles.ray_class_group.Modulus.equivalent_ideal_coprime_to_other">
+<code class="sig-name descname">equivalent_ideal_coprime_to_other</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">I</span></em>, <em class="sig-param"><span class="n">other</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.ray_class_group.Modulus.equivalent_ideal_coprime_to_other" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given <code class="docutils literal notranslate"><span class="pre">I</span></code> coprime to this modulus <span class="math notranslate nohighlight">\(m\)</span>, return an ideal <span class="math notranslate nohighlight">\(J\)</span> such that <span class="math notranslate nohighlight">\(J\)</span> is coprime
+to the modulus <code class="docutils literal notranslate"><span class="pre">other</span></code> and equivalent to <code class="docutils literal notranslate"><span class="pre">I</span></code> <span class="math notranslate nohighlight">\(\mathrm{mod}^\ast m\)</span>.</p>
+<p>This is useful for lowering the level of a non-primitive Hecke character.</p>
+<p>INPUT:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">I</span></code> – an ideal relatively prime to this modulus (not checked).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">other</span></code> – some other modulus.</p></li>
+</ul>
+<p>OUTPUT:</p>
+<p>an ideal coprime to <code class="docutils literal notranslate"><span class="pre">other</span></code> and equivalent to <code class="docutils literal notranslate"><span class="pre">I</span></code> in the ray class
+group modulo this modulus.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="adeles.ray_class_group.Modulus.fix_signs">
+<code class="sig-name descname">fix_signs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.ray_class_group.Modulus.fix_signs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given <code class="docutils literal notranslate"><span class="pre">a</span></code> in <code class="docutils literal notranslate"><span class="pre">self.number_field()</span></code>, find <span class="math notranslate nohighlight">\(b\)</span> congruent to <code class="docutils literal notranslate"><span class="pre">a</span></code> <span class="math notranslate nohighlight">\(mod^\ast\)</span> <code class="docutils literal notranslate"><span class="pre">self.finite_part()</span></code>
+such that <span class="math notranslate nohighlight">\(b\)</span> is positive at the infinite places dividing <code class="docutils literal notranslate"><span class="pre">self</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="adeles.ray_class_group.RayClassGroup">
+<em class="property">class </em><code class="sig-prename descclassname">adeles.ray_class_group.</code><code class="sig-name descname">RayClassGroup</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">gens_orders</span></em>, <em class="sig-param"><span class="n">names</span></em>, <em class="sig-param"><span class="n">modulus</span></em>, <em class="sig-param"><span class="n">gens</span></em>, <em class="sig-param"><span class="n">bnr</span></em>, <em class="sig-param"><span class="n">proof</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.ray_class_group.RayClassGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sage.groups.abelian_gps.abelian_group.AbelianGroup_class</span></code></p>
+<p>Ray class group of a number field</p>
+<dl class="py attribute">
+<dt id="adeles.ray_class_group.RayClassGroup.Element">
+<code class="sig-name descname">Element</code><a class="headerlink" href="#adeles.ray_class_group.RayClassGroup.Element" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#adeles.ray_class_group.RayClassGroupElement" title="adeles.ray_class_group.RayClassGroupElement"><code class="xref py py-class docutils literal notranslate"><span class="pre">RayClassGroupElement</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="adeles.ray_class_group.RayClassGroup.gens_ideals">
+<code class="sig-name descname">gens_ideals</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adeles.ray_class_group.RayClassGroup.gens_ideals" title="Permalink to this definition">¶</a></dt>
+<dd><p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="k">class</span> <span class="nc">Foo</span><span class="p">:</span>
+<span class="o">....</span><span class="p">:</span>     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="o">....</span><span class="p">:</span>         <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="n">x</span>
+<span class="o">....</span><span class="p">:</span>     <span class="nd">@cached_method</span>
+<span class="o">....</span><span class="p">:</span>     <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="o">....</span><span class="p">:</span>         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="o">^</span><span class="mi">2</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">a</span> <span class="o">=</span> <span class="n">Foo</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">f</span><span class="o">.</span><span class="n">cache</span><span class="p">)</span>
+<span class="kc">None</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">a</span><span class="o">.</span><span class="n">f</span><span class="p">()</span>
+<span class="mi">4</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">a</span><span class="o">.</span><span class="n">f</span><span class="o">.</span><span class="n">cache</span>
+<span class="mi">4</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="adeles.ray_class_group.RayClassGroup.ray_class_field">
+<code class="sig-name descname">ray_class_field</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">subgroup</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">names</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">algorithm</span><span class="o">=</span><span class="default_value">'stark'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.ray_class_group.RayClassGroup.ray_class_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Two different algorithms are possible: pari’s
+<a class="reference external" href="https://pari.math.u-bordeaux.fr/dochtml/html/General_number_fields.html#se:bnrstark">bnrstark</a> and
+<a class="reference external" href="https://pari.math.u-bordeaux.fr/dochtml/html/General_number_fields.html#se:rnfkummer">rnfkummer</a>.
+The first one uses the Stark conjecture and only deals with totally real
+extensions of a totally real base field. The second one uses Kummer
+theory and only deals with extensions of prime degree.</p>
+<p>INPUT:</p>
+<ul class="simple">
+<li><p>algorithm – (default: <code class="docutils literal notranslate"><span class="pre">stark</span></code>) if the value is <code class="docutils literal notranslate"><span class="pre">stark</span></code>,
+then pari’s <code class="docutils literal notranslate"><span class="pre">bnrstark</span></code> function is tried first, and if that
+fails, <code class="docutils literal notranslate"><span class="pre">rnfkummer</span></code> will be attempted. If the value is
+<code class="docutils literal notranslate"><span class="pre">kummer</span></code>, then pari’s <code class="docutils literal notranslate"><span class="pre">rnfkummer</span></code> is tried first, with
+<code class="docutils literal notranslate"><span class="pre">bnrstark</span></code> as a backup. Using <code class="docutils literal notranslate"><span class="pre">stark_only</span></code> or <code class="docutils literal notranslate"><span class="pre">kummer_only</span></code>
+will just raise an exception if the first attempt fails.</p></li>
+</ul>
+<p>OUTPUT:</p>
+<p>The class field corresponding to the given subgroup, or the
+ray class field if <code class="docutils literal notranslate"><span class="pre">subgroup</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, as a relative
+number field.</p>
+<p>EXAMPLES:</p>
+<p>Class fields of <span class="math notranslate nohighlight">\(\QQ(\sqrt{3})\)</span>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">F</span><span class="o">.&lt;</span><span class="n">a</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">QuadraticField</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">m</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">ideal</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span><span class="o">.</span><span class="n">modulus</span><span class="p">()</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">R</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">ray_class_group</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">R</span><span class="o">.</span><span class="n">ray_class_field</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">)</span>
+<span class="n">Number</span> <span class="n">Field</span> <span class="ow">in</span> <span class="n">b</span> <span class="k">with</span> <span class="n">defining</span> <span class="n">polynomial</span> <span class="n">x</span><span class="o">^</span><span class="mi">6</span> <span class="o">+</span> <span class="n">a</span><span class="o">*</span><span class="n">x</span><span class="o">^</span><span class="mi">5</span> <span class="o">-</span> <span class="mi">4</span><span class="o">*</span><span class="n">x</span><span class="o">^</span><span class="mi">4</span> <span class="o">-</span> <span class="mi">4</span><span class="o">*</span><span class="n">a</span><span class="o">*</span><span class="n">x</span><span class="o">^</span><span class="mi">3</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">a</span><span class="o">*</span><span class="n">x</span> <span class="o">-</span> <span class="mi">1</span> <span class="n">over</span> <span class="n">its</span> <span class="n">base</span> <span class="n">field</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">S</span> <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">subgroup</span><span class="p">([</span><span class="n">R</span><span class="o">.</span><span class="n">gen</span><span class="p">()</span><span class="o">^</span><span class="mi">2</span><span class="p">])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">R</span><span class="o">.</span><span class="n">ray_class_field</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">)</span>
+<span class="n">Number</span> <span class="n">Field</span> <span class="ow">in</span> <span class="n">b</span> <span class="k">with</span> <span class="n">defining</span> <span class="n">polynomial</span> <span class="n">x</span><span class="o">^</span><span class="mi">2</span> <span class="o">-</span> <span class="n">a</span><span class="o">*</span><span class="n">x</span> <span class="o">-</span> <span class="mi">1</span> <span class="n">over</span> <span class="n">its</span> <span class="n">base</span> <span class="n">field</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">m</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">modulus</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">R</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">ray_class_group</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">S</span> <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">subgroup</span><span class="p">([</span><span class="n">R</span><span class="o">.</span><span class="n">gens</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">^</span><span class="mi">2</span><span class="p">,</span> <span class="n">R</span><span class="o">.</span><span class="n">gens</span><span class="p">()[</span><span class="mi">1</span><span class="p">]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">R</span><span class="o">.</span><span class="n">ray_class_field</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">)</span>
+<span class="n">Number</span> <span class="n">Field</span> <span class="ow">in</span> <span class="n">b</span> <span class="k">with</span> <span class="n">defining</span> <span class="n">polynomial</span> <span class="n">x</span><span class="o">^</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">a</span> <span class="o">-</span> <span class="mi">4</span> <span class="n">over</span> <span class="n">its</span> <span class="n">base</span> <span class="n">field</span>
+</pre></div>
+</div>
+<p>An example where pari’s <code class="docutils literal notranslate"><span class="pre">bnrstark</span></code> fails, but <code class="docutils literal notranslate"><span class="pre">rnfkummer</span></code> saves the day:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">F</span><span class="o">.&lt;</span><span class="n">a</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">NumberField</span><span class="p">(</span><span class="n">x</span><span class="o">^</span><span class="mi">8</span> <span class="o">-</span> <span class="mi">12</span><span class="o">*</span><span class="n">x</span><span class="o">^</span><span class="mi">6</span> <span class="o">+</span> <span class="mi">36</span><span class="o">*</span><span class="n">x</span><span class="o">^</span><span class="mi">4</span> <span class="o">-</span> <span class="mi">36</span><span class="o">*</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">9</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">m</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">ideal</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">modulus</span><span class="p">()</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">R</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">ray_class_group</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">set_verbose</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">K</span> <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">ray_class_field</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">);</span> <span class="n">K</span>
+<span class="n">verbose</span> <span class="mi">1</span> <span class="p">(</span><span class="o">...</span><span class="p">:</span> <span class="n">class_group</span><span class="o">.</span><span class="n">py</span><span class="p">,</span> <span class="n">ray_class_field</span><span class="p">)</span> <span class="n">bnrstark</span> <span class="n">failed</span><span class="p">;</span> <span class="n">trying</span> <span class="n">rnfkummer</span><span class="o">.</span>
+<span class="n">Number</span> <span class="n">Field</span> <span class="ow">in</span> <span class="n">b</span> <span class="k">with</span> <span class="n">defining</span> <span class="n">polynomial</span> <span class="n">x</span><span class="o">^</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="o">*</span><span class="n">a</span><span class="o">^</span><span class="mi">6</span> <span class="o">-</span> <span class="mi">10</span><span class="o">/</span><span class="mi">3</span><span class="o">*</span><span class="n">a</span><span class="o">^</span><span class="mi">4</span> <span class="o">+</span> <span class="mi">5</span><span class="o">*</span><span class="n">a</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="o">*</span><span class="n">a</span><span class="o">^</span><span class="mi">6</span> <span class="o">-</span> <span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="o">*</span><span class="n">a</span><span class="o">^</span><span class="mi">5</span> <span class="o">-</span> <span class="mi">11</span><span class="o">/</span><span class="mi">3</span><span class="o">*</span><span class="n">a</span><span class="o">^</span><span class="mi">4</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">a</span><span class="o">^</span><span class="mi">3</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">a</span><span class="o">^</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">4</span><span class="o">*</span><span class="n">a</span> <span class="o">-</span> <span class="mi">5</span> <span class="n">over</span> <span class="n">its</span> <span class="n">base</span> <span class="n">field</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">set_verbose</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="adeles.ray_class_group.RayClassGroupElement">
+<em class="property">class </em><code class="sig-prename descclassname">adeles.ray_class_group.</code><code class="sig-name descname">RayClassGroupElement</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em>, <em class="sig-param"><span class="n">exponents</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.ray_class_group.RayClassGroupElement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sage.groups.abelian_gps.abelian_group_element.AbelianGroupElement</span></code></p>
+<p>Element of a ray class group</p>
+<dl class="py method">
+<dt id="adeles.ray_class_group.RayClassGroupElement.ideal">
+<code class="sig-name descname">ideal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">reduce</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.ray_class_group.RayClassGroupElement.ideal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an ideal representing this ray class.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">reduce</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code> (by default) the returned ideal is
+reduced to ‘small’ (this can be slow on large inputs).</p>
+<p>INPUT:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">reduce</span></code> – (default: <code class="docutils literal notranslate"><span class="pre">True</span></code>) determine whether or not
+to output a ‘small’ representative.</p></li>
+</ul>
+<p>OUTPUT:</p>
+<p>An ideal representing this ray class. If <code class="docutils literal notranslate"><span class="pre">reduce</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>,
+the ideal returned is made ‘small’ by the ideal’s
+<code class="docutils literal notranslate"><span class="pre">reduce_equiv</span></code> function (and <code class="docutils literal notranslate"><span class="pre">reduce_equiv</span></code> is used at
+each step of computing this representative). Otherwise, the
+output is just the appropriate product of the powers of the
+generators of the ray class group.</p>
+<p>EXAMPLES:</p>
+<p>Over a real quadratic field field of class number 1:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">F</span><span class="o">.&lt;</span><span class="n">a</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">NumberField</span><span class="p">(</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">5</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">m</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">ideal</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span><span class="o">.</span><span class="n">modulus</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">R</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">ray_class_group</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">c0</span><span class="p">,</span> <span class="n">c1</span> <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">gens</span><span class="p">()</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">c</span> <span class="o">=</span> <span class="n">c0</span><span class="o">^</span><span class="mi">4</span><span class="o">*</span><span class="n">c1</span><span class="p">;</span> <span class="n">c</span><span class="o">.</span><span class="n">ideal</span><span class="p">()</span>
+<span class="n">Fractional</span> <span class="n">ideal</span> <span class="p">(</span><span class="o">-</span><span class="n">a</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">ideal</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">Fractional</span> <span class="n">ideal</span> <span class="p">(</span><span class="o">-</span><span class="mi">6242265</span><span class="o">*</span><span class="n">a</span> <span class="o">+</span> <span class="mi">1268055</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Over a real quadratic field of class number 2:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">F</span> <span class="o">=</span> <span class="n">QuadraticField</span><span class="p">(</span><span class="mi">40</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">R</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">ray_class_group</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">prime_above</span><span class="p">(</span><span class="mi">13</span><span class="p">)</span><span class="o">.</span><span class="n">modulus</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+<span class="n">sage</span><span class="p">:</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">R</span><span class="p">:</span>
+<span class="o">...</span>       <span class="k">if</span> <span class="n">R</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">ideal</span><span class="p">())</span> <span class="o">!=</span> <span class="n">c</span><span class="p">:</span>
+<span class="o">...</span>           <span class="nb">print</span> <span class="s2">&quot;Bug!&quot;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="py function">
 <dt id="adeles.ray_class_group.pari_extended_ideal_to_sage">
 <code class="sig-prename descclassname">adeles.ray_class_group.</code><code class="sig-name descname">pari_extended_ideal_to_sage</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">K</span></em>, <em class="sig-param"><span class="n">Ix</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.ray_class_group.pari_extended_ideal_to_sage" title="Permalink to this definition">¶</a></dt>
