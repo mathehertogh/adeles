@@ -1020,7 +1020,7 @@ class Idele(MultiplicativeGroupElement):
                 return K.ideal(self.finite_part())
         else:
             from sage.misc.misc_c import prod
-            return prod([p**self.valuation(p) for p in self.finite_part()])
+            return prod([p**self.valuation(p) for p in self.stored_primes()])
 
     def has_exact_finite_part(self):
         """
@@ -1359,8 +1359,6 @@ class Idele(MultiplicativeGroupElement):
 
         Section 4.5 of [Her2021].
         """
-        from sage.misc.misc_c import prod
-
         if self.has_exact_finite_part():
             finite = {q : (self.finite_part(), e) for q, e in modulus.finite_factors()}
             return self.parent()(self.infinite_part(), finite).to_ray_class(modulus)
@@ -1420,7 +1418,7 @@ class Idele(MultiplicativeGroupElement):
 
         # Our `v` is finished. We can now build up an ideal representing the
         # image of `v` (which is equal to the image of ``self``) in ``G``.
-        I = prod([q**v[q].valuation() for q in v.stored_primes()])
+        I = v.ideal()
         return G(I)
 
 
