@@ -224,6 +224,10 @@ class ProfiniteNumber(CommutativeAlgebraElement):
     """
     Profinite Number of a Number Field
 
+    REFERENCES:
+
+    Section 3.2 of [Her2021].
+
     .. automethod:: __init__
 
     .. automethod:: __getitem__
@@ -380,6 +384,10 @@ class ProfiniteNumber(CommutativeAlgebraElement):
             1/3*a^2 + 1/3*a mod (5/3)
             sage: Khat(Ohat(a+1, 20*a+3), 7) + 5
             -3749/7*a^2 mod (-20/7*a - 3/7)
+
+        REFERENCES:
+
+        Section Arithmetic in Section 3.2 of [Her2021].
         """
         numerator = self.numerator() * other.denominator() + other.numerator() * self.denominator()
         denominator = self.denominator() * other.denominator()
@@ -412,6 +420,10 @@ class ProfiniteNumber(CommutativeAlgebraElement):
             0 mod (20)
             sage: Khat(a, 100) - Khat(2, 5*a)
             a - 2 mod (5*a)
+
+        REFERENCES:
+
+        Section Arithmetic in Section 3.2 of [Her2021].
         """
         numerator = self.numerator() * other.denominator() - other.numerator() * self.denominator()
         denominator = self.denominator() * other.denominator()
@@ -442,6 +454,10 @@ class ProfiniteNumber(CommutativeAlgebraElement):
             2 mod (100/3*zeta5^3)
             sage: Khat(zeta5, 9) * Khat(1/2, 9*zeta5)
             1/2*zeta5 mod (9/2)
+
+        REFERENCES:
+
+        Section Arithmetic in Section 3.2 of [Her2021].
         """
         numerator = self.numerator() * other.numerator()
         denominator = self.denominator() * other.denominator()
@@ -472,6 +488,10 @@ class ProfiniteNumber(CommutativeAlgebraElement):
             sage: Khat = ProfiniteNumbers(K)
             sage: Khat(1, 100) / zeta3^2
             zeta3 mod (100*zeta3)
+
+        REFERENCES:
+
+        Section Arithmetic in Section 3.2 of [Her2021].
 
         TESTS::
 
@@ -527,6 +547,10 @@ class ProfiniteNumber(CommutativeAlgebraElement):
                 True
                 sage: a == c
                 False
+
+        REFERENCES:
+
+        Section 5.4 of [Her2021].
         """
         from sage.structure.richcmp import op_EQ, op_NE
         if op == op_EQ:
@@ -810,6 +834,10 @@ class ProfiniteNumber(CommutativeAlgebraElement):
 
             sage: Qhat(1/2, 10).to_rational_vector()
             (1/2 mod 10,)
+
+        REFERENCES:
+
+        Section 4.4 of [Her2021].
 
         TESTS:
 

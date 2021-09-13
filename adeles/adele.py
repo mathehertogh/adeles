@@ -233,6 +233,10 @@ class Adele(CommutativeAlgebraElement):
     """
     Adèle over a Number Field
 
+    REFERENCES:
+
+    Section 3.4 of [Her2021].
+
     .. automethod:: __init__
 
     .. automethod:: __getitem__
@@ -362,6 +366,10 @@ class Adele(CommutativeAlgebraElement):
             3^-1 + O(3^10)
             sage: a[5]
             O(5^0)
+
+        REFERENCES:
+
+        Section 4.6 of [Her2021].
         """
         if self.parent().base() is not QQ:
             raise NotImplementedError("projection to `p`-adics only implemented over rationals")
@@ -423,6 +431,10 @@ class Adele(CommutativeAlgebraElement):
             sage: d = Ak([3.5, I], Khat((zeta5^3+zeta5^4)/2, 200))
             sage: c + d
             (3.5000000000000000? + 1*I, 0, 0 mod (100))
+
+        REFERENCES:
+
+        Section Arithmetic in Section 3.4 of [Her2021].
         """
         t = len(self.infinite_part())
         infinite = [self.infinite_part(i) + other.infinite_part(i) for i in range(t)]
@@ -456,6 +468,10 @@ class Adele(CommutativeAlgebraElement):
             (0, 0 mod (30))
             sage: b - a
             (-0.73205080756887720?*I, -3/4*a mod (-10*a))
+
+        REFERENCES:
+
+        Section Arithmetic in Section 3.4 of [Her2021].
         """
         t = len(self.infinite_part())
         infinite = [self.infinite_part(i) - other.infinite_part(i) for i in range(t)]
@@ -485,6 +501,10 @@ class Adele(CommutativeAlgebraElement):
             (-1, -a - 1 mod (10))
             sage: a * b
             (-0.86602540378443860? - 0.50000000000000000?*I, -a - 1 mod (-10*a - 10))
+
+        REFERENCES:
+
+        Section Arithmetic in Section 3.4 of [Her2021].
         """
         t = len(self.infinite_part())
         infinite = [self.infinite_part(i) * other.infinite_part(i) for i in range(t)]
@@ -529,6 +549,10 @@ class Adele(CommutativeAlgebraElement):
                 Traceback (most recent call last):
                 ...
                 ZeroDivisionError: profinite number division by zero
+
+        REFERENCES:
+
+        Section Arithmetic in Section 3.4 of [Her2021].
         """
         t = len(self.infinite_part())
         infinite = [self.infinite_part(i) / other.infinite_part(i) for i in range(t)]
@@ -578,6 +602,10 @@ class Adele(CommutativeAlgebraElement):
             True
             sage: b != c
             False
+
+        REFERENCES:
+
+        Section 5.4 of [Her2021].
 
         TESTS::
             
@@ -685,6 +713,10 @@ class Adele(CommutativeAlgebraElement):
         .. SEEALSO::
 
             :meth:`~adeles.profinite_number.ProfiniteNumber.to_rational_vector`
+
+        REFERENCES:
+
+        Section 4.4 of [Her2021].
         """
         from sage.modules.free_module_element import vector
         from sage.matrix.constructor import matrix
@@ -719,6 +751,10 @@ class Adele(CommutativeAlgebraElement):
 class Adeles(UniqueRepresentation, CommutativeAlgebra):
     """
     Adèle Ring of a Number Field
+
+    REFERENCES:
+
+    Section 3.4 of [Her2021].
 
     .. automethod:: _element_constructor_
     """
@@ -974,6 +1010,10 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
             (-3, 83/10 mod 10)
             sage: a * u
             (-1.2500000000000000?, 7/10 mod 1)
+
+        REFERENCES:
+
+        Section 4.3 of [Her2021].
         """        
         infinite = idele.infinite_part().copy()
 
@@ -1059,6 +1099,10 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
             (RR, 18/49 mod 9/7)
             sage: b[3] == b_3 and b[7] == b_7
             True
+
+        REFERENCES:
+
+        Section 4.6 of [Her2021].
         """
         reals = [x for x in padics if x in RIF]
         if len(reals) == 0:

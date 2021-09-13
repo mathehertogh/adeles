@@ -204,6 +204,10 @@ class ProfiniteInteger(CommutativeAlgebraElement):
     """
     Profinite Integer over a Number Field
 
+    REFERENCES:
+
+    Section 3.1 of [Her2021].
+
     .. automethod:: __init__
 
     .. automethod:: __getitem__
@@ -420,6 +424,10 @@ class ProfiniteInteger(CommutativeAlgebraElement):
             2 mod (a)
             sage: O(-a)+c
             a + 1 mod (7)
+
+        REFERENCES:
+
+        Section Arithmetic of Section 3.1 of [Her2021].
         """
         modulus = self._common_modulus(other)
         value = self.value() + other.value()
@@ -455,6 +463,10 @@ class ProfiniteInteger(CommutativeAlgebraElement):
             0 mod (a)
             sage: c-1
             2*a mod (7)
+
+        REFERENCES:
+
+        Section Arithmetic of Section 3.1 of [Her2021].
         """
         modulus = self._common_modulus(other)
         value = self.value() - other.value()
@@ -491,6 +503,10 @@ class ProfiniteInteger(CommutativeAlgebraElement):
             sage: 1*c
             2*a + 1 mod (7)
 
+        REFERENCES:
+
+        Section Arithmetic of Section 3.1 of [Her2021].
+
         .. TODO::
 
             Currently this multiplication method implicitly defines powering of
@@ -501,7 +517,7 @@ class ProfiniteInteger(CommutativeAlgebraElement):
                 1 mod 2
 
             This is however not optimal: for any `\alpha \in 1 + 2\hat{\ZZ}` we
-            have `\alpha^2 \in 1 + 4\hat{\ZZ}`. Hence by implementing powering
+            have `\alpha^2 \in 1 + 8\hat{\ZZ}`. Hence by implementing powering
             explicitly we could obtain the better behaviour::
 
                 sage: a * a
@@ -654,6 +670,10 @@ class ProfiniteInteger(CommutativeAlgebraElement):
             True
             sage: c != d
             False
+
+        REFERENCES:
+
+        Section 5.4 of [Her2021].
 
         TESTS::
 
@@ -916,6 +936,10 @@ class ProfiniteInteger(CommutativeAlgebraElement):
             [1, 2, 1]
             sage: sum([digits[i] * factorial(i+1) for i in range(3)])
             11
+
+        REFERENCES:
+
+        Section 7.2 of [Her2021].
         """
         if self.parent().number_field() is not QQ:
             raise NotImplementedError("only implemented for profinite QQ-integers")
@@ -968,6 +992,10 @@ class ProfiniteInteger(CommutativeAlgebraElement):
 
             sage: Zhat(2, 3).visual()
             (1/6, 1)
+
+        REFERENCES:
+
+        Section 7.3 of [Her2021].
         """
         from sage.functions.other import factorial
 
@@ -989,19 +1017,13 @@ class ProfiniteInteger(CommutativeAlgebraElement):
         return min(lefts), max(rights)
 
 
-
-        # left = ZZ(0)
-        # k_fac = ZZ(1)
-        # for k in range(ZZ(1), len(digits)+1):
-        #     k_fac *= k + 1
-        #     left += digits[k-1] / k_fac
-        # right = left + ZZ(1)/k_fac
-        # return left, right
-
-
 class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
     """
     Ring of profinite integers over a number field
+
+    REFERENCES:
+
+    Section 3.1 of [Her2021].
 
     .. automethod:: _element_constructor_
     """
@@ -1252,6 +1274,10 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
             -a + 3 mod (5*a)
             sage: Ohat(c)
             -a + 3 mod (5*a)
+
+        REFERENCES:
+
+        Section 4.2 of [Her2021].
         """
         OmodI = element.parent()
         modulus = OmodI.defining_ideal()
@@ -1286,6 +1312,10 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
             Traceback (most recent call last):
             ...
             ValueError: can't convert non-integral profinite number to profinite integer
+
+        REFERENCES:
+
+        Section 4.1 of [Her2021].
         """
         if not number.is_integral():
             raise ValueError("can't convert non-integral profinite number to profinite integer")
@@ -1379,6 +1409,10 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
             13 mod 120
             sage: Zhat._from_factorial_digits([])
             0 mod 1
+
+        REFERENCES:
+
+        Section 7.2 of [Her2021].
         """
         from sage.functions.other import factorial
         value = sum([digits[i] * factorial(i+1) for i in range(len(digits))])

@@ -254,6 +254,10 @@ class Idele(MultiplicativeGroupElement):
     r"""
     Idèle over a Number Field
 
+    REFERENCES:
+
+    Section 3.6 of [Her2021].
+
     .. automethod:: __init__
 
     .. automethod:: __getitem__
@@ -505,6 +509,10 @@ class Idele(MultiplicativeGroupElement):
               (3, a + 1):   -1 * U(3)
               (7):          1/3*a * U(0)
               other primes: 1 * U(0)
+
+        REFERENCES:
+
+        Section Arithmetic in Section 3.6 of [Her2021].
         """
         # At the infinite primes we perform component-wise multiplication.
         infinite = [self[oo, i] * other[oo, i] for i in range(len(self.infinite_part()))]
@@ -574,6 +582,10 @@ class Idele(MultiplicativeGroupElement):
               (3):          1/6*i * U(8)
               (7):          (-2/5*i + 1/5) * U(0)
               other primes: 1 * U(0)
+
+        REFERENCES:
+
+        Section Arithmetic in Section 3.6 of [Her2021].
         """
         return self * other.inverse()
 
@@ -618,6 +630,10 @@ class Idele(MultiplicativeGroupElement):
             False
             sage: J(1, {2: (4, 0)}) == J(1, {97: (1, 0)})
             False
+
+        REFERENCES:
+
+        Section 5.4 of [Her2021].
         """
         from sage.structure.richcmp import op_EQ, op_NE
 
@@ -829,6 +845,10 @@ class Idele(MultiplicativeGroupElement):
               (2, a):       1/2*a * U(3)
               (3):          -1 * U(5)
               other primes: 1 * U(0)
+
+        REFERENCES:
+
+        Section Arithmetic in Section 3.6 of [Her2021].
         """
         infinite = self.infinite_part().copy()
         for i in range(len(infinite)):
@@ -1027,6 +1047,10 @@ class Idele(MultiplicativeGroupElement):
             True
             sage: u.is_very_integral()
             False
+
+        REFERENCES:
+
+        Section 4.3 of [Her2021].
         """
         O = self.parent().number_field().maximal_order()
         if self.has_exact_finite_part():
@@ -1178,6 +1202,10 @@ class Idele(MultiplicativeGroupElement):
               infinity_1:   2*I
               other primes: a^2
 
+        REFERENCES:
+
+        Section 9.3.1 of [Her2021].
+
         TESTS::
 
             sage: u.increase_precision([QQ])
@@ -1282,6 +1310,10 @@ class Idele(MultiplicativeGroupElement):
         Once we have such a `v`, we return the image of the ideal
         `\prod_{p} p^{ord_p(v)}` in ``G``, where `p` ranges over the stored
         primes of `v`.
+
+        REFERENCES:
+
+        Section 4.5 of [Her2021].
         """
         from sage.misc.misc_c import prod
 
@@ -1351,6 +1383,10 @@ class Idele(MultiplicativeGroupElement):
 class Ideles(UniqueRepresentation, Group):
     """
     Idèle Group of a Number Field
+
+    REFERENCES:
+
+    Section 3.6 of [Her2021].
 
     .. automethod:: _element_constructor_
     """
@@ -1586,6 +1622,10 @@ class Ideles(UniqueRepresentation, Group):
               (5, a + 2):   a^2 * U(1)
               (7, a):       (a + 1) * U(5)
               other primes: 1 * U(0)
+
+        REFERENCES:
+
+        Section 4.2 of [Her2021].
         """
         K = self.number_field()
         r, s = K.signature()
@@ -1669,6 +1709,10 @@ class Ideles(UniqueRepresentation, Group):
               (15053, a + 13254):   -94683370*a * U(0)
               (11483827, a + 1242116):      -22108284774109*a * U(0)
               other primes: 1 * U(0)
+
+        REFERENCES:
+
+        Section 4.5 of [Her2021].
         """
         K = self.number_field()
         G = r.parent()  # ray class group of r

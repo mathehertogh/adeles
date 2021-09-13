@@ -202,6 +202,10 @@ class MultiplicativePAdic(MultiplicativeGroupElement):
     r"""
     Multiplicative `p`-adic, for `p` a finite prime of a number field
 
+    REFERENCES:
+
+    Section 3.5 of [Her2021].
+
     .. automethod:: _mul_
     
     .. automethod:: _div_
@@ -321,6 +325,10 @@ class MultiplicativePAdic(MultiplicativeGroupElement):
             1/3*a * U(4)
             sage: M(1, 0) * M(-1, 3)
             -1 * U(0)
+
+        REFERENCES:
+
+        Section Arithmetic in Section 3.5 of [Her2021].
         """
         center = self.center() * other.center()
         prec = min(self.prec(), other.prec())
@@ -348,6 +356,10 @@ class MultiplicativePAdic(MultiplicativeGroupElement):
             2
             sage: M(a^5, 2) / M(a^4, 3)
             49/976 * U(2)
+
+        REFERENCES:
+
+        Section Arithmetic in Section 3.5 of [Her2021].
         """
         return self * other.inverse()
 
@@ -385,6 +397,10 @@ class MultiplicativePAdic(MultiplicativeGroupElement):
             False
             sage: M(a, 0) == 3*a+1
             True
+
+        REFERENCES:
+
+        Section 5.4 of [Her2021].
         """
         from sage.structure.richcmp import op_EQ, op_NE
         if op == op_EQ:
@@ -456,6 +472,10 @@ class MultiplicativePAdic(MultiplicativeGroupElement):
             -1/10*a * U(0)
             sage: M(-a/3, oo).inverse()
             3/10*a^2
+
+        REFERENCES:
+
+        Section Arithmetic in Section 3.5 of [Her2021].
         """
         return self.__class__(self.parent(), 1/self.center(), self.prec())
 
@@ -586,6 +606,10 @@ class MultiplicativePAdic(MultiplicativeGroupElement):
 class MultiplicativePAdics(UniqueRepresentation, Group):
     """
     Group of Multiplicative `p`-adics, for `p` a finite prime of a number field
+
+    REFERENCES:
+
+    Section 3.5 of [Her2021].
 
     .. automethod:: _element_constructor_
     """
