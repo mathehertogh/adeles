@@ -251,6 +251,8 @@ properties, design choices and two applications can be found there.</p>
 <em class="property">class </em><code class="sig-prename descclassname">adeles.idele.</code><code class="sig-name descname">Idele</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em>, <em class="sig-param"><span class="n">infinite</span></em>, <em class="sig-param"><span class="n">finite</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.idele.Idele" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sage.structure.element.MultiplicativeGroupElement</span></code></p>
 <p>Idèle over a Number Field</p>
+<p>REFERENCES:</p>
+<p>Section 3.6 of [Her2021].</p>
 <dl class="py method">
 <dt id="adeles.idele.Idele.__init__">
 <code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em>, <em class="sig-param"><span class="n">infinite</span></em>, <em class="sig-param"><span class="n">finite</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.idele.Idele.__init__" title="Permalink to this definition">¶</a></dt>
@@ -422,6 +424,8 @@ Idèle with values:
   other primes: 1 * U(0)
 </pre></div>
 </div>
+<p>REFERENCES:</p>
+<p>Section Arithmetic in Section 3.6 of [Her2021].</p>
 </dd></dl>
 
 <dl class="py method">
@@ -475,6 +479,8 @@ Idèle with values:
   other primes: 1 * U(0)
 </pre></div>
 </div>
+<p>REFERENCES:</p>
+<p>Section Arithmetic in Section 3.6 of [Her2021].</p>
 </dd></dl>
 
 <dl class="py method">
@@ -515,6 +521,8 @@ have non-empty intersection.</p>
 <span class="kc">False</span>
 </pre></div>
 </div>
+<p>REFERENCES:</p>
+<p>Section 5.4 of [Her2021].</p>
 </dd></dl>
 
 <dl class="py method">
@@ -549,6 +557,39 @@ have non-empty intersection.</p>
 <span class="n">sage</span><span class="p">:</span> <span class="n">v</span> <span class="o">=</span> <span class="n">J</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">{</span><span class="mi">2</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)})</span>
 <span class="n">sage</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">has_exact_finite_part</span><span class="p">()</span>
 <span class="kc">False</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="adeles.idele.Idele.ideal">
+<code class="sig-name descname">ideal</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adeles.idele.Idele.ideal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the fractional ideal with the same valuations as this idèle</p>
+<p>OUTPUT:</p>
+<p>The fractional ideal <span class="math notranslate nohighlight">\(I\)</span> of our base field <span class="math notranslate nohighlight">\(K\)</span> such that <span class="math notranslate nohighlight">\(I\)</span> has the
+same valuation as this idèle at every finite prime of <span class="math notranslate nohighlight">\(K\)</span> if <span class="math notranslate nohighlight">\(K \neq
+\QQ\)</span>. If <span class="math notranslate nohighlight">\(K = \QQ\)</span>, then we return the rational number that has the same
+valuations as this idèle at every prime number.</p>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">J</span> <span class="o">=</span> <span class="n">Ideles</span><span class="p">(</span><span class="n">QQ</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">J</span><span class="p">(</span><span class="mi">9</span><span class="o">/</span><span class="mi">7</span><span class="p">)</span><span class="o">.</span><span class="n">ideal</span><span class="p">()</span>
+<span class="mi">9</span><span class="o">/</span><span class="mi">7</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">u</span> <span class="o">=</span> <span class="n">J</span><span class="p">(</span><span class="mf">3.1415</span><span class="p">,</span> <span class="p">{</span><span class="mi">2</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="mi">5</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">)})</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">ideal</span><span class="p">()</span>
+<span class="mi">1</span><span class="o">/</span><span class="mi">5</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">K</span><span class="o">.&lt;</span><span class="n">a</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">NumberField</span><span class="p">(</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="o">+</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">Jk</span> <span class="o">=</span> <span class="n">Ideles</span><span class="p">(</span><span class="n">K</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">Jk</span><span class="p">(</span><span class="n">a</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">ideal</span><span class="p">()</span>
+<span class="n">Fractional</span> <span class="n">ideal</span> <span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">p2</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">prime_above</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">p3</span><span class="p">,</span> <span class="n">q3</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">primes_above</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">v</span> <span class="o">=</span> <span class="n">Jk</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">{</span><span class="n">p2</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">p3</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">q3</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">6</span><span class="p">,</span> <span class="mi">20</span><span class="p">)})</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">I</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">ideal</span><span class="p">();</span> <span class="n">I</span>
+<span class="n">Fractional</span> <span class="n">ideal</span> <span class="p">(</span><span class="mi">4</span><span class="o">/</span><span class="mi">3</span><span class="o">*</span><span class="n">a</span> <span class="o">-</span> <span class="mi">8</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="nb">all</span><span class="p">([</span><span class="n">I</span><span class="o">.</span><span class="n">valuation</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">==</span> <span class="n">v</span><span class="o">.</span><span class="n">valuation</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">K</span><span class="o">.</span><span class="n">primes_of_bounded_norm</span><span class="p">(</span><span class="mi">50</span><span class="p">)])</span>
+<span class="kc">True</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -633,6 +674,8 @@ precision of <code class="docutils literal notranslate"><span class="pre">u</spa
   <span class="n">other</span> <span class="n">primes</span><span class="p">:</span> <span class="n">a</span><span class="o">^</span><span class="mi">2</span>
 </pre></div>
 </div>
+<p>REFERENCES:</p>
+<p>Section 9.3.1 of [Her2021].</p>
 <p>TESTS:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">increase_precision</span><span class="p">([</span><span class="n">QQ</span><span class="p">])</span>
 <span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
@@ -677,6 +720,8 @@ Idèle with values:
   other primes: 1 * U(0)
 </pre></div>
 </div>
+<p>REFERENCES:</p>
+<p>Section Arithmetic in Section 3.6 of [Her2021].</p>
 </dd></dl>
 
 <dl class="py method">
@@ -727,6 +772,8 @@ of <span class="math notranslate nohighlight">\(K\)</span>.</p>
 <span class="kc">False</span>
 </pre></div>
 </div>
+<p>REFERENCES:</p>
+<p>Section 4.3 of [Her2021].</p>
 </dd></dl>
 
 <dl class="py method">
@@ -835,6 +882,8 @@ Theorem (cf. <code class="xref py py-func docutils literal notranslate"><span cl
 <p>Once we have such a <span class="math notranslate nohighlight">\(v\)</span>, we return the image of the ideal
 <span class="math notranslate nohighlight">\(\prod_{p} p^{ord_p(v)}\)</span> in <code class="docutils literal notranslate"><span class="pre">G</span></code>, where <span class="math notranslate nohighlight">\(p\)</span> ranges over the stored
 primes of <span class="math notranslate nohighlight">\(v\)</span>.</p>
+<p>REFERENCES:</p>
+<p>Section 4.5 of [Her2021].</p>
 </dd></dl>
 
 <dl class="py method">
@@ -939,6 +988,8 @@ integer such that this idèle equals <span class="math notranslate nohighlight">
 <em class="property">class </em><code class="sig-prename descclassname">adeles.idele.</code><code class="sig-name descname">Ideles</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">K</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.idele.Ideles" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sage.structure.unique_representation.UniqueRepresentation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">sage.groups.group.Group</span></code></p>
 <p>Idèle Group of a Number Field</p>
+<p>REFERENCES:</p>
+<p>Section 3.6 of [Her2021].</p>
 <dl class="py method">
 <dt id="adeles.idele.Ideles._element_constructor_">
 <code class="sig-name descname">_element_constructor_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.idele.Ideles._element_constructor_" title="Permalink to this definition">¶</a></dt>
@@ -1066,6 +1117,8 @@ of our base field and <span class="math notranslate nohighlight">\(I\)</span> an
   <span class="n">other</span> <span class="n">primes</span><span class="p">:</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">U</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>REFERENCES:</p>
+<p>Section 4.2 of [Her2021].</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1132,6 +1185,8 @@ homomorphism <span class="math notranslate nohighlight">\(\phi: J \to G\)</span>
   <span class="n">other</span> <span class="n">primes</span><span class="p">:</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">U</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>REFERENCES:</p>
+<p>Section 4.5 of [Her2021].</p>
 </dd></dl>
 
 </dd></dl>

@@ -170,6 +170,7 @@ primes of number fields in general.</p>
 <h2>Adèles over Number Fields<a class="headerlink" href="#adeles-over-number-fields" title="Permalink to this headline">¶</a></h2>
 <p>Let’s create a non-trivial number field and the corresponding adèle ring.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">K</span><span class="o">.&lt;</span><span class="n">a</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">NumberField</span><span class="p">(</span><span class="n">x</span><span class="o">^</span><span class="mi">5</span> <span class="o">-</span> <span class="n">x</span><span class="o">^</span><span class="mi">3</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">Khat</span> <span class="o">=</span> <span class="n">ProfiniteNumbers</span><span class="p">(</span><span class="n">K</span><span class="p">)</span>
 <span class="n">sage</span><span class="p">:</span> <span class="n">Ak</span> <span class="o">=</span> <span class="n">Adeles</span><span class="p">(</span><span class="n">K</span><span class="p">);</span> <span class="n">Ak</span>
 <span class="n">Adèle</span> <span class="n">Ring</span> <span class="n">of</span> <span class="n">Number</span> <span class="n">Field</span> <span class="ow">in</span> <span class="n">a</span> <span class="k">with</span> <span class="n">defining</span> <span class="n">polynomial</span> <span class="n">x</span><span class="o">^</span><span class="mi">5</span> <span class="o">-</span> <span class="n">x</span><span class="o">^</span><span class="mi">3</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span>
 <span class="n">sage</span><span class="p">:</span> <span class="n">K</span><span class="o">.</span><span class="n">signature</span><span class="p">()</span>
@@ -235,6 +236,8 @@ properties, design choices and two applications can be found there.</p>
 <em class="property">class </em><code class="sig-prename descclassname">adeles.adele.</code><code class="sig-name descname">Adele</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em>, <em class="sig-param"><span class="n">infinite</span></em>, <em class="sig-param"><span class="n">finite</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.adele.Adele" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sage.structure.element.CommutativeAlgebraElement</span></code></p>
 <p>Adèle over a Number Field</p>
+<p>REFERENCES:</p>
+<p>Section 3.4 of [Her2021].</p>
 <dl class="py method">
 <dt id="adeles.adele.Adele.__init__">
 <code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em>, <em class="sig-param"><span class="n">infinite</span></em>, <em class="sig-param"><span class="n">finite</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.adele.Adele.__init__" title="Permalink to this definition">¶</a></dt>
@@ -320,6 +323,8 @@ sage: a[5]
 O(5^0)
 </pre></div>
 </div>
+<p>REFERENCES:</p>
+<p>Section 4.6 of [Her2021].</p>
 </dd></dl>
 
 <dl class="py method">
@@ -345,6 +350,8 @@ sage: c + d
 (3.5000000000000000? + 1*I, 0, 0 mod (100))
 </pre></div>
 </div>
+<p>REFERENCES:</p>
+<p>Section Arithmetic in Section 3.4 of [Her2021].</p>
 </dd></dl>
 
 <dl class="py method">
@@ -374,6 +381,8 @@ sage: b - a
 (-0.73205080756887720?*I, -3/4*a mod (-10*a))
 </pre></div>
 </div>
+<p>REFERENCES:</p>
+<p>Section Arithmetic in Section 3.4 of [Her2021].</p>
 </dd></dl>
 
 <dl class="py method">
@@ -399,6 +408,8 @@ sage: a * b
 (-0.86602540378443860? - 0.50000000000000000?*I, -a - 1 mod (-10*a - 10))
 </pre></div>
 </div>
+<p>REFERENCES:</p>
+<p>Section Arithmetic in Section 3.4 of [Her2021].</p>
 </dd></dl>
 
 <dl class="py method">
@@ -439,6 +450,8 @@ is raised:</p>
 </pre></div>
 </div>
 </div>
+<p>REFERENCES:</p>
+<p>Section Arithmetic in Section 3.4 of [Her2021].</p>
 </dd></dl>
 
 <dl class="py method">
@@ -481,13 +494,15 @@ represented subsets have non-empty intersection.</p>
 <span class="kc">False</span>
 </pre></div>
 </div>
+<p>REFERENCES:</p>
+<p>Section 5.4 of [Her2021].</p>
 <p>TESTS:</p>
-<blockquote>
-<div><p>sage: b &lt; c
-Traceback (most recent call last):
-…
-NotImplementedError: only equality and inequality are implemented</p>
-</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">b</span> <span class="o">&lt;</span> <span class="n">c</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">NotImplementedError</span><span class="p">:</span> <span class="n">only</span> <span class="n">equality</span> <span class="ow">and</span> <span class="n">inequality</span> <span class="n">are</span> <span class="n">implemented</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -531,8 +546,8 @@ sage: a.infinite_part(2)
 </dd></dl>
 
 <dl class="py method">
-<dt id="adeles.adele.Adele.to_rational_adele_vector">
-<code class="sig-name descname">to_rational_adele_vector</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adeles.adele.Adele.to_rational_adele_vector" title="Permalink to this definition">¶</a></dt>
+<dt id="adeles.adele.Adele.to_rational_vector">
+<code class="sig-name descname">to_rational_vector</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adeles.adele.Adele.to_rational_vector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert this adèle to a vector of <span class="math notranslate nohighlight">\(\QQ\)</span>-adèles</p>
 <p>Let <span class="math notranslate nohighlight">\(K\)</span> be our base number field, <span class="math notranslate nohighlight">\(\alpha\)</span> its generator over <span class="math notranslate nohighlight">\(\QQ\)</span> and
 <span class="math notranslate nohighlight">\(n\)</span> its degree over <span class="math notranslate nohighlight">\(\QQ\)</span>. Then every <span class="math notranslate nohighlight">\(x \in \Bold{A}_K\)</span> can be written
@@ -551,7 +566,7 @@ with the projection to the <span class="math notranslate nohighlight">\(i\)</spa
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>sage: K.&lt;a&gt; = NumberField(x^3-2)
 sage: AK = Adeles(K)
 sage: b = AK([-7, 2+I], 1+2*a+3*a^2)
-sage: c = b.to_rational_adele_vector(); c
+sage: c = b.to_rational_vector(); c
 ((-1.00000000000000?, 1), (-1.92285836561943?, 2), (-2.25358945349955?, 3))
 </pre></div>
 </div>
@@ -567,8 +582,10 @@ sage: x[0] + x[1]*emb[1](a) + x[2]*emb[1](a^2)
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><a class="reference internal" href="profinite_number.html#adeles.profinite_number.ProfiniteNumber.to_profinite_rational_vector" title="adeles.profinite_number.ProfiniteNumber.to_profinite_rational_vector"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_profinite_rational_vector()</span></code></a></p>
+<p><a class="reference internal" href="profinite_number.html#adeles.profinite_number.ProfiniteNumber.to_rational_vector" title="adeles.profinite_number.ProfiniteNumber.to_rational_vector"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_rational_vector()</span></code></a></p>
 </div>
+<p>REFERENCES:</p>
+<p>Section 4.4 of [Her2021].</p>
 </dd></dl>
 
 </dd></dl>
@@ -578,6 +595,8 @@ sage: x[0] + x[1]*emb[1](a) + x[2]*emb[1](a^2)
 <em class="property">class </em><code class="sig-prename descclassname">adeles.adele.</code><code class="sig-name descname">Adeles</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">K</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.adele.Adeles" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sage.structure.unique_representation.UniqueRepresentation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">sage.rings.ring.CommutativeAlgebra</span></code></p>
 <p>Adèle Ring of a Number Field</p>
+<p>REFERENCES:</p>
+<p>Section 3.4 of [Her2021].</p>
 <dl class="py method">
 <dt id="adeles.adele.Adeles._element_constructor_">
 <code class="sig-name descname">_element_constructor_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.adele.Adeles._element_constructor_" title="Permalink to this definition">¶</a></dt>
@@ -697,6 +716,8 @@ sage: a[oo]
 <span class="kc">True</span>
 </pre></div>
 </div>
+<p>REFERENCES:</p>
+<p>Section 4.6 of [Her2021].</p>
 </dd></dl>
 
 <dl class="py method">
@@ -752,6 +773,8 @@ sage: a * u
 (-1.2500000000000000?, 7/10 mod 1)
 </pre></div>
 </div>
+<p>REFERENCES:</p>
+<p>Section 4.3 of [Her2021].</p>
 </dd></dl>
 
 </dd></dl>

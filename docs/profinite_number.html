@@ -246,6 +246,8 @@ there.</p>
 <em class="property">class </em><code class="sig-prename descclassname">adeles.profinite_number.</code><code class="sig-name descname">ProfiniteNumber</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em>, <em class="sig-param"><span class="n">numerator</span></em>, <em class="sig-param"><span class="n">denominator</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.profinite_number.ProfiniteNumber" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sage.structure.element.CommutativeAlgebraElement</span></code></p>
 <p>Profinite Number of a Number Field</p>
+<p>REFERENCES:</p>
+<p>Section 3.2 of [Her2021].</p>
 <dl class="py method">
 <dt id="adeles.profinite_number.ProfiniteNumber.__init__">
 <code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em>, <em class="sig-param"><span class="n">numerator</span></em>, <em class="sig-param"><span class="n">denominator</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#adeles.profinite_number.ProfiniteNumber.__init__" title="Permalink to this definition">¶</a></dt>
@@ -342,6 +344,8 @@ i.e. containig <span class="math notranslate nohighlight">\(\alpha + \beta\)</sp
 <span class="o">-</span><span class="mi">3749</span><span class="o">/</span><span class="mi">7</span><span class="o">*</span><span class="n">a</span><span class="o">^</span><span class="mi">2</span> <span class="n">mod</span> <span class="p">(</span><span class="o">-</span><span class="mi">20</span><span class="o">/</span><span class="mi">7</span><span class="o">*</span><span class="n">a</span> <span class="o">-</span> <span class="mi">3</span><span class="o">/</span><span class="mi">7</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>REFERENCES:</p>
+<p>Section Arithmetic in Section 3.2 of [Her2021].</p>
 </dd></dl>
 
 <dl class="py method">
@@ -370,6 +374,8 @@ and <span class="math notranslate nohighlight">\(b\)</span>, i.e. containig <spa
 <span class="n">a</span> <span class="o">-</span> <span class="mi">2</span> <span class="n">mod</span> <span class="p">(</span><span class="mi">5</span><span class="o">*</span><span class="n">a</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>REFERENCES:</p>
+<p>Section Arithmetic in Section 3.2 of [Her2021].</p>
 </dd></dl>
 
 <dl class="py method">
@@ -396,6 +402,8 @@ and <span class="math notranslate nohighlight">\(b\)</span>, i.e. containig <spa
 <span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="n">zeta5</span> <span class="n">mod</span> <span class="p">(</span><span class="mi">9</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>REFERENCES:</p>
+<p>Section Arithmetic in Section 3.2 of [Her2021].</p>
 </dd></dl>
 
 <dl class="py method">
@@ -421,6 +429,8 @@ unique profinite number whose represented subset equals <span class="math notran
 <span class="n">zeta3</span> <span class="n">mod</span> <span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">zeta3</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>REFERENCES:</p>
+<p>Section Arithmetic in Section 3.2 of [Her2021].</p>
 <p>TESTS:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">Khat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span> <span class="o">/</span> <span class="n">Khat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
 <span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
@@ -470,6 +480,8 @@ unique profinite number whose represented subset equals <span class="math notran
 </pre></div>
 </div>
 </div>
+<p>REFERENCES:</p>
+<p>Section 5.4 of [Her2021].</p>
 </dd></dl>
 
 <dl class="py method">
@@ -595,14 +607,17 @@ So this profinite integer represents <span class="math notranslate nohighlight">
 </dd></dl>
 
 <dl class="py method">
-<dt id="adeles.profinite_number.ProfiniteNumber.to_profinite_rational_vector">
-<code class="sig-name descname">to_profinite_rational_vector</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adeles.profinite_number.ProfiniteNumber.to_profinite_rational_vector" title="Permalink to this definition">¶</a></dt>
+<dt id="adeles.profinite_number.ProfiniteNumber.to_rational_vector">
+<code class="sig-name descname">to_rational_vector</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adeles.profinite_number.ProfiniteNumber.to_rational_vector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert this profinite number to a vector of profinite <span class="math notranslate nohighlight">\(\QQ\)</span>-numbers</p>
-<p>Let <span class="math notranslate nohighlight">\(K\)</span> be our base number field, <span class="math notranslate nohighlight">\(\alpha\)</span> its generator over <span class="math notranslate nohighlight">\(\QQ\)</span> and
-<span class="math notranslate nohighlight">\(n\)</span> its degree over <span class="math notranslate nohighlight">\(\QQ\)</span>. Then every <span class="math notranslate nohighlight">\(x \in \hat{K}\)</span> can be written
-uniquely as <span class="math notranslate nohighlight">\(x = \sum_{i=0}^{n-1} x_i \alpha^i\)</span> with
-<span class="math notranslate nohighlight">\(x_i \in \hat{\QQ}\)</span>. This induces a map <span class="math notranslate nohighlight">\(\phi: \hat{K} \to \hat{\QQ}^n\)</span>.</p>
-<p>This method implements <span class="math notranslate nohighlight">\(\phi\)</span>.</p>
+<p>Let <span class="math notranslate nohighlight">\(K\)</span> be our base number field. This method requires <code class="docutils literal notranslate"><span class="pre">K.gen()</span></code> to be
+integral.</p>
+<p>Denote <code class="docutils literal notranslate"><span class="pre">K.gen()</span></code> by <span class="math notranslate nohighlight">\(\alpha\)</span> and <code class="docutils literal notranslate"><span class="pre">K.degree()</span></code> by <span class="math notranslate nohighlight">\(n\)</span>. Then
+<span class="math notranslate nohighlight">\(\{1, \alpha, \alpha^2, ..., \alpha^{n-1}\}\)</span> is a <span class="math notranslate nohighlight">\(\hat{\QQ}\)</span>-basis of
+<span class="math notranslate nohighlight">\(\hat{K}\)</span>. Hence there is a map <span class="math notranslate nohighlight">\(\phi: \hat{K} \to \hat{\QQ}^n\)</span> that
+maps <span class="math notranslate nohighlight">\(x \in \hat{K}\)</span> to the unique <span class="math notranslate nohighlight">\((x_0, x_1, ..., x_{n-1}) \in
+\hat{\QQ}^n\)</span> such that <span class="math notranslate nohighlight">\(x = \sum_{i=0}^{n-1} x_i \alpha^i\)</span>. This method
+implements <span class="math notranslate nohighlight">\(\phi\)</span>.</p>
 <p>OUTPUT:</p>
 <p>A vector <span class="math notranslate nohighlight">\((x_0, ..., x_{n-1})\)</span> of profinite <span class="math notranslate nohighlight">\(\QQ\)</span>-integers such that the
 following holds. Write <span class="math notranslate nohighlight">\(\phi_i: \hat{K} \to \hat{\QQ}\)</span> for <span class="math notranslate nohighlight">\(\phi\)</span>
@@ -611,11 +626,11 @@ composed with the projection to the <span class="math notranslate nohighlight">\
 <p>EXAMPLES:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">K</span><span class="o">.&lt;</span><span class="n">a</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">NumberField</span><span class="p">(</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="o">-</span><span class="mi">3</span><span class="p">)</span>
 <span class="n">sage</span><span class="p">:</span> <span class="n">Khat</span> <span class="o">=</span> <span class="n">ProfiniteNumbers</span><span class="p">(</span><span class="n">K</span><span class="p">)</span>
-<span class="n">sage</span><span class="p">:</span> <span class="n">Khat</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">9</span> <span class="o">+</span> <span class="mi">7</span><span class="o">*</span><span class="n">a</span><span class="p">)</span><span class="o">.</span><span class="n">to_profinite_rational_vector</span><span class="p">()</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">Khat</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">9</span> <span class="o">+</span> <span class="mi">7</span><span class="o">*</span><span class="n">a</span><span class="p">)</span><span class="o">.</span><span class="n">to_rational_vector</span><span class="p">()</span>
 <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">9</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
 <span class="n">sage</span><span class="p">:</span> <span class="n">b</span> <span class="o">=</span> <span class="n">Khat</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
-<span class="n">sage</span><span class="p">:</span> <span class="n">b0</span><span class="p">,</span> <span class="n">b1</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">to_profinite_rational_vector</span><span class="p">();</span> <span class="n">b0</span><span class="p">,</span> <span class="n">b1</span>
-<span class="p">(</span><span class="mi">0</span> <span class="n">mod</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">1</span> <span class="n">mod</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">b0</span><span class="p">,</span> <span class="n">b1</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">to_rational_vector</span><span class="p">();</span> <span class="n">b0</span><span class="p">,</span> <span class="n">b1</span>
+<span class="p">(</span><span class="mi">0</span> <span class="n">mod</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">1</span> <span class="n">mod</span> <span class="mi">6</span><span class="p">)</span>
 <span class="n">sage</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">represents</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
 <span class="kc">True</span>
 <span class="n">sage</span><span class="p">:</span> <span class="n">b0</span><span class="o">.</span><span class="n">represents</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">vector</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> <span class="n">b1</span><span class="o">.</span><span class="n">represents</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">vector</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
@@ -630,8 +645,8 @@ composed with the projection to the <span class="math notranslate nohighlight">\
 <span class="n">sage</span><span class="p">:</span> <span class="n">Khat</span> <span class="o">=</span> <span class="n">ProfiniteNumbers</span><span class="p">(</span><span class="n">K</span><span class="p">)</span>
 <span class="n">sage</span><span class="p">:</span> <span class="n">b</span> <span class="o">=</span> <span class="n">Khat</span><span class="p">(</span><span class="n">a</span><span class="o">^</span><span class="mi">2</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="o">*</span><span class="n">a</span><span class="p">);</span> <span class="n">b</span>
 <span class="n">a</span><span class="o">^</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="o">/</span><span class="mi">3</span> <span class="n">mod</span> <span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">a</span><span class="p">)</span>
-<span class="n">sage</span><span class="p">:</span> <span class="n">c</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">to_profinite_rational_vector</span><span class="p">();</span> <span class="n">c</span>
-<span class="p">(</span><span class="mi">8</span><span class="o">/</span><span class="mi">3</span> <span class="n">mod</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span> <span class="n">mod</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">7</span> <span class="n">mod</span> <span class="mi">3</span><span class="o">/</span><span class="mi">7</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">c</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">to_rational_vector</span><span class="p">();</span> <span class="n">c</span>
+<span class="p">(</span><span class="mi">8</span><span class="o">/</span><span class="mi">3</span> <span class="n">mod</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span> <span class="n">mod</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span> <span class="n">mod</span> <span class="mi">3</span><span class="p">)</span>
 <span class="n">sage</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">represents</span><span class="p">(</span><span class="n">a</span><span class="o">^</span><span class="mi">2</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
 <span class="kc">True</span>
 <span class="n">sage</span><span class="p">:</span> <span class="nb">all</span><span class="p">([</span><span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">represents</span><span class="p">((</span><span class="n">a</span><span class="o">^</span><span class="mi">2</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">vector</span><span class="p">()[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)])</span>
@@ -642,9 +657,19 @@ composed with the projection to the <span class="math notranslate nohighlight">\
 <span class="kc">True</span>
 </pre></div>
 </div>
-<p>TESTS:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">Qhat</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">to_profinite_rational_vector</span><span class="p">()</span>
+<p>Base field <span class="math notranslate nohighlight">\(\QQ\)</span> is allowed as well:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">Qhat</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">to_rational_vector</span><span class="p">()</span>
 <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span> <span class="n">mod</span> <span class="mi">10</span><span class="p">,)</span>
+</pre></div>
+</div>
+<p>REFERENCES:</p>
+<p>Section 4.4 of [Her2021].</p>
+<p>TESTS:</p>
+<p>Check for a previous bug with <span class="math notranslate nohighlight">\([O:\ZZ[\alpha]] &gt; 1\)</span>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">K</span><span class="o">.&lt;</span><span class="n">a</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">NumberField</span><span class="p">(</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">Khat</span> <span class="o">=</span> <span class="n">ProfiniteNumbers</span><span class="p">(</span><span class="n">K</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">Khat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">to_rational_vector</span><span class="p">()</span>
+<span class="p">(</span><span class="mi">0</span> <span class="n">mod</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span> <span class="n">mod</span> <span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
