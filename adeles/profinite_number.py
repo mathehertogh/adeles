@@ -754,12 +754,15 @@ class ProfiniteNumber(CommutativeAlgebraElement):
         r"""
         Convert this profinite number to a vector of profinite `\QQ`-numbers
     
-        Let `K` be our base number field, `\alpha` its generator over `\QQ` and
-        `n` its degree over `\QQ`. Then every `x \in \hat{K}` can be written
-        uniquely as `x = \sum_{i=0}^{n-1} x_i \alpha^i` with
-        `x_i \in \hat{\QQ}`. This induces a map `\phi: \hat{K} \to \hat{\QQ}^n`.
+        Let `K` be our base number field. This method requires ``K.gen()`` to be
+        integral.
 
-        This method implements `\phi`.
+        Denote ``K.gen()`` by `\alpha` and ``K.degree()`` by `n`. Then
+        `\{1, \alpha, \alpha^2, ..., \alpha^{n-1}\}` is a `\hat{\QQ}`-basis of
+        `\hat{K}`. Hence there is a map `\phi: \hat{K} \to \hat{\QQ}^n` that
+        maps `x \in \hat{K}` to the unique `(x_0, x_1, ..., x_{n-1}) \in
+        \hat{\QQ}^n` such that `x = \sum_{i=0}^{n-1} x_i \alpha^i`. This method
+        implements `\phi`.
         
         OUTPUT:
 
@@ -776,7 +779,7 @@ class ProfiniteNumber(CommutativeAlgebraElement):
             (1/9, 7)
             sage: b = Khat(a, 6)
             sage: b0, b1 = b.to_rational_vector(); b0, b1
-            (0 mod 6, 1 mod 2)
+            (0 mod 6, 1 mod 6)
             sage: b.represents(a)
             True
             sage: b0.represents(a.vector()[0]) and b1.represents(a.vector()[1])
@@ -793,7 +796,7 @@ class ProfiniteNumber(CommutativeAlgebraElement):
             sage: b = Khat(a^2-1/3, 3*a); b
             a^2 - 1/3 mod (3*a)
             sage: c = b.to_rational_vector(); c
-            (8/3 mod 3, 0 mod 3, 1/7 mod 3/7)
+            (8/3 mod 3, 0 mod 3, 1 mod 3)
             sage: b.represents(a^2-1/3)
             True
             sage: all([c[i].represents((a^2-1/3).vector()[i]) for i in range(3)])
@@ -803,12 +806,22 @@ class ProfiniteNumber(CommutativeAlgebraElement):
             sage: all([c[i].represents((-2*a^2-1/3).vector()[i]) for i in range(3)])
             True
 
-        TESTS::
+        Base field `\QQ` is allowed as well::
 
             sage: Qhat(1/2, 10).to_rational_vector()
             (1/2 mod 10,)
+
+        TESTS:
+
+        Check for a previous bug with `[O:\ZZ[\alpha]] > 1`::
+
+            sage: K.<a> = NumberField(x^2-5)
+            sage: Khat = ProfiniteNumbers(K)
+            sage: Khat(1, 2).to_rational_vector()
+            (0 mod 1, 0 mod 1)
         """
         K = self.parent().base()
+        n = K.degree()
 
         if K is QQ:
             return (self,)
@@ -816,21 +829,22 @@ class ProfiniteNumber(CommutativeAlgebraElement):
         if self.modulus() == 0:
             return vector(Qhat, self.value().vector())
         
-        # We compute the set of (rational) prime numbers above which a prime of
-        # K exists at which our modulus has non-zero valuation.
-        primes = set([ZZ(P.gens_two()[0]) for P in self.modulus().prime_factors()])
+        # Compute the largest rational number `r` such that `m \subset rO`, with
+        # `m` the modulus of ``self`` and `O` the ring of integers of `K`.
+        # This `r` equals `1/s` where `s` is the positive generator of
+        # `1/m \cap \QQ`.
+        r = QQ(1 / (1/self.modulus()).gens_two()[0])
 
-        I = self.modulus()
-        result = []
-        for i in range(K.absolute_degree()):
-            modulus = 1
-            for p in primes:
-                e = min([I.valuation(P) // K(p).valuation(P) for P in K.primes_above(p)])
-                modulus *= p**e
-            result.append(Qhat(self.value().vector()[i], modulus))
-            I /= K.gen()
+        # Compute the index of `\ZZ[\alpha]` in the maximal order `O` of `K`.
+        O = K.maximal_order()
+        ZZalpha = K.order(K.gen())
+        index = ZZalpha.index_in(O)
+        
+        modulus = r / index
 
-        return vector(result)
+        values = self.value().vector()
+
+        return vector([Qhat(values[i], modulus) for i in range(n)])
 
 
 class ProfiniteNumbers(UniqueRepresentation, CommutativeAlgebra):
