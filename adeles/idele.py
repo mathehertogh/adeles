@@ -978,6 +978,50 @@ class Idele(MultiplicativeGroupElement):
             return self.finite_part().valuation(prime)
         return self[prime].valuation()
 
+    def ideal(self):
+        r"""
+        Return the fractional ideal with the same valuations as this idèle
+        
+        OUTPUT: 
+
+        The fractional ideal `I` of our base field `K` such that `I` has the
+        same valuation as this idèle at every finite prime of `K` if `K \neq
+        \QQ`. If `K = \QQ`, then we return the rational number that has the same
+        valuations as this idèle at every prime number.
+
+        EXAMPLES::
+
+            sage: J = Ideles(QQ)
+            sage: J(9/7).ideal()
+            9/7
+            sage: u = J(3.1415, {2: (3, 2), 5: (1/5, 0)})
+            sage: u.ideal()
+            1/5
+
+        ::
+
+            sage: K.<a> = NumberField(x^2+5)
+            sage: Jk = Ideles(K)
+            sage: Jk(a-1).ideal()
+            Fractional ideal (a - 1)
+            sage: p2 = K.prime_above(2)
+            sage: p3, q3 = K.primes_above(3)
+            sage: v = Jk(-1, {p2: (4, 3), p3: (3, 10), q3: (1/6, 20)})
+            sage: I = v.ideal(); I
+            Fractional ideal (4/3*a - 8/3)
+            sage: all([I.valuation(p) == v.valuation(p) for p in K.primes_of_bounded_norm(50)])
+            True
+        """
+        if self.has_exact_finite_part():
+            K = self.parent().number_field()
+            if K is QQ:
+                return self.finite_part()
+            else:
+                return K.ideal(self.finite_part())
+        else:
+            from sage.misc.misc_c import prod
+            return prod([p**self.valuation(p) for p in self.finite_part()])
+
     def has_exact_finite_part(self):
         """
         Return whether or not this idèle has exact finite part
