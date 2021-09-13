@@ -643,7 +643,7 @@ class Adele(CommutativeAlgebraElement):
         """
         return self._finite
 
-    def to_rational_adele_vector(self):
+    def to_rational_vector(self):
         r"""
         Convert this adèle to a vector of `\QQ`-adèles
     
@@ -669,7 +669,7 @@ class Adele(CommutativeAlgebraElement):
             sage: K.<a> = NumberField(x^3-2)
             sage: AK = Adeles(K)
             sage: b = AK([-7, 2+I], 1+2*a+3*a^2)
-            sage: c = b.to_rational_adele_vector(); c
+            sage: c = b.to_rational_vector(); c
             ((-1.00000000000000?, 1), (-1.92285836561943?, 2), (-2.25358945349955?, 3))
 
         Let us check that these infinite parts are correct::
@@ -684,7 +684,7 @@ class Adele(CommutativeAlgebraElement):
 
         .. SEEALSO::
 
-            :meth:`~adeles.profinite_number.ProfiniteNumber.to_profinite_rational_vector`
+            :meth:`~adeles.profinite_number.ProfiniteNumber.to_rational_vector`
         """
         from sage.modules.free_module_element import vector
         from sage.matrix.constructor import matrix
@@ -710,7 +710,7 @@ class Adele(CommutativeAlgebraElement):
 
         infinites = A.solve_right(Y)
         
-        finites = self.finite_part().to_profinite_rational_vector()
+        finites = self.finite_part().to_rational_vector()
 
         A_Q = Adeles(QQ)
         return vector([A_Q([infinites[i]], finites[i]) for i in range(n)])

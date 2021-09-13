@@ -750,7 +750,7 @@ class ProfiniteNumber(CommutativeAlgebraElement):
         """
         return self.denominator() == 1
 
-    def to_profinite_rational_vector(self):
+    def to_rational_vector(self):
         r"""
         Convert this profinite number to a vector of profinite `\QQ`-numbers
     
@@ -772,10 +772,10 @@ class ProfiniteNumber(CommutativeAlgebraElement):
 
             sage: K.<a> = NumberField(x^2-3)
             sage: Khat = ProfiniteNumbers(K)
-            sage: Khat(1/9 + 7*a).to_profinite_rational_vector()
+            sage: Khat(1/9 + 7*a).to_rational_vector()
             (1/9, 7)
             sage: b = Khat(a, 6)
-            sage: b0, b1 = b.to_profinite_rational_vector(); b0, b1
+            sage: b0, b1 = b.to_rational_vector(); b0, b1
             (0 mod 6, 1 mod 2)
             sage: b.represents(a)
             True
@@ -792,7 +792,7 @@ class ProfiniteNumber(CommutativeAlgebraElement):
             sage: Khat = ProfiniteNumbers(K)
             sage: b = Khat(a^2-1/3, 3*a); b
             a^2 - 1/3 mod (3*a)
-            sage: c = b.to_profinite_rational_vector(); c
+            sage: c = b.to_rational_vector(); c
             (8/3 mod 3, 0 mod 3, 1/7 mod 3/7)
             sage: b.represents(a^2-1/3)
             True
@@ -805,7 +805,7 @@ class ProfiniteNumber(CommutativeAlgebraElement):
 
         TESTS::
 
-            sage: Qhat(1/2, 10).to_profinite_rational_vector()
+            sage: Qhat(1/2, 10).to_rational_vector()
             (1/2 mod 10,)
         """
         K = self.parent().base()

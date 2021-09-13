@@ -147,7 +147,7 @@ def shimura_connecting_homomorphism(u, output_prec=None):
 	# First we convert u to a vector of profinite QQ-numbers.
 	K = u.parent().number_field()
 	a = Adeles(K)(u)
-	t, s = a.finite_part().to_profinite_rational_vector()
+	t, s = a.finite_part().to_rational_vector()
 
 	# Next we compute the entries of the transpose of the matrix
 	# representing the multiplication by x map.
