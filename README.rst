@@ -2,7 +2,7 @@
 Computing with adèles and idèles
 --------------------------------
 
-This is a `SageMath <https://www.sagemath.org/>`_ package for computing with
+This is a `SageMath <https://www.sagemath.org/>`__ package for computing with
 adèles and idèles. It is based on and part of the master's thesis [Her2021].
 
 [Her2021] Mathé Hertogh, Computing with adèles and idèles, master's thesis,
@@ -62,14 +62,14 @@ Documentation
 -------------
 
 The documentation resides in the folder ``docs`` and is also hosted online at
-the following webpage: `<https://mathehertogh.github.io/adeles>`_.
+the following webpage: `<https://mathehertogh.github.io/adeles>`__.
 
 
 Installing the package
 ----------------------
 
 First of all you should make sure you have a recent version of `SageMath
-<https://www.sagemath.org/download.html>`_ installed, specifically *SageMath
+<https://www.sagemath.org/download.html>`__ installed, specifically *SageMath
 version 9.2 or newer*.
 
 Now run the command ::
@@ -98,7 +98,7 @@ To update to the latest stable version of this package, run ::
 	$ sage -pip install --upgrade adeles
 
 It might be the case that the GitHub repository
-`<https://github.com/mathehertogh/adeles>`_ contains an ever newer version.
+`<https://github.com/mathehertogh/adeles>`__ contains an ever newer version.
 To install that version, clone the repository ::
 
 	$ git clone https://github.com/mathehertogh/adeles.git
