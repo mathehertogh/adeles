@@ -62,7 +62,7 @@ Documentation
 -------------
 
 The documentation resides in the folder ``docs`` and is also hosted online at
-the following webpage: `https://mathehertogh.github.io/adeles`_.
+the following webpage: `<https://mathehertogh.github.io/adeles>`_.
 
 
 Installing the package
