@@ -237,6 +237,7 @@ from sage.arith.misc import factor
 from sage.rings.integer_ring import ZZ
 from sage.rings.rational_field import QQ
 from sage.rings.real_mpfi import RIF
+from sage.all import RR, CC
 from sage.rings.complex_interval_field import ComplexIntervalField
 from sage.rings.infinity import Infinity
 from sage.sets.primes import Primes
@@ -728,7 +729,9 @@ class Idele(MultiplicativeGroupElement):
         K = self.parent().number_field()
         K_oo = infinite_completions(K, fields_only=True)
 
-        if len(K_oo) == 1 and self._infinite in K_oo[0]:
+        if len(K_oo) == 1 and (self._infinite in K_oo[0] or
+                                (K_oo[0] is RIF and self._infinite in RR) or
+                                (K_oo[0] is CIF and self._infinite in CC)):
             self._infinite = [self._infinite]
         else:
             try:
@@ -741,7 +744,8 @@ class Idele(MultiplicativeGroupElement):
 
         for i in range(len(K_oo)):
             val = self._infinite[i]
-            if val not in K_oo[i] or val == 0:
+            if (not (val in K_oo[i] or (K_oo[i] is RIF and val in RR)
+                    or (K_oo[i] is CIF and val in CC)) or val == 0):
                 raise TypeError("{}th infinite value ({}) must be a non-zero element of {}".format(i, val, K_oo[i]))
             self._infinite[i] = K_oo[i](val)
 

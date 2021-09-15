@@ -212,7 +212,7 @@ from sage.structure.element import CommutativeAlgebraElement
 from sage.rings.ring import CommutativeAlgebra
 from sage.categories.homset import Hom
 from sage.sets.primes import Primes
-from sage.all import ComplexField
+from sage.all import ComplexField, RR
 from sage.rings.complex_interval_field import ComplexIntervalField
 from sage.rings.real_mpfi import RIF
 from sage.rings.integer_ring import ZZ
@@ -294,7 +294,7 @@ class Adele(CommutativeAlgebraElement):
             sage: Adele(A, [3.0, -1.0], 7)
             Traceback (most recent call last):
             ...
-            TypeError: infinite should have length 1
+            TypeError: infinite must have length 1
             sage: Adele(Ak, 1.0, 7)
             Traceback (most recent call last):
             ...
@@ -302,18 +302,20 @@ class Adele(CommutativeAlgebraElement):
             sage: Adele(A, [I], 7)
             Traceback (most recent call last):
             ...
-            TypeError: 0th infinite value (I) should lie in Real Interval Field with 53 bits of precision
+            TypeError: 0th infinite value (I) must lie in Real Interval Field with 53 bits of precision
             sage: Adele(A, [1.0], a+1)
             Traceback (most recent call last):
             ...
-            TypeError: finite should lie in Profinite Numbers of Rational Field
+            TypeError: finite must lie in Profinite Numbers of Rational Field
         """
         CommutativeAlgebraElement.__init__(self, parent)
 
         K = parent.base()
         K_oo = infinite_completions(K, fields_only=True)
 
-        if len(K_oo) == 1 and infinite in K_oo[0]:
+        if len(K_oo) == 1 and (infinite in K_oo[0] or
+                                (K_oo[0] is RIF and infinite in RR) or
+                                (K_oo[0] is CIF and infinite in CC)):
             self._infinite = [infinite]
         else:
             try:
@@ -326,7 +328,8 @@ class Adele(CommutativeAlgebraElement):
 
         for i in range(len(K_oo)):
             val = self._infinite[i]
-            if val not in K_oo[i]:
+            if not (val in K_oo[i] or (K_oo[i] is RIF and val in RR) or
+                    (K_oo[i] is CIF and val in CC)):
                 raise TypeError("{}th infinite value ({}) must lie in {}".format(i, val, K_oo[i]))
             self._infinite[i] = K_oo[i](val)
 
