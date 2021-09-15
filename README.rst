@@ -30,7 +30,7 @@ files:
 
 Part 2 corresponds to Chapter 7 of [Her2021] and implements profinite graphs,
 which visualize graphs of functions from and to the ring of rational profinite
-integers. In particular, the profinite Fibonacci function is implemnted. Part 2
+integers. In particular, the profinite Fibonacci function is implemented. Part 2
 consists of out two files:
 
 - ``profinite_function.py`` -- profinite functions, including Fibonacci
@@ -50,6 +50,21 @@ reciprocity law. It consists of the files:
 - ``hilbert.py`` -- example hilbert class field computations
 
 
+Getting acquainted with the package
+-----------------------------------
+
+Instead of browsing through the source code files, we recommend browsing the
+documentation, which is nicer formatted. It contains many examples to illustrate
+the functionality.
+
+
+Documentation
+-------------
+
+The documentation resides in the folder ``docs`` and is also hosted online at
+the following webpage: `https://mathehertogh.github.io/adeles`_.
+
+
 Installing the package
 ----------------------
 
@@ -57,19 +72,9 @@ First of all you should make sure you have a recent version of `SageMath
 <https://www.sagemath.org/download.html>`_ installed, specifically *SageMath
 version 9.2 or newer*.
 
-Download this repository to your local machine, for example using ``git``::
+Now run the command ::
 
-		$ git clone https://github.com/mathehertogh/adeles.git
-
-On your local machine, move to the root directory of the local copy of the
-repository. Then install the package with the command::
-
-		$ make
-
-This will both install the package and build its documentation.
-
-The documentation resides in the directory ``docs/html``: open the file
-``index.html`` in a browser to view the documentation.
+	$ sage -pip install adeles
 
 To use the package, from anywhere on your computer, open ``sage`` ::
 
@@ -85,12 +90,26 @@ Now you will have all functionality available, for example::
 		Adèle Ring of Rational Field
 
 
-Getting acquainted with the package
------------------------------------
+Updating the package
+--------------------
 
-Instead of browsing through the source code files, we recommend browsing the
-documentation, which is nicer formatted. It contains many examples to illustrate
-the functionality.
+To update to the latest stable version of this package, run ::
+
+	$ sage -pip install --upgrade adeles
+
+It might be the case that the GitHub repository
+`https://github.com/mathehertogh/adeles`_ contains an ever newer version.
+To install that version, clone the repository ::
+
+	$ git clone https://github.com/mathehertogh/adeles.git
+
+change to the root directory of the package ::
+
+	$ cd adeles
+
+and build the package using ::
+
+	$ make
 
 
 Background information
