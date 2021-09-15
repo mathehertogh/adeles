@@ -62,8 +62,7 @@ Documentation
 -------------
 
 The documentation resides in the folder ``docs`` and is also hosted online at
-the following webpage:
-`https://mathehertogh.github.io/adeles <https://mathehertogh.github.io/adeles>`_.
+the following webpage: `<https://mathehertogh.github.io/adeles>`_.
 
 
 Installing the package
@@ -99,7 +98,7 @@ To update to the latest stable version of this package, run ::
 	$ sage -pip install --upgrade adeles
 
 It might be the case that the GitHub repository
-`https://github.com/mathehertogh/adeles`_ contains an ever newer version.
+`<https://github.com/mathehertogh/adeles>`_ contains an ever newer version.
 To install that version, clone the repository ::
 
 	$ git clone https://github.com/mathehertogh/adeles.git
