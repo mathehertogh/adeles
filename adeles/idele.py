@@ -237,7 +237,8 @@ from sage.arith.misc import factor
 from sage.rings.integer_ring import ZZ
 from sage.rings.rational_field import QQ
 from sage.rings.real_mpfi import RIF
-from sage.all import RR, CC
+from sage.rings.real_mpfr import RR
+from sage.rings.complex_mpfr import ComplexField
 from sage.rings.complex_interval_field import ComplexIntervalField
 from sage.rings.infinity import Infinity
 from sage.sets.primes import Primes
@@ -247,6 +248,7 @@ from .completion import infinite_completions
 from .multiplicative_padic import is_finite_prime, MulPAdic, MultiplicativePAdics
 from .ray_class_group import Modulus, ray_class_group, RayClassGroupElement
 
+CC = ComplexField()
 CIF = ComplexIntervalField()
 oo = Infinity
 
