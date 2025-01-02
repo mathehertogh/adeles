@@ -27,7 +27,7 @@ AUTHORS:
 # ****************************************************************************
 
 from sage.categories.homset import Hom
-from sage.all import ComplexField
+from sage.rings.complex_mpfr import ComplexField
 from sage.rings.complex_interval_field import ComplexIntervalField
 from sage.rings.real_mpfi import RealIntervalField
 

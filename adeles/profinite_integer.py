@@ -1211,8 +1211,9 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
         """
         from .profinite_number import ProfiniteNumbers
         from sage.rings.quotient_ring import is_QuotientRing
-        from sage.rings.padics.generic_nodes import is_pAdicRing, is_pAdicField
-        is_pAdic = lambda P: is_pAdicRing(P) or is_pAdicField(P)
+        import sage.rings.abc
+
+        is_pAdic = lambda P: isinstance(P, (sage.rings.abc.pAdicRing, sage.rings.abc.pAdicField))
 
         if y is None:
             P = x.parent() if hasattr(x, "parent") else None
