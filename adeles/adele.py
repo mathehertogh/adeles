@@ -972,7 +972,6 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
         EXAMPLES::
 
             sage: A = Adeles(QQ)
-            sage: from idele import Ideles
             sage: J = Ideles(QQ)
             sage: u = J(6, {2: (1, 1), 3: (1/3, 0)})
             sage: A(u)
@@ -1137,7 +1136,6 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
             True
             sage: A._coerce_map_from_(CyclotomicField())
             False
-            sage: from idele import Ideles
             sage: J = Ideles(K)
             sage: A._coerce_map_from_(J)
             True

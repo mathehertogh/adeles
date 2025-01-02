@@ -155,7 +155,6 @@ of ``ProfiniteInteger``, as opposed to element of `\hat{O}`.
         2*a mod (15)
         sage: b.parent() is Ohat
         False
-        sage: from profinite_number import ProfiniteNumbers
         sage: b.parent() is ProfiniteNumbers(K)
         True
 
