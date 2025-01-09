@@ -1089,11 +1089,11 @@ class ProfiniteNumbers(UniqueRepresentation, CommutativeAlgebra):
             return self.element_class(self, x, y)
 
         if K is QQ:
-            from sage.rings.padics.generic_nodes import is_pAdicRing, is_pAdicField
+            import sage.rings.abc
             def is_pAdic(a):
                 """Utility function to check if ``a`` is a p-adic number"""
                 if not hasattr(a, "parent"): return False
-                return is_pAdicRing(a.parent()) or is_pAdicField(a.parent())
+                return isinstance(a.parent(), (sage.rings.abc.pAdicRing, sage.rings.abc.pAdicField))
             if isinstance(x, list) and all([is_pAdic(a) for a in x]):
                 return self._from_padic_numbers(x)
 

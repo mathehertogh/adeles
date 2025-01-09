@@ -212,9 +212,10 @@ from sage.structure.element import CommutativeAlgebraElement
 from sage.rings.ring import CommutativeAlgebra
 from sage.categories.homset import Hom
 from sage.sets.primes import Primes
-from sage.all import ComplexField, RR
+from sage.rings.complex_mpfr import ComplexField
 from sage.rings.complex_interval_field import ComplexIntervalField
 from sage.rings.real_mpfi import RIF
+from sage.rings.real_mpfr import RR
 from sage.rings.integer_ring import ZZ
 from sage.rings.rational_field import QQ
 from sage.rings.infinity import Infinity
@@ -948,12 +949,12 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
 
             # Is K==QQ and x a list of `p`-adics?
             if K is QQ:
-                from sage.rings.padics.generic_nodes import is_pAdicRing, is_pAdicField
+                import sage.rings.abc
                 def is_pAdic(a):
                     """Utility function to check if ``a`` is real or a p-adic number"""
                     if a in RIF: return True
                     if not hasattr(a, "parent"): return False
-                    return is_pAdicRing(a.parent()) or is_pAdicField(a.parent())
+                    return isinstance(a.parent(), (sage.rings.abc.pAdicRing, sage.rings.abc.pAdicField))
                 if isinstance(x, list) and all([is_pAdic(a) for a in x]):
                     return self._from_padics(x)
 
@@ -971,7 +972,6 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
         EXAMPLES::
 
             sage: A = Adeles(QQ)
-            sage: from idele import Ideles
             sage: J = Ideles(QQ)
             sage: u = J(6, {2: (1, 1), 3: (1/3, 0)})
             sage: A(u)
@@ -1136,7 +1136,6 @@ class Adeles(UniqueRepresentation, CommutativeAlgebra):
             True
             sage: A._coerce_map_from_(CyclotomicField())
             False
-            sage: from idele import Ideles
             sage: J = Ideles(K)
             sage: A._coerce_map_from_(J)
             True

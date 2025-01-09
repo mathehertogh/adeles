@@ -792,7 +792,7 @@ class RayClassGroup(AbelianGroup_class):
             subgroup_mat = None
 
         from cypari2.handle_error import PariError
-        from sage.misc.all import verbose
+        from sage.misc.verbose import verbose
 
         bnr = self._bnr
         if algorithm == 'stark_only':
