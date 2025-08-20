@@ -187,12 +187,13 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
+from sage.categories.algebras import Algebras
 from sage.categories.rings import Rings
 from sage.categories.integral_domains import IntegralDomains
 from sage.structure.unique_representation import UniqueRepresentation
 from sage.categories.pushout import ConstructionFunctor
-from sage.rings.ring import CommutativeAlgebra
 from sage.structure.element import CommutativeAlgebraElement
+from sage.structure.parent import Parent
 from sage.rings.integer_ring import ZZ
 from sage.rings.rational_field import QQ
 from sage.arith.misc import gcd
@@ -1016,7 +1017,7 @@ class ProfiniteInteger(CommutativeAlgebraElement):
         return min(lefts), max(rights)
 
 
-class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
+class ProfiniteIntegers(UniqueRepresentation, Parent):
     """
     Ring of profinite integers over a number field
 
@@ -1093,7 +1094,7 @@ class ProfiniteIntegers(UniqueRepresentation, CommutativeAlgebra):
             True
         """
         # Note that the input O is checked by __classcall__().
-        CommutativeAlgebra.__init__(self, O)
+        Parent.__init__(self, O, category=Algebras(O).Commutative())
 
     def _repr_(self):
         """
