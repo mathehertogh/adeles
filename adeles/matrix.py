@@ -209,7 +209,7 @@ def factor_GLQhat(M, detM):
             [0 mod 2 0 mod 2]
             sage: has_good_precision(M, 2)
             True
-    
+
     This function returns the following `A`::
 
         sage: A = factor_GLQhat(M, 2); A
@@ -225,7 +225,7 @@ def factor_GLQhat(M, detM):
         sage: N_2 = matrix(QQ, [[1, 0], [0, 1/4]]); N_2
         [  1   0]
         [  0 1/4]
-    
+
     and at `3` by ::
 
         sage: N_3 = matrix(QQ, [[0, 2], [3, 1/5]]); N_3
@@ -248,7 +248,7 @@ def factor_GLQhat(M, detM):
         sage: A = factor_GLQhat(M, 3/4); A
         [  3   0]
         [  0 1/4]
-    
+
     We check that this is correct by checking that `N_p A^{-1} \in GL_2(\ZZ_p)`
     for all prime numbers `p`. This is clear for `p \geq 5` since we then have
     `I, A \in GL_2(\ZZ_p)`. At `2` and `3` we have ::
@@ -275,7 +275,7 @@ def factor_GLQhat(M, detM):
         [15  5  0]
         [ 9 11 -1]
         [ 5 -9  1]
-    
+
     and at all other primes `p` by the `3 \times 3`-identity matrix `I`. We have
     ::
 
