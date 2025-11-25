@@ -5,7 +5,7 @@ Computing with adèles and idèles
 This is a `SageMath <https://www.sagemath.org/>`__ package for computing with
 adèles and idèles. It is based on and part of the master's thesis [Her2021].
 
-[Her2021] Mathé Hertogh, Computing with adèles and idèles, master's thesis,
+[Her2021] Mathé Hertogh, `Computing with adèles and idèles <https://hdl.handle.net/1887/3249353>`__, master's thesis,
 Leiden University, 2021.
 
 In the root of this repository you can find [Her2021] as a PDF-file.
