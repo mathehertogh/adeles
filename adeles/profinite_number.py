@@ -910,8 +910,8 @@ class ProfiniteNumbers(UniqueRepresentation, CommutativeAlgebra):
             ...
             TypeError: K should be a number field
         """
-        from sage.rings.number_field.number_field import is_NumberField
-        if not is_NumberField(K):
+        from sage.rings.number_field.number_field_base import NumberField
+        if not isinstance(K, NumberField):
             raise TypeError("K should be a number field")
         return super(ProfiniteNumbers, cls).__classcall__(cls, K)
 

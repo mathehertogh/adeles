@@ -653,8 +653,8 @@ class MultiplicativePAdics(UniqueRepresentation, Group):
             ...
             ValueError: p should be a finite prime of Rational Field
         """
-        from sage.rings.number_field.number_field import is_NumberField
-        if not is_NumberField(K):
+        from sage.rings.number_field.number_field_base import NumberField
+        if not isinstance(K, NumberField):
             raise TypeError("K should be a number field")
         if not is_finite_prime(p, K):
             raise ValueError("p should be a finite prime of {}".format(K))
@@ -1083,13 +1083,13 @@ def MulPAdic(p, data):
         ...
         TypeError: can't construct a multiplicative p-adic from ['blah']
     """
-    from sage.rings.number_field.number_field_ideal import is_NumberFieldIdeal
-    from sage.rings.number_field.number_field_element import is_NumberFieldElement
+    from sage.rings.number_field.number_field_ideal import NumberFieldIdeal
+    from sage.rings.number_field.number_field_element import NumberFieldElement
     if p in Primes():
         K = QQ
-    elif is_NumberFieldIdeal(p):
+    elif isinstance(p, NumberFieldIdeal):
         K = p.number_field()
-    elif is_NumberFieldElement(p):
+    elif isinstance(p, NumberFieldElement):
         K = p.parent()
     else:
         raise ValueError("p must be a finite prime of a number field")
