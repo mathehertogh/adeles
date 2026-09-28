@@ -1466,8 +1466,8 @@ class Ideles(UniqueRepresentation, Group):
             ...
             TypeError: K should be a number field
         """
-        from sage.rings.number_field.number_field import is_NumberField
-        if not is_NumberField(K):
+        from sage.rings.number_field.number_field_base import NumberField
+        if not isinstance(K, NumberField):
                 raise TypeError("K should be a number field")
         return super(Ideles, cls).__classcall__(cls, K)
 
@@ -1621,10 +1621,10 @@ class Ideles(UniqueRepresentation, Group):
                 return self.element_class(self, infinite, x)
 
             # Conversion from (O/I)^* to this idèle group
-            from sage.rings.quotient_ring import is_QuotientRing
+            from sage.rings.quotient_ring import QuotientRing_nc
             P = x.parent() if hasattr(x, "parent") else None
             O = K.maximal_order()
-            if is_QuotientRing(P) and P.ambient() in [O, K]:
+            if isinstance(P, QuotientRing_nc) and P.ambient() in [O, K]:
                 if K.ideal(x.lift()) + P.defining_ideal() != 1:
                     raise ValueError("{} is not a unit modulo {}".format(x, P.defining_ideal()))
                 return self._from_modulo_element(x)

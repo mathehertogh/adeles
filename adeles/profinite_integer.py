@@ -1047,8 +1047,8 @@ class ProfiniteIntegers(UniqueRepresentation, Parent):
             sage: ProfiniteIntegers(ZZ) is ProfiniteIntegers(QQ)
             True
         """
-        from sage.rings.number_field.number_field import is_NumberField
-        if is_NumberField(R):
+        from sage.rings.number_field.number_field_base import NumberField
+        if isinstance(R, NumberField):
             O = R.maximal_order()
         elif R is ZZ:
             O = ZZ
@@ -1057,7 +1057,7 @@ class ProfiniteIntegers(UniqueRepresentation, Parent):
                 K = R.ambient()
             except AttributeError:
                 raise TypeError("R must be (the maximal order of) a number field")
-            if not is_NumberField(K) or R != K.maximal_order():
+            if not isinstance(K, NumberField) or R != K.maximal_order():
                 raise TypeError("R must be (the maximal order of) a number field")
             O = R
         return super(ProfiniteIntegers, cls).__classcall__(cls, O)
@@ -1210,7 +1210,7 @@ class ProfiniteIntegers(UniqueRepresentation, Parent):
             52 mod 288
         """
         from .profinite_number import ProfiniteNumbers
-        from sage.rings.quotient_ring import is_QuotientRing
+        from sage.rings.quotient_ring import QuotientRing_nc
         import sage.rings.abc
 
         is_pAdic = lambda P: isinstance(P, (sage.rings.abc.pAdicRing, sage.rings.abc.pAdicField))
@@ -1227,7 +1227,7 @@ class ProfiniteIntegers(UniqueRepresentation, Parent):
                 return self._from_profinite_number(x)
             
             # Check if x is an element of a quotient of our base maximal order:
-            if is_QuotientRing(P) and P.ambient() in [self.base(), self.number_field()]:
+            if isinstance(P, QuotientRing_nc) and P.ambient() in [self.base(), self.number_field()]:
                     return self._from_modulo_element(x)
 
             if self.number_field() is QQ:
@@ -1446,8 +1446,8 @@ class ProfiniteIntegers(UniqueRepresentation, Parent):
             return True
         if isinstance(S, ProfiniteIntegers) and self.number_field().has_coerce_map_from(S.number_field()):
             return True
-        from sage.rings.quotient_ring import is_QuotientRing
-        if is_QuotientRing(S) and S.ambient() in [self.base(), self.number_field()]:
+        from sage.rings.quotient_ring import QuotientRing_nc
+        if isinstance(S, QuotientRing_nc) and S.ambient() in [self.base(), self.number_field()]:
             return True
         return False
 
